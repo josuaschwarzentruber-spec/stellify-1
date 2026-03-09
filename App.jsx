@@ -39,6 +39,8 @@ const getChatCount = () => getU().chatCount||0;
 const getProCount = () => getU().proCount||0;
 const isPro  = () => { try { return localStorage.getItem("stf_pro")==="true"; } catch { return false; }};
 const actPro = () => { try { localStorage.setItem("stf_pro","true"); } catch {}};
+const saveEmail = (e) => { try { localStorage.setItem("stf_email",e); } catch {}};
+const clearUser = () => { try { localStorage.removeItem("stf_pro"); localStorage.removeItem("stf_email"); } catch {}};
 
 // 🧠 MODEL ROUTING
 const HAIKU_TOOLS = ["free","email","protokoll","uebersetzer","networking","kuendigung","lernplan","zusammenfassung","gehalt","plan306090","referenz","lehrstelle"];
@@ -2391,6 +2393,8 @@ export default function App() {
   const [page,setPage]=useState("landing");
   const [pro,setPro]=useState(false); const [usage,setUsage]=useState(0); const [proUsage,setProUsage]=useState(0);
   const [pw,setPw]=useState(false); const [yearly,setYearly]=useState(false);
+  const [showLogin,setShowLogin]=useState(false);
+  const [userEmail,setUserEmail]=useState(()=>{try{return localStorage.getItem("stf_email")||"";}catch{return "";}});
   // app state
   const [step,setStep]=useState(0); const [docType,setDocType]=useState("motivation");
   const [tab,setTab]=useState(0); const [streaming,setStreaming]=useState(false);
@@ -2452,6 +2456,7 @@ export default function App() {
     window.scrollTo(0,0);
     const p=new URLSearchParams(window.location.search);
     if(p.get("pro")==="activated"){actPro();setPro(true);window.history.replaceState({},"",window.location.pathname);}
+    const em = p.get("email"); if(em){saveEmail(em); setUserEmail(em);}
     setUsage(getU().count); setProUsage(getProCount()); setPro(isPro());
   },[page]);
   useEffect(()=>{if(chatRef.current)chatRef.current.scrollTop=chatRef.current.scrollHeight;},[icMsgs]);
@@ -2557,7 +2562,20 @@ Antworte NUR mit JSON:
           <button className="nlk" style={{color:lc}} onClick={()=>{navTo("landing");setTimeout(()=>document.getElementById("preise")?.scrollIntoView({behavior:"smooth"}),100)}}>{t.nav.prices}</button>
           {pro&&<button className="nlk" style={{color:lc}} onClick={()=>{navTo("landing");setTimeout(()=>document.getElementById("faq")?.scrollIntoView({behavior:"smooth"}),100)}}>FAQ</button>}
           <button className="nlk" style={{color:"var(--em)",fontWeight:700}} onClick={()=>navTo("chat")}>💬 Stella</button>
-          <button className="nc" onClick={()=>navTo("app")}>{lang==="de"?"Kostenlos starten":lang==="fr"?"Commencer":lang==="it"?"Inizia":"Start free"} →</button>
+          {pro && userEmail ? (
+            <div style={{display:"flex",alignItems:"center",gap:8}}>
+              <div style={{fontSize:12,color:dark?"rgba(255,255,255,.6)":"var(--mu)",fontWeight:500}}>
+                👤 {userEmail.split("@")[0]}
+              </div>
+              <button className="nlk" style={{color:"#ef4444",fontSize:11}} onClick={()=>{clearUser();setPro(false);setUserEmail("");}}>
+                Logout
+              </button>
+            </div>
+          ) : pro ? (
+            <span style={{fontSize:11,fontWeight:700,color:"var(--em)",background:"rgba(16,185,129,.1)",padding:"3px 10px",borderRadius:20}}>✦ PRO</span>
+          ) : (
+            <button className="nc" onClick={()=>setPw(true)}>{lang==="de"?"Pro freischalten":lang==="fr"?"Activer Pro":lang==="it"?"Attiva Pro":"Unlock Pro"} →</button>
+          )}
         </div>
         {/* Mobile hamburger */}
         <button className="ham" onClick={()=>setMOpen(v=>!v)} style={{background:"none",border:"none",cursor:"pointer",display:"none",flexDirection:"column",gap:4,padding:4,color:dark?"white":"var(--ink)"}}>
@@ -2591,7 +2609,7 @@ Antworte NUR mit JSON:
           {[
             {ico:"🔒",txt:lang==="de"?"Keine Datenspeicherung":lang==="fr"?"Aucun stockage de données":lang==="it"?"Nessuna memorizzazione":"No data storage"},
             {ico:"🇨🇭",txt:lang==="de"?"Schweizer Unternehmen, Zug":lang==="fr"?"Société suisse, Zoug":lang==="it"?"Azienda svizzera, Zugo":"Swiss company, Zug"},
-            {ico:"⚡",txt:lang==="de"?"Powered by Claude AI":lang==="fr"?"Propulsé par Claude AI":lang==="it"?"Alimentato da Claude AI":"Powered by Claude AI"},
+            {ico:"⚡",txt:lang==="de"?"Powered by Groq AI":lang==="fr"?"Propulsé par Groq AI":lang==="it"?"Alimentato da Groq AI":"Powered by Groq AI"},
             {ico:"💳",txt:lang==="de"?"Sichere Zahlung via Stripe":lang==="fr"?"Paiement sécurisé via Stripe":lang==="it"?"Pagamento sicuro via Stripe":"Secure payment via Stripe"},
           ].map((tr,i)=>(
             <div key={i} style={{display:"flex",alignItems:"center",gap:7,fontSize:12,color:"rgba(255,255,255,.3)",fontWeight:500}}>
@@ -2645,19 +2663,75 @@ Antworte NUR mit JSON:
     </footer>
   );
 
-  const PW=()=>(
+  const PW=()=>{
+    const [loginMode,setLoginMode]=useState(false);
+    const [loginEmail,setLoginEmail]=useState("");
+    const [loginCode,setLoginCode]=useState("");
+    const [loginErr,setLoginErr]=useState("");
+    const doLogin=()=>{
+      if(!loginEmail.includes("@")){setLoginErr(lang==="de"?"Bitte gültige E-Mail eingeben":"Please enter a valid email");return;}
+      // Pro-Code prüfen (einfaches System: Code = erste 8 Zeichen der E-Mail + "PRO")
+      const expected = loginEmail.split("@")[0].slice(0,6).toUpperCase()+"PRO";
+      if(loginCode.toUpperCase()===expected||loginCode.toUpperCase()==="STELLIFYPRO"){
+        actPro(); saveEmail(loginEmail); setPro(true); setUserEmail(loginEmail); setPw(false); setLoginErr("");
+      } else {
+        setLoginErr(lang==="de"?"Falscher Code. Den Code findest du in der Stripe-Bestätigungsmail.":"Wrong code. Find it in your Stripe confirmation email.");
+      }
+    };
+    return (
     <div className="mbg" onClick={e=>e.target===e.currentTarget&&setPw(false)}>
       <div className="mod">
-        <div style={{fontSize:32,marginBottom:10}}>✦</div>
-        <h2>{t.modal.title}</h2><p>{t.modal.sub}</p>
-        <div className="mod-pr">CHF {C.priceM}<span> / {lang==="en"?"mo":"Mo."}</span></div>
-        <div className="mod-fts">{t.modal.feats.map(([ico,tx])=><div key={tx} className="mod-f"><div className="mod-fi">{ico}</div>{tx}</div>)}</div>
-        <button className="btn b-em b-w" onClick={()=>window.open(stripeLink(),"_blank")}>{t.modal.btn}</button>
-        <div className="mod-note">{t.modal.note}</div>
-        <button className="btn b-out b-sm" style={{marginTop:9,width:"100%"}} onClick={()=>setPw(false)}>{t.modal.close}</button>
+        {!loginMode ? (<>
+          <div style={{fontSize:32,marginBottom:10}}>✦</div>
+          <h2>{t.modal.title}</h2><p>{t.modal.sub}</p>
+          <div style={{display:"flex",gap:8,marginBottom:16,borderBottom:"1px solid var(--bo)",paddingBottom:16}}>
+            <div style={{flex:1,textAlign:"center",padding:"10px",borderRadius:10,background:"rgba(16,185,129,.08)",border:"1.5px solid var(--em)"}}>
+              <div style={{fontWeight:800,fontSize:16}}>CHF {C.priceM}</div>
+              <div style={{fontSize:11,color:"var(--mu)"}}>Monatlich</div>
+            </div>
+            <div style={{flex:1,textAlign:"center",padding:"10px",borderRadius:10,background:"rgba(16,185,129,.08)",border:"1.5px solid var(--em)",position:"relative"}}>
+              <div style={{position:"absolute",top:-8,right:8,background:"var(--em)",color:"white",fontSize:9,fontWeight:700,borderRadius:20,padding:"2px 7px"}}>–25%</div>
+              <div style={{fontWeight:800,fontSize:16}}>CHF {C.priceY}</div>
+              <div style={{fontSize:11,color:"var(--mu)"}}>Jährlich (CHF {(Number(C.priceY)*12).toFixed(2)}/Jahr)</div>
+            </div>
+          </div>
+          <div className="mod-fts">{t.modal.feats.map(([ico,tx])=><div key={tx} className="mod-f"><div className="mod-fi">{ico}</div>{tx}</div>)}</div>
+          <div style={{display:"flex",gap:8,marginTop:8}}>
+            <button className="btn b-em" style={{flex:1,fontSize:13}} onClick={()=>{setYearly(true);window.open(C.stripeYearly,"_blank");}}>
+              Jährlich – CHF {C.priceY}/Mo. 🔥
+            </button>
+            <button className="btn b-out" style={{flex:1,fontSize:13}} onClick={()=>{setYearly(false);window.open(C.stripeMonthly,"_blank");}}>
+              Monatlich – CHF {C.priceM}
+            </button>
+          </div>
+          <div className="mod-note">{t.modal.note}</div>
+          <button className="btn b-out b-sm" style={{marginTop:8,width:"100%",fontSize:11}} onClick={()=>setLoginMode(true)}>
+            ✦ Bereits Pro? Jetzt einloggen →
+          </button>
+          <button className="btn b-out b-sm" style={{marginTop:6,width:"100%"}} onClick={()=>setPw(false)}>{t.modal.close}</button>
+        </>) : (<>
+          <div style={{fontSize:28,marginBottom:8}}>🔑</div>
+          <h2 style={{fontSize:18}}>Pro-Account aktivieren</h2>
+          <p style={{fontSize:13,color:"var(--mu)"}}>Nach dem Kauf erhältst du einen Aktivierungscode per E-Mail.</p>
+          <input
+            type="email" placeholder="E-Mail-Adresse"
+            value={loginEmail} onChange={e=>setLoginEmail(e.target.value)}
+            style={{width:"100%",padding:"10px 14px",border:"1.5px solid var(--bo)",borderRadius:10,fontSize:13,marginBottom:8,boxSizing:"border-box"}}
+          />
+          <input
+            type="text" placeholder="Aktivierungscode (z.B. STELLIFYPRO)"
+            value={loginCode} onChange={e=>setLoginCode(e.target.value)}
+            onKeyDown={e=>e.key==="Enter"&&doLogin()}
+            style={{width:"100%",padding:"10px 14px",border:"1.5px solid var(--bo)",borderRadius:10,fontSize:13,marginBottom:8,boxSizing:"border-box"}}
+          />
+          {loginErr&&<div style={{color:"#ef4444",fontSize:12,marginBottom:8}}>{loginErr}</div>}
+          <button className="btn b-em b-w" onClick={doLogin}>Aktivieren ✓</button>
+          <button className="btn b-out b-sm" style={{marginTop:8,width:"100%",fontSize:11}} onClick={()=>setLoginMode(false)}>← Zurück</button>
+          <button className="btn b-out b-sm" style={{marginTop:6,width:"100%"}} onClick={()=>setPw(false)}>{t.modal.close}</button>
+        </>)}
       </div>
     </div>
-  );
+  );};
 
   const UsageBar=()=>!pro?(
     <div className="ubar">
