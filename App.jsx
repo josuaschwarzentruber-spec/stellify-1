@@ -2185,11 +2185,40 @@ function ChatBot({ lang, pro, setPw, navTo }) {
   const [input, setInput]     = useState("");
   const [loading, setLoading] = useState(false);
   const [chatUsage, setChatUsage] = useState(0);
+  const [uploadedFile, setUploadedFile] = useState(null);
+  const [uploadedText, setUploadedText] = useState("");
   const bottomRef = useRef(null);
+  const fileRef = useRef(null);
+
+  // ── E-Mail Gate ──────────────────────────────────────
+  const [gateEmail, setGateEmail] = useState("");
+  const [gateErr, setGateErr]     = useState("");
+  const [gateSubmitting, setGateSubmitting] = useState(false);
+  const registeredEmail = (() => { try { return localStorage.getItem("stf_chat_email")||""; } catch { return ""; }})();
+  const [chatEmail, setChatEmail] = useState(registeredEmail);
+
+  const submitGate = () => {
+    if(!gateEmail.includes("@")||gateEmail.length<5){
+      setGateErr(L("Bitte gültige E-Mail eingeben","Please enter a valid email","Veuillez saisir un e-mail valide","Inserisci un'email valida"));
+      return;
+    }
+    setGateSubmitting(true);
+    setTimeout(()=>{
+      try { localStorage.setItem("stf_chat_email", gateEmail); } catch{}
+      setChatEmail(gateEmail);
+      setGateSubmitting(false);
+      // Welcome message
+      setMsgs([{r:"ai",t:L(
+        `Hallo! Ich bin Stella 👋 Schön, dass du dabei bist${gateEmail?" "+gateEmail.split("@")[0]:""}! Ich helfe dir rund um Karriere, Bewerbungen und den Schweizer Arbeitsmarkt. Du kannst auch Dokumente hochladen (PDF, Word, Excel, PowerPoint). Wie kann ich dir helfen?`,
+        `Hi! I'm Stella 👋 Welcome${gateEmail?" "+gateEmail.split("@")[0]:""}! I help with careers, applications and the Swiss job market. You can also upload documents. How can I help?`,
+        `Bonjour! Je suis Stella 👋 Bienvenue! Je vous aide pour votre carrière et le marché du travail suisse. Comment puis-je vous aider?`,
+        `Ciao! Sono Stella 👋 Benvenuto! Ti aiuto con la carriera e il mercato del lavoro svizzero. Come posso aiutarti?`
+      )}]);
+    }, 600);
+  };
 
   useEffect(()=>{
     try { setCookieDone(!!localStorage.getItem("stf_cookie")); } catch{}
-    // Re-check every 500ms until cookie is set
     const iv = setInterval(()=>{ try { if(localStorage.getItem("stf_cookie")) { setCookieDone(true); clearInterval(iv); } } catch{} },500);
     return ()=>clearInterval(iv);
   },[]);
@@ -2197,7 +2226,6 @@ function ChatBot({ lang, pro, setPw, navTo }) {
   useEffect(()=>{ setChatUsage(getChatCount()); },[open]);
   useEffect(()=>{ bottomRef.current?.scrollIntoView({behavior:"smooth"}); },[msgs]);
 
-  // Auto-Bubble nach 8 Sekunden – nur einmal pro Session
   useEffect(()=>{
     const seen = sessionStorage.getItem("stf_bubble");
     if(seen) return;
@@ -2207,6 +2235,41 @@ function ChatBot({ lang, pro, setPw, navTo }) {
 
   const canChat = pro || chatUsage < C.CHAT_FREE_LIMIT;
 
+  // ── Datei-Upload ──────────────────────────────────────
+  const handleFile = async (file) => {
+    if(!file) return;
+    const maxMB = 5;
+    if(file.size > maxMB*1024*1024){
+      setGateErr(L(`Max. ${maxMB}MB erlaubt`,`Max. ${maxMB}MB allowed`,`Max. ${maxMB}MB autorisé`,`Max. ${maxMB}MB consentiti`));
+      return;
+    }
+    setUploadedFile(file);
+    const ext = file.name.split(".").pop().toLowerCase();
+    const allowedText = ["txt","md","csv","json"];
+    if(allowedText.includes(ext)){
+      const text = await file.text();
+      setUploadedText(text.slice(0,3000));
+    } else {
+      // For PDF/Word/Excel/PPT - just send filename + type as context
+      setUploadedText(`[Datei hochgeladen: ${file.name} (${(file.size/1024).toFixed(0)} KB)]`);
+    }
+    setMsgs(m=>[...m,{r:"sys",t:`📎 ${file.name} hochgeladen`}]);
+  };
+
+  // ── Dokument-Download ─────────────────────────────────
+  const downloadAsText = (text, filename) => {
+    const blob = new Blob([text], {type:"text/plain;charset=utf-8"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a"); a.href=url; a.download=filename; a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const downloadLastAnswer = () => {
+    const lastAI = [...msgs].reverse().find(m=>m.r==="ai");
+    if(!lastAI) return;
+    downloadAsText(lastAI.t, "Stellify-Antwort.txt");
+  };
+
   const SYSTEM = `Du bist Stella, die KI-Karriere-Assistentin von Stellify. Du hast tiefes Wissen über Karriere, Bewerbungen, den Schweizer Arbeitsmarkt und Produktivität.
 
 Dein Wissen umfasst: Schweizer Bewerbungsunterlagen (Motivationsschreiben, Lebenslauf mit Foto, 1-2 Seiten), ATS-Optimierung, Schweizer Arbeitsrecht (Kündigungsfristen, Sperrfristen, Zeugnis-Code: "stets zu vollsten Zufriedenheit"=sehr gut), Gehälter nach Branche/Erfahrung, LinkedIn-Optimierung, Interview-Vorbereitung (STAR-Methode), Gehaltsverhandlungs-Taktiken, Schweizer Bildungssystem (EFZ, FH, Uni, CAS/MAS).
@@ -2214,7 +2277,10 @@ Dein Wissen umfasst: Schweizer Bewerbungsunterlagen (Motivationsschreiben, Leben
 Tools von Stellify:
 ✍️ Bewerbungen (1× gratis), 💼 LinkedIn Optimierung, 🤖 ATS-Simulation, 📜 Zeugnis-Analyse, 🎯 Job-Matching, 🎤 Interview-Coach, 📊 Excel-Generator, 📽️ PowerPoint-Maker, 💰 Gehaltsverhandlung, 🤝 Networking-Nachricht, 📤 Kündigung schreiben, 🗓️ 30-60-90-Tage-Plan, 🏆 Referenzschreiben, 📚 Lernplan, 📝 Zusammenfassung, 🎓 Lehrstelle, ✉️ E-Mail, 📋 Protokoll, 🌍 Übersetzer
 
-Verhalten: Antworte konkret und umsetzbar (max. 3-4 Sätze im Widget). Schreib Beispieltexte direkt aus wenn gefragt. Empfehle Tool-Namen exakt wie oben damit Links funktionieren. Sei warm, direkt, wie ein erfahrener Karriere-Coach.`;
+Wenn der Nutzer ein Dokument hochlädt, analysiere es und gib konkrete Verbesserungsvorschläge.
+Wenn du ein Dokument erstellst (Bewerbung, Lebenslauf, etc.), füge am Ende hinzu: "💾 DOKUMENT BEREIT ZUM DOWNLOAD" damit der Download-Button erscheint.
+
+Verhalten: Antworte konkret und umsetzbar (max. 3-4 Sätze im Widget, ausführlicher im Vollbild). Schreib Beispieltexte direkt aus wenn gefragt. Empfehle Tool-Namen exakt wie oben. Sei warm, direkt, wie ein erfahrener Karriere-Coach.`;
 
   const TOOL_MAP = {
     "bewerbung":["✍️ Bewerbungen","app"], "bewerbungen":["✍️ Bewerbungen","app"],
@@ -2229,22 +2295,29 @@ Verhalten: Antworte konkret und umsetzbar (max. 3-4 Sätze im Widget). Schreib B
     "protokoll":["📋 Protokoll","protokoll"], "übersetzer":["🌍 Übersetzer","uebersetzer"],
   };
 
-  // Parse tool links from assistant response
   const renderMsg = (text) => {
-    const parts = [];
-    let remaining = text;
+    const hasDoc = text.includes("💾 DOKUMENT BEREIT ZUM DOWNLOAD");
+    const cleanText = text.replace("💾 DOKUMENT BEREIT ZUM DOWNLOAD","");
+    let remaining = cleanText;
     Object.entries(TOOL_MAP).forEach(([key,[label,page]])=>{
       remaining = remaining.replace(new RegExp(`(${label.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")})`, "gi"),
         `<TOOL:${page}:${label}>`);
     });
     const segments = remaining.split(/(<TOOL:[^>]+>)/);
-    return segments.map((seg,i)=>{
+    const rendered = segments.map((seg,i)=>{
       const m = seg.match(/^<TOOL:([^:]+):(.+)>$/);
       if(m) return <button key={i} onClick={()=>{setOpen(false);navTo(m[1]);}}
         style={{display:"inline-flex",alignItems:"center",gap:4,background:"rgba(16,185,129,.15)",border:"1px solid rgba(16,185,129,.3)",borderRadius:8,padding:"2px 9px",fontSize:12,fontWeight:700,color:"var(--em)",cursor:"pointer",margin:"1px 2px"}}>
         {m[2]} →</button>;
       return <span key={i}>{seg}</span>;
     });
+    return (<>
+      {rendered}
+      {hasDoc&&<button onClick={downloadLastAnswer}
+        style={{display:"flex",alignItems:"center",gap:6,marginTop:8,background:"rgba(16,185,129,.15)",border:"1.5px solid var(--em)",borderRadius:10,padding:"7px 14px",fontSize:12,fontWeight:700,color:"var(--em)",cursor:"pointer",width:"100%",justifyContent:"center"}}>
+        💾 {L("Dokument herunterladen","Download document","Télécharger le document","Scarica il documento")}
+      </button>}
+    </>);
   };
 
   const send = async () => {
@@ -2252,33 +2325,31 @@ Verhalten: Antworte konkret und umsetzbar (max. 3-4 Sätze im Widget). Schreib B
     if(!canChat){ setPw(true); return; }
     const userMsg = input.trim();
     setInput("");
-    const newMsgs = [...msgs, {r:"u", t:userMsg}];
-    setMsgs(newMsgs);
+    let contextMsg = userMsg;
+    if(uploadedText) {
+      contextMsg = userMsg + "\n\n[Hochgeladene Datei: " + (uploadedFile?.name||"Datei") + "]\n" + uploadedText;
+      setUploadedFile(null); setUploadedText("");
+    }
+    const newMsgs = [...msgs.filter(m=>m.r!=="sys"), {r:"u", t:userMsg}];
+    setMsgs([...msgs, {r:"u", t:userMsg}]);
     setLoading(true);
     if(!pro){ incChat(); setChatUsage(c=>c+1); }
     try {
-      // Nur user/assistant abwechselnd, immer mit user starten
       const apiMsgs = [];
       for(const m of newMsgs) {
         const role = m.r==="u" ? "user" : "assistant";
-        // Keine zwei gleichen Rollen hintereinander
         if(apiMsgs.length > 0 && apiMsgs[apiMsgs.length-1].role === role) continue;
-        apiMsgs.push({role, content: m.t});
+        apiMsgs.push({role, content: m.r==="u"&&m===newMsgs[newMsgs.length-1] ? contextMsg : m.t});
       }
-      // Muss mit user starten
       while(apiMsgs.length && apiMsgs[0].role !== "user") apiMsgs.shift();
-      // Letzten 10 nehmen
-      const finalMsgs = apiMsgs.slice(-10);
-
-      // System als erste Nachricht einfügen
-      const msgsWithSystem = [{role:"system",content:SYSTEM}, ...finalMsgs];
+      const finalMsgs = apiMsgs.slice(-12);
       const res = await fetch(GROQ_URL, {
         method: "POST",
         headers: groqHeaders(),
         body: JSON.stringify({
           model: C.MODEL_FAST,
-          max_tokens: 600,
-          messages: msgsWithSystem
+          max_tokens: 700,
+          messages: [{role:"system",content:SYSTEM}, ...finalMsgs]
         })
       });
       const data = await res.json();
@@ -2296,96 +2367,157 @@ Verhalten: Antworte konkret und umsetzbar (max. 3-4 Sätze im Widget). Schreib B
   const openChat = () => {
     setBubble(false);
     setOpen(o=>!o);
-    if(!msgs.length) setMsgs([{r:"ai",t:L(
-      "Hallo! Ich bin Stella 👋 Deine KI-Karriere-Assistentin von Stellify. Wie kann ich dir helfen? Ich empfehle dir das passende Tool.",
-      "Hi! I'm Stella 👋 Your AI career assistant from Stellify. How can I help? I'll recommend the right tool.",
-      "Bonjour! Je suis Stella 👋 Votre assistante carrière IA de Stellify. Comment puis-je vous aider?",
-      "Ciao! Sono Stella 👋 La tua assistente di carriera IA di Stellify. Come posso aiutarti?"
-    )}]);
   };
 
+  // ── E-Mail Gate Screen ────────────────────────────────
+  const GateScreen = () => (
+    <div style={{padding:"28px 20px",display:"flex",flexDirection:"column",alignItems:"center",gap:14,minHeight:260}}>
+      <div style={{fontSize:36}}>✦</div>
+      <div style={{fontFamily:"var(--hd)",fontSize:16,fontWeight:800,color:"white",textAlign:"center"}}>
+        {L("Gratis mit Stella chatten","Chat with Stella for free","Chatter gratuitement avec Stella","Chatta gratuitamente con Stella")}
+      </div>
+      <div style={{fontSize:13,color:"rgba(255,255,255,.5)",textAlign:"center",lineHeight:1.5}}>
+        {L(`${C.CHAT_FREE_LIMIT} Nachrichten gratis · kein Abo nötig`,`${C.CHAT_FREE_LIMIT} messages free · no subscription`,`${C.CHAT_FREE_LIMIT} messages gratuits · sans abonnement`,`${C.CHAT_FREE_LIMIT} messaggi gratis · nessun abbonamento`)}
+      </div>
+      <input
+        type="email"
+        placeholder={L("Deine E-Mail-Adresse","Your email address","Votre adresse e-mail","Il tuo indirizzo email")}
+        value={gateEmail}
+        onChange={e=>{setGateEmail(e.target.value);setGateErr("");}}
+        onKeyDown={e=>e.key==="Enter"&&submitGate()}
+        style={{width:"100%",padding:"11px 14px",border:"1.5px solid rgba(255,255,255,.15)",borderRadius:12,fontSize:13,background:"rgba(255,255,255,.07)",color:"white",outline:"none",boxSizing:"border-box"}}
+        autoFocus
+      />
+      {gateErr&&<div style={{color:"#f87171",fontSize:12,textAlign:"center"}}>{gateErr}</div>}
+      <button onClick={submitGate} disabled={gateSubmitting}
+        style={{width:"100%",padding:"12px",background:"var(--em)",border:"none",borderRadius:12,color:"white",fontWeight:700,fontSize:14,cursor:"pointer"}}>
+        {gateSubmitting?"⏳ …":L("Kostenlos starten →","Start for free →","Commencer gratuitement →","Inizia gratuitamente →")}
+      </button>
+      <div style={{fontSize:11,color:"rgba(255,255,255,.3)",textAlign:"center"}}>
+        {L("Keine Werbemails. Jederzeit abmeldbar.","No spam. Unsubscribe anytime.","Aucun spam. Désinscription possible à tout moment.","Nessuno spam. Disiscrizione possibile in qualsiasi momento.")}
+      </div>
+      <button onClick={()=>setPw(true)}
+        style={{fontSize:12,color:"var(--em)",background:"none",border:"none",cursor:"pointer",fontWeight:600}}>
+        ✦ {L("Bereits Pro? Einloggen →","Already Pro? Login →","Déjà Pro? Se connecter →","Già Pro? Accedi →")}
+      </button>
+    </div>
+  );
+
   return (<>
-    {/* Auto-Bubble – nur wenn Cookie akzeptiert */}
-    {cookieDone&&bubble&&!open&&<div style={{position:"fixed",bottom:90,right:20,maxWidth:220,background:"var(--dk2)",border:"1px solid rgba(16,185,129,.3)",borderRadius:"14px 14px 4px 14px",padding:"11px 14px",zIndex:1002,boxShadow:"0 8px 32px rgba(0,0,0,.4)",cursor:"pointer",animation:"fadeSlideUp .4s ease"}}
+    {cookieDone&&bubble&&!open&&<div
+      style={{position:"fixed",bottom:90,right:20,maxWidth:220,background:"var(--dk2)",border:"1px solid rgba(16,185,129,.3)",borderRadius:"14px 14px 4px 14px",padding:"11px 14px",zIndex:1002,boxShadow:"0 8px 32px rgba(0,0,0,.4)",cursor:"pointer",animation:"fadeSlideUp .4s ease"}}
       onClick={openChat}>
       <button onClick={e=>{e.stopPropagation();setBubble(false);}} style={{position:"absolute",top:6,right:8,background:"none",border:"none",color:"rgba(255,255,255,.3)",fontSize:12,cursor:"pointer",lineHeight:1}}>✕</button>
       <div style={{fontSize:13,color:"rgba(255,255,255,.85)",lineHeight:1.5,paddingRight:12}}>
-        {L("Hallo 👋 Welches Tool passt zu dir? Frag mich!","Hi 👋 Which tool suits you? Ask me!","Bonjour 👋 Quel outil vous convient? Demandez-moi!","Ciao 👋 Quale tool fa per te? Chiedimi!")}
+        {L("Hallo 👋 Frag Stella – deine Karriere-KI!","Hi 👋 Ask Stella – your career AI!","Bonjour 👋 Demandez à Stella!","Ciao 👋 Chiedi a Stella!")}
       </div>
-      <div style={{fontSize:11,color:"var(--em)",fontWeight:600,marginTop:5}}>{L("Mit Stella chatten →","Chat with Stella →","Discuter avec Stella →","Chatta con Stella →")}</div>
+      <div style={{fontSize:11,color:"var(--em)",fontWeight:600,marginTop:5}}>{L("Jetzt kostenlos starten →","Start free now →","Commencer gratuitement →","Inizia gratuitamente →")}</div>
     </div>}
 
-    {/* Floating Button – nur wenn Cookie akzeptiert */}
     {cookieDone&&<button onClick={openChat}
       style={{position:"fixed",bottom:open?248:24,right:24,width:56,height:56,borderRadius:"50%",background:"var(--em)",border:"none",cursor:"pointer",zIndex:1001,boxShadow:"0 4px 20px rgba(16,185,129,.45)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,transition:"all .3s",transform:open?"rotate(10deg)":"none"}}>
       {open?"✕":"💬"}
       {bubble&&!open&&<div style={{position:"absolute",top:0,right:0,width:14,height:14,borderRadius:"50%",background:"#ef4444",border:"2px solid white"}}/>}
     </button>}
 
-    {/* Chat Window */}
     {open&&<div style={{position:"fixed",bottom:92,right:24,width:340,maxWidth:"calc(100vw - 32px)",background:"var(--dk2)",border:"1px solid rgba(255,255,255,.1)",borderRadius:20,boxShadow:"0 20px 60px rgba(0,0,0,.5)",zIndex:1000,display:"flex",flexDirection:"column",overflow:"hidden"}}>
+
       {/* Header */}
       <div style={{background:"linear-gradient(135deg,rgba(16,185,129,.2),rgba(16,185,129,.08))",borderBottom:"1px solid rgba(255,255,255,.07)",padding:"14px 18px",display:"flex",alignItems:"center",gap:12}}>
         <div style={{width:36,height:36,background:"var(--em)",borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>🤖</div>
         <div style={{flex:1}}>
           <div style={{fontFamily:"var(--hd)",fontSize:14,fontWeight:800,color:"white"}}>Stella – Stellify Assistant</div>
           <div style={{fontSize:11,color:"rgba(255,255,255,.4)"}}>
-            {pro ? L("Pro · Unbegrenzte Nachrichten","Pro · Unlimited messages","Pro · Messages illimités","Pro · Messaggi illimitati")
-                 : L(`${remaining} von ${C.CHAT_FREE_LIMIT} Gratis-Nachrichten`,`${remaining} of ${C.CHAT_FREE_LIMIT} free messages`,`${remaining} sur ${C.CHAT_FREE_LIMIT} messages gratuits`,`${remaining} di ${C.CHAT_FREE_LIMIT} messaggi gratuiti`)}
+            {!chatEmail ? L("Kostenlos registrieren","Register for free","Inscription gratuite","Registrazione gratuita")
+              : pro ? L("Pro · Unbegrenzte Nachrichten","Pro · Unlimited messages","Pro · Messages illimités","Pro · Messaggi illimitati")
+              : L(`${remaining} von ${C.CHAT_FREE_LIMIT} Nachrichten`,`${remaining} of ${C.CHAT_FREE_LIMIT} messages`,`${remaining} sur ${C.CHAT_FREE_LIMIT} messages`,`${remaining} di ${C.CHAT_FREE_LIMIT} messaggi`)}
           </div>
         </div>
-        <button onClick={()=>{setOpen(false);navTo("chat");}} title={L("Vollbild öffnen","Open fullscreen","Plein écran","Schermo intero")}
-          style={{background:"rgba(255,255,255,.08)",border:"1px solid rgba(255,255,255,.1)",borderRadius:8,width:30,height:30,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",fontSize:14,color:"rgba(255,255,255,.6)",flexShrink:0,transition:"all .2s"}}
-          onMouseEnter={e=>e.currentTarget.style.background="rgba(255,255,255,.15)"}
-          onMouseLeave={e=>e.currentTarget.style.background="rgba(255,255,255,.08)"}>
-          ⤢
-        </button>
-        <div style={{width:8,height:8,borderRadius:"50%",background:"#22c55e",boxShadow:"0 0 6px #22c55e"}}/>
+        {chatEmail&&<button onClick={()=>{setOpen(false);navTo("chat");}}
+          style={{background:"rgba(255,255,255,.08)",border:"1px solid rgba(255,255,255,.1)",borderRadius:8,width:30,height:30,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",fontSize:14,color:"rgba(255,255,255,.6)",flexShrink:0}}>⤢</button>}
+        <div style={{width:8,height:8,borderRadius:"50%",background:"#22c55e",boxShadow:"0 0 6px #22c55e",flexShrink:0}}/>
       </div>
 
-      {/* Messages */}
-      <div style={{flex:1,overflowY:"auto",padding:14,display:"flex",flexDirection:"column",gap:10,maxHeight:320,minHeight:200}}>
-        {msgs.map((m,i)=>(
-          <div key={i} style={{display:"flex",gap:8,flexDirection:m.r==="u"?"row-reverse":"row",alignItems:"flex-start"}}>
-            <div style={{width:28,height:28,borderRadius:"50%",background:m.r==="u"?"rgba(16,185,129,.2)":"rgba(255,255,255,.08)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,flexShrink:0}}>{m.r==="u"?"👤":"🤖"}</div>
-            <div style={{maxWidth:"78%",background:m.r==="u"?"rgba(16,185,129,.15)":"rgba(255,255,255,.05)",border:`1px solid ${m.r==="u"?"rgba(16,185,129,.25)":"rgba(255,255,255,.07)"}`,borderRadius:m.r==="u"?"14px 14px 4px 14px":"14px 14px 14px 4px",padding:"9px 12px",fontSize:13,color:"rgba(255,255,255,.85)",lineHeight:1.6}}>
-              {m.r==="ai"?renderMsg(m.t):m.t}
+      {/* Gate OR Chat */}
+      {!chatEmail ? <GateScreen/> : (<>
+
+        {/* Messages */}
+        <div style={{flex:1,overflowY:"auto",padding:14,display:"flex",flexDirection:"column",gap:10,maxHeight:280,minHeight:180}}>
+          {msgs.map((m,i)=>(
+            m.r==="sys"
+              ? <div key={i} style={{textAlign:"center",fontSize:11,color:"rgba(255,255,255,.3)",padding:"4px 0"}}>📎 {m.t}</div>
+              : <div key={i} style={{display:"flex",gap:8,flexDirection:m.r==="u"?"row-reverse":"row",alignItems:"flex-start"}}>
+                  <div style={{width:28,height:28,borderRadius:"50%",background:m.r==="u"?"rgba(16,185,129,.2)":"rgba(255,255,255,.08)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,flexShrink:0}}>{m.r==="u"?"👤":"🤖"}</div>
+                  <div style={{maxWidth:"78%",background:m.r==="u"?"rgba(16,185,129,.15)":"rgba(255,255,255,.05)",border:`1px solid ${m.r==="u"?"rgba(16,185,129,.25)":"rgba(255,255,255,.07)"}`,borderRadius:m.r==="u"?"14px 14px 4px 14px":"14px 14px 14px 4px",padding:"9px 12px",fontSize:13,color:"rgba(255,255,255,.85)",lineHeight:1.6}}>
+                    {m.r==="ai"?renderMsg(m.t):m.t}
+                  </div>
+                </div>
+          ))}
+          {loading&&<div style={{display:"flex",gap:8,alignItems:"flex-start"}}>
+            <div style={{width:28,height:28,borderRadius:"50%",background:"rgba(255,255,255,.08)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13}}>🤖</div>
+            <div style={{background:"rgba(255,255,255,.05)",border:"1px solid rgba(255,255,255,.07)",borderRadius:"14px 14px 14px 4px",padding:"9px 12px"}}>
+              <div style={{display:"flex",gap:4}}>{[0,1,2].map(j=><div key={j} style={{width:6,height:6,borderRadius:"50%",background:"var(--em)",opacity:.7,animation:`pulse 1.2s ease-in-out ${j*0.2}s infinite`}}/>)}</div>
             </div>
-          </div>
-        ))}
-        {loading&&<div style={{display:"flex",gap:8,alignItems:"flex-start"}}>
-          <div style={{width:28,height:28,borderRadius:"50%",background:"rgba(255,255,255,.08)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13}}>🤖</div>
-          <div style={{background:"rgba(255,255,255,.05)",border:"1px solid rgba(255,255,255,.07)",borderRadius:"14px 14px 14px 4px",padding:"9px 12px"}}>
-            <div style={{display:"flex",gap:4}}>{[0,1,2].map(j=><div key={j} style={{width:6,height:6,borderRadius:"50%",background:"var(--em)",opacity:.7,animation:`pulse 1.2s ease-in-out ${j*0.2}s infinite`}}/>)}</div>
-          </div>
+          </div>}
+          <div ref={bottomRef}/>
+        </div>
+
+        {/* Limit reached */}
+        {!canChat&&<div style={{padding:"10px 14px",background:"rgba(245,158,11,.08)",borderTop:"1px solid rgba(245,158,11,.15)",display:"flex",alignItems:"center",justifyContent:"space-between",gap:10}}>
+          <div style={{fontSize:12,color:"rgba(245,158,11,.8)"}}>{L("Gratis-Limit erreicht","Free limit reached","Limite gratuit atteint","Limite gratuito raggiunto")}</div>
+          <button onClick={()=>setPw(true)} style={{background:"var(--am)",color:"white",border:"none",borderRadius:8,padding:"5px 12px",fontSize:11,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap"}}>Pro {L("freischalten","unlock","activer","sblocca")} →</button>
         </div>}
-        <div ref={bottomRef}/>
-      </div>
 
-      {/* Limit reached */}
-      {!canChat&&<div style={{padding:"10px 14px",background:"rgba(245,158,11,.08)",borderTop:"1px solid rgba(245,158,11,.15)",display:"flex",alignItems:"center",justifyContent:"space-between",gap:10}}>
-        <div style={{fontSize:12,color:"rgba(245,158,11,.8)"}}>{L("Gratis-Limit erreicht","Free limit reached","Limite gratuit atteint","Limite gratuito raggiunto")}</div>
-        <button onClick={()=>setPw(true)} style={{background:"var(--am)",color:"white",border:"none",borderRadius:8,padding:"5px 12px",fontSize:11,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap"}}>Pro {L("freischalten","unlock","activer","sblocca")} →</button>
-      </div>}
+        {/* File Upload Bar */}
+        {uploadedFile&&<div style={{padding:"6px 12px",background:"rgba(16,185,129,.08)",borderTop:"1px solid rgba(16,185,129,.15)",display:"flex",alignItems:"center",gap:8,fontSize:12,color:"var(--em)"}}>
+          <span>📎 {uploadedFile.name}</span>
+          <button onClick={()=>{setUploadedFile(null);setUploadedText("");}} style={{marginLeft:"auto",background:"none",border:"none",color:"rgba(255,255,255,.4)",cursor:"pointer",fontSize:14}}>✕</button>
+        </div>}
 
-      {/* Input */}
-      <div style={{borderTop:"1px solid rgba(255,255,255,.07)",padding:"10px 12px",display:"flex",gap:8,alignItems:"flex-end"}}>
-        <textarea value={input} onChange={e=>setInput(e.target.value)}
-          onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey&&!loading&&canChat){e.preventDefault();send();}}}
-          placeholder={canChat ? L("Frag mich etwas…","Ask me anything…","Posez-moi une question…","Chiedimi qualcosa…") : L("Pro freischalten für mehr…","Unlock Pro for more…","Activer Pro pour plus…","Sblocca Pro per di più…")}
-          disabled={!canChat||loading}
-          style={{flex:1,background:"rgba(255,255,255,.06)",border:"1px solid rgba(255,255,255,.1)",borderRadius:10,padding:"8px 11px",fontSize:13,color:"white",resize:"none",minHeight:36,maxHeight:90,outline:"none",lineHeight:1.5}}
-          rows={1}/>
-        <button onClick={send} disabled={!input.trim()||loading||!canChat}
-          style={{width:36,height:36,borderRadius:10,background:input.trim()&&canChat?"var(--em)":"rgba(255,255,255,.08)",border:"none",cursor:input.trim()&&canChat?"pointer":"default",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,flexShrink:0,transition:"background .2s"}}>
-          {loading?"⏳":"➤"}
-        </button>
-      </div>
+        {/* Input */}
+        <div style={{borderTop:"1px solid rgba(255,255,255,.07)",padding:"10px 12px",display:"flex",flexDirection:"column",gap:8}}>
+          <div style={{display:"flex",gap:8,alignItems:"flex-end"}}>
+            {/* Upload button */}
+            <input ref={fileRef} type="file"
+              accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.md"
+              style={{display:"none"}}
+              onChange={e=>{ if(e.target.files[0]) handleFile(e.target.files[0]); e.target.value=""; }}
+            />
+            <button onClick={()=>fileRef.current?.click()}
+              title={L("Datei hochladen","Upload file","Télécharger un fichier","Carica file")}
+              style={{width:36,height:36,borderRadius:10,background:"rgba(255,255,255,.07)",border:"1px solid rgba(255,255,255,.1)",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,flexShrink:0,color:"rgba(255,255,255,.5)"}}>
+              📎
+            </button>
+            <textarea value={input} onChange={e=>setInput(e.target.value)}
+              onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey&&!loading&&canChat){e.preventDefault();send();}}}
+              placeholder={canChat
+                ? L("Frag mich etwas… (Enter = Senden)","Ask me anything… (Enter = send)","Posez-moi une question…","Chiedimi qualcosa…")
+                : L("Pro freischalten für mehr…","Unlock Pro for more…","Activer Pro pour plus…","Sblocca Pro per di più…")}
+              disabled={!canChat||loading}
+              style={{flex:1,background:"rgba(255,255,255,.06)",border:"1px solid rgba(255,255,255,.1)",borderRadius:10,padding:"8px 11px",fontSize:13,color:"white",resize:"none",minHeight:36,maxHeight:90,outline:"none",lineHeight:1.5}}
+              rows={1}/>
+            <button onClick={send} disabled={!input.trim()||loading||!canChat}
+              style={{width:36,height:36,borderRadius:10,background:input.trim()&&canChat?"var(--em)":"rgba(255,255,255,.08)",border:"none",cursor:input.trim()&&canChat?"pointer":"default",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,flexShrink:0,transition:"background .2s"}}>
+              {loading?"⏳":"➤"}
+            </button>
+          </div>
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+            <div style={{fontSize:10,color:"rgba(255,255,255,.2)"}}>
+              {L("Stella kann Fehler machen. Wichtige Entscheidungen bitte selbst prüfen.","Stella can make mistakes. Please verify important decisions yourself.","Stella peut faire des erreurs.","Stella può sbagliare.")}
+            </div>
+            {msgs.some(m=>m.r==="ai")&&<button onClick={downloadLastAnswer}
+              style={{fontSize:10,color:"var(--em)",background:"none",border:"none",cursor:"pointer",whiteSpace:"nowrap"}}>
+              💾 {L("Speichern","Save","Enregistrer","Salva")}
+            </button>}
+          </div>
+        </div>
+      </>)}
     </div>}
 
     <style>{`@keyframes pulse{0%,100%{transform:scale(1);opacity:.7}50%{transform:scale(1.3);opacity:1}}@keyframes fadeSlideUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}`}</style>
   </>);
 }
+
 
 // ════════════════════════════════════════
 export default function App() {
