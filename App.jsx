@@ -14,11 +14,16 @@ const C = {
   stripeYearly:  "https://buy.stripe.com/YEARLY_LINK",
   priceM: "19.90",
   priceY: "14.90",
+  priceUnlM: "39.90",
+  priceUnlY: "29.90",
+  stripeUnlimitedMonthly: "https://buy.stripe.com/UNLIMITED_MONTHLY",
+  stripeUnlimitedYearly:  "https://buy.stripe.com/UNLIMITED_YEARLY",
   FREE_LIMIT: 1,
   PRO_LIMIT: 60,
+  UNLIMITED_LIMIT: 999999,
   CHAT_FREE_LIMIT: 20,
   // ── GROQ CONFIG ──────────────────────────────
-  GROQ_KEY: "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",
+  GROQ_KEY: "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",
   MODEL_FAST: "llama-3.1-8b-instant",      // Schnell & günstig
   MODEL_FULL: "llama-3.3-70b-versatile",   // Smart, für Bewerbungen etc.
   // ─────────────────────────────────────────────
@@ -42,7 +47,18 @@ const getProCount = () => getU().proCount||0;
 const isPro  = () => { try { return localStorage.getItem("stf_pro")==="true"; } catch { return false; }};
 const actPro = () => { try { localStorage.setItem("stf_pro","true"); } catch {}};
 const saveEmail = (e) => { try { localStorage.setItem("stf_email",e); } catch {}};
-const clearUser = () => { try { localStorage.removeItem("stf_pro"); localStorage.removeItem("stf_email"); } catch {}};
+const clearUser = () => { try { localStorage.removeItem("stf_pro"); localStorage.removeItem("stf_email"); localStorage.removeItem("stf_pw_hash"); localStorage.removeItem("stf_chat_email"); localStorage.removeItem("stf_unlimited"); } catch {}};
+
+// Simple password hash (browser-native)
+const hashPw = async (pw) => {
+  const data = new TextEncoder().encode("stf_salt_2024_" + pw);
+  const buf = await crypto.subtle.digest("SHA-256", data);
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,"0")).join("").slice(0,32);
+};
+const savePwHash = (h) => { try { localStorage.setItem("stf_pw_hash", h); } catch {}};
+const getPwHash = () => { try { return localStorage.getItem("stf_pw_hash")||""; } catch { return ""; }};
+const isUnlimited = () => { try { return localStorage.getItem("stf_unlimited")==="true"; } catch { return false; }};
+const actUnlimited = () => { try { localStorage.setItem("stf_unlimited","true"); localStorage.setItem("stf_pro","true"); } catch {}};
 
 // ── Pro-Code Generator (Web Crypto, deterministisch) ──
 const generateCode = async (email) => {
@@ -575,6 +591,15 @@ const mkT = (lang) => {
            ["Documenti illimitati","✍️ Lettera & CV","💼 LinkedIn analisi & ottimizzazione","🤖 Simulazione ATS con score","📜 Analisi certificato di lavoro","🎯 Job matching (Top 5)","🎤 Coach colloquio (voto 0–100)","📊 Generatore Excel con formule (NUOVO)","📽️ Creatore PowerPoint (NUOVO)","✅ Checklist","✉️ E-mail & PDF","4 lingue"]
          ),
          btn:L("Jetzt Pro werden → CHF 19.90/Mo.","Become Pro → CHF 19.90/mo","Devenir Pro → CHF 19.90/mois","Diventa Pro → CHF 19.90/mese"),btnS:"b-em"},
+        {id:"unlimited",name:L("Unlimited","Unlimited","Unlimited","Unlimited"),priceM:39.90,priceY:29.90,
+         note:L("Für Power-User & Profis","Pour les power-users","Per i power-user","For power users"),
+         list:L(
+           ["✦ Wirklich unbegrenzte Generierungen","Alle Pro-Features","Priorität-Support","KI-Modell: GPT-4 Klasse","Dokumenten-Archiv (bald)","API-Zugang (bald)"],
+           ["✦ Truly unlimited generations","All Pro features","Priority support","AI model: GPT-4 class","Document archive (soon)","API access (soon)"],
+           ["✦ Générations vraiment illimitées","Toutes les fonctions Pro","Support prioritaire","Modèle IA: classe GPT-4","Archive documents (bientôt)","Accès API (bientôt)"],
+           ["✦ Truly unlimited generations","All Pro features","Priority support","AI model: GPT-4 class","Document archive (soon)","API access (soon)"]
+         ),
+         btn:L("Unlimited werden → CHF 39.90/Mo.","Become Unlimited → CHF 39.90/mo","Devenir Unlimited → CHF 39.90/mois","Become Unlimited → CHF 39.90/mo"),btnS:"b-out b-gold"},
         {id:"team",name:L("Team","Équipe","Team","Team"),price:null,
          note:L("Für Schulen & HR-Teams","Écoles & équipes RH","Scuole & team HR","Schools & HR teams"),
          list:L(["Alles in Pro","Bis 25 Nutzer","Admin-Dashboard","Onboarding"],["Tout en Pro","25 utilisateurs","Dashboard","Onboarding"],["Tutto in Pro","25 utenti","Dashboard","Onboarding"],["Everything in Pro","Up to 25 users","Admin dashboard","Onboarding"]),
@@ -2198,346 +2223,460 @@ function CookieBanner({ lang, onAccept }) {
 // ════════════════════════════════════════
 // 💬 STELLIFY CHAT BOT
 // ════════════════════════════════════════
-function ChatBot({ lang, pro, setPw, navTo }) {
-  const L = (d,e,f,i) => ({de:d,en:e,fr:f,it:i}[lang]||d);
-  const [open, setOpen]       = useState(false);
-  const [bubble, setBubble]   = useState(false);
-  const [cookieDone, setCookieDone] = useState(false);
-  const [msgs, setMsgs]       = useState([]);
-  const [input, setInput]     = useState("");
+
+// ── ChatGate: Register & Login ──────────────────────────────────────────────
+function ChatGate({ lang, L, C, onSuccess, onPro }) {
+  const [mode, setMode]     = useState(() => {
+    // If user was registered before, show login
+    try { return localStorage.getItem("stf_pw_hash") ? "login" : "register"; } catch { return "register"; }
+  });
+  const [email, setEmail]   = useState(() => { try { return localStorage.getItem("stf_chat_email")||""; } catch { return ""; }});
+  const [pw, setPw]         = useState("");
+  const [pw2, setPw2]       = useState("");
+  const [err, setErr]       = useState("");
   const [loading, setLoading] = useState(false);
-  const [chatUsage, setChatUsage] = useState(0);
-  const [uploadedFile, setUploadedFile] = useState(null);
-  const [uploadedText, setUploadedText] = useState("");
-  const bottomRef = useRef(null);
-  const fileRef = useRef(null);
 
-  // ── E-Mail Gate ──────────────────────────────────────
-  const [gateEmail, setGateEmail] = useState("");
-  const [gateErr, setGateErr]     = useState("");
-  const [gateSubmitting, setGateSubmitting] = useState(false);
-  const registeredEmail = (() => { try { return localStorage.getItem("stf_chat_email")||""; } catch { return ""; }})();
-  const [chatEmail, setChatEmail] = useState(registeredEmail);
+  const inputStyle = { width:"100%", padding:"11px 14px", border:"1.5px solid rgba(255,255,255,.15)", borderRadius:12, fontSize:13, background:"rgba(255,255,255,.07)", color:"white", outline:"none", boxSizing:"border-box" };
+  const btnStyle   = { width:"100%", padding:12, background:"var(--em)", border:"none", borderRadius:12, color:"white", fontWeight:700, fontSize:14, cursor:"pointer" };
 
-  const submitGate = () => {
-    if(!gateEmail.includes("@")||gateEmail.length<5){
-      setGateErr(L("Bitte gültige E-Mail eingeben","Please enter a valid email","Veuillez saisir un e-mail valide","Inserisci un'email valida"));
-      return;
-    }
-    setGateSubmitting(true);
-    setTimeout(()=>{
-      try { localStorage.setItem("stf_chat_email", gateEmail); } catch{}
-      setChatEmail(gateEmail);
-      setGateSubmitting(false);
-      // Welcome message
-      setMsgs([{r:"ai",t:L(
-        `Hallo! Ich bin Stella 👋 Schön, dass du dabei bist${gateEmail?" "+gateEmail.split("@")[0]:""}! Ich helfe dir rund um Karriere, Bewerbungen und den Schweizer Arbeitsmarkt. Du kannst auch Dokumente hochladen (PDF, Word, Excel, PowerPoint). Wie kann ich dir helfen?`,
-        `Hi! I'm Stella 👋 Welcome${gateEmail?" "+gateEmail.split("@")[0]:""}! I help with careers, applications and the Swiss job market. You can also upload documents. How can I help?`,
-        `Bonjour! Je suis Stella 👋 Bienvenue! Je vous aide pour votre carrière et le marché du travail suisse. Comment puis-je vous aider?`,
-        `Ciao! Sono Stella 👋 Benvenuto! Ti aiuto con la carriera e il mercato del lavoro svizzero. Come posso aiutarti?`
-      )}]);
-    }, 600);
+  const doRegister = async () => {
+    if (!email.includes("@")) { setErr(L("Bitte gültige E-Mail eingeben","Please enter a valid email","E-mail invalide","Email non valida")); return; }
+    if (pw.length < 6) { setErr(L("Passwort mind. 6 Zeichen","Password min. 6 chars","Mot de passe min. 6 caractères","Password min. 6 caratteri")); return; }
+    if (pw !== pw2) { setErr(L("Passwörter stimmen nicht überein","Passwords do not match","Les mots de passe ne correspondent pas","Le password non corrispondono")); return; }
+    setLoading(true);
+    const hash = await hashPw(pw);
+    setLoading(false);
+    onSuccess(email.toLowerCase().trim(), hash);
   };
 
-  useEffect(()=>{
-    try { setCookieDone(!!localStorage.getItem("stf_cookie")); } catch{}
-    const iv = setInterval(()=>{ try { if(localStorage.getItem("stf_cookie")) { setCookieDone(true); clearInterval(iv); } } catch{} },500);
-    return ()=>clearInterval(iv);
-  },[]);
+  const doLogin = async () => {
+    if (!email.includes("@")) { setErr(L("Bitte E-Mail eingeben","Please enter email","Entrez votre e-mail","Inserisci email")); return; }
+    if (!pw) { setErr(L("Bitte Passwort eingeben","Please enter password","Entrez votre mot de passe","Inserisci password")); return; }
+    setLoading(true);
+    const hash = await hashPw(pw);
+    const saved = getPwHash();
+    const savedEmail = (() => { try { return localStorage.getItem("stf_chat_email")||""; } catch { return ""; }})();
+    setLoading(false);
+    if (saved && hash === saved && email.toLowerCase().trim() === savedEmail) {
+      onSuccess(email.toLowerCase().trim(), hash);
+    } else if (!saved) {
+      // First time on this device – register automatically
+      onSuccess(email.toLowerCase().trim(), hash);
+    } else {
+      setErr(L("E-Mail oder Passwort falsch","Email or password incorrect","E-mail ou mot de passe incorrect","Email o password errati"));
+    }
+  };
 
-  useEffect(()=>{ setChatUsage(getChatCount()); },[open]);
-  useEffect(()=>{ bottomRef.current?.scrollIntoView({behavior:"smooth"}); },[msgs]);
+  return (
+    <div style={{ padding:"24px 20px", display:"flex", flexDirection:"column", gap:12 }}>
+      <div style={{ textAlign:"center", marginBottom:4 }}>
+        <div style={{ fontSize:32 }}>{mode==="register" ? "✦" : "🔑"}</div>
+        <div style={{ fontFamily:"var(--hd)", fontSize:15, fontWeight:800, color:"white", marginTop:6 }}>
+          {mode==="register"
+            ? L("Konto erstellen – kostenlos","Create account – free","Créer un compte – gratuit","Crea account – gratuito")
+            : L("Anmelden","Sign in","Se connecter","Accedi")}
+        </div>
+        <div style={{ fontSize:12, color:"rgba(255,255,255,.4)", marginTop:4 }}>
+          {mode==="register"
+            ? L(`${C.CHAT_FREE_LIMIT} Gratis-Nachrichten · kein Abo nötig`,`${C.CHAT_FREE_LIMIT} free messages · no subscription`,`${C.CHAT_FREE_LIMIT} messages gratuits`,`${C.CHAT_FREE_LIMIT} messaggi gratis`)
+            : L("Willkommen zurück!","Welcome back!","Bon retour!","Bentornato!")}
+        </div>
+      </div>
 
-  useEffect(()=>{
-    const seen = sessionStorage.getItem("stf_bubble");
-    if(seen) return;
-    const t = setTimeout(()=>{ setBubble(true); sessionStorage.setItem("stf_bubble","1"); }, 8000);
-    return ()=>clearTimeout(t);
-  },[]);
+      <input type="email" placeholder={L("E-Mail-Adresse","Email address","Adresse e-mail","Indirizzo email")}
+        value={email} onChange={e=>{setEmail(e.target.value);setErr("");}}
+        onKeyDown={e=>e.key==="Enter"&&document.getElementById("stf-gate-pw")?.focus()}
+        autoFocus style={inputStyle} />
+
+      <input id="stf-gate-pw" type="password"
+        placeholder={L("Passwort","Password","Mot de passe","Password")}
+        value={pw} onChange={e=>{setPw(e.target.value);setErr("");}}
+        onKeyDown={e=>{ if(e.key==="Enter"){ if(mode==="register") document.getElementById("stf-gate-pw2")?.focus(); else doLogin(); }}}
+        style={inputStyle} />
+
+      {mode==="register" && (
+        <input id="stf-gate-pw2" type="password"
+          placeholder={L("Passwort bestätigen","Confirm password","Confirmer le mot de passe","Conferma password")}
+          value={pw2} onChange={e=>{setPw2(e.target.value);setErr("");}}
+          onKeyDown={e=>e.key==="Enter"&&doRegister()}
+          style={inputStyle} />
+      )}
+
+      {err && <div style={{ color:"#f87171", fontSize:12, textAlign:"center" }}>{err}</div>}
+
+      <button onClick={mode==="register" ? doRegister : doLogin} disabled={loading} style={btnStyle}>
+        {loading ? "⏳ …" : mode==="register"
+          ? L("Konto erstellen →","Create account →","Créer →","Crea account →")
+          : L("Anmelden →","Sign in →","Se connecter →","Accedi →")}
+      </button>
+
+      <div style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:8, marginTop:2 }}>
+        <button onClick={()=>{setMode(mode==="register"?"login":"register");setErr("");setPw("");setPw2("");}}
+          style={{ fontSize:12, color:"rgba(255,255,255,.4)", background:"none", border:"none", cursor:"pointer" }}>
+          {mode==="register"
+            ? L("Bereits registriert? Anmelden","Already registered? Sign in","Déjà inscrit? Se connecter","Già registrato? Accedi")
+            : L("Neu hier? Konto erstellen","New here? Create account","Nouveau? Créer un compte","Nuovo? Crea account")}
+        </button>
+      </div>
+
+      <div style={{ borderTop:"1px solid rgba(255,255,255,.08)", paddingTop:10, textAlign:"center" }}>
+        <button onClick={onPro}
+          style={{ fontSize:12, color:"var(--em)", background:"none", border:"none", cursor:"pointer", fontWeight:600 }}>
+          ✦ {L("Bereits Pro? Pro-Code einlösen →","Already Pro? Redeem code →","Déjà Pro? →","Già Pro? →")}
+        </button>
+      </div>
+
+      <div style={{ fontSize:10, color:"rgba(255,255,255,.25)", textAlign:"center" }}>
+        {L("Kein Spam. Jederzeit löschbar.","No spam. Delete anytime.","Aucun spam.","Nessuno spam.")}
+      </div>
+    </div>
+  );
+}
+
+function ChatBot({ lang, pro, setPw, navTo }) {
+  const L = (d,e,f,i) => ({de:d,en:e,fr:f,it:i}[lang]||d);
+
+  // Core state
+  const [open, setOpen]         = useState(false);
+  const [bubble, setBubble]     = useState(false);
+  const [cookieDone, setCookieDone] = useState(false);
+  const [msgs, setMsgs]         = useState([]);
+  const [input, setInput]       = useState("");
+  const [loading, setLoading]   = useState(false);
+  const [chatUsage, setChatUsage] = useState(0);
+
+  // Email gate
+  const [gateEmail, setGateEmail]   = useState("");
+  const [gateErr, setGateErr]       = useState("");
+  const [gateLoading, setGateLoading] = useState(false);
+  const [chatEmail, setChatEmail]   = useState(() => {
+    try { return localStorage.getItem("stf_chat_email") || ""; } catch { return ""; }
+  });
+
+  // File upload
+  const [uploadFile, setUploadFile] = useState(null);
+  const [uploadText, setUploadText] = useState("");
+  const fileRef = useRef(null);
+  const bottomRef = useRef(null);
+
+  // Cookie check
+  useEffect(() => {
+    try { setCookieDone(!!localStorage.getItem("stf_cookie")); } catch {}
+    const iv = setInterval(() => {
+      try { if (localStorage.getItem("stf_cookie")) { setCookieDone(true); clearInterval(iv); } } catch {}
+    }, 500);
+    return () => clearInterval(iv);
+  }, []);
+
+  useEffect(() => { setChatUsage(getChatCount()); }, [open]);
+  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [msgs]);
+
+  // Auto-bubble once per session after 8s
+  useEffect(() => {
+    if (sessionStorage.getItem("stf_bubble")) return;
+    const t = setTimeout(() => {
+      setBubble(true);
+      sessionStorage.setItem("stf_bubble", "1");
+    }, 8000);
+    return () => clearTimeout(t);
+  }, []);
 
   const canChat = pro || chatUsage < C.CHAT_FREE_LIMIT;
 
-  // ── Datei-Upload ──────────────────────────────────────
-  const handleFile = async (file) => {
-    if(!file) return;
-    const maxMB = 5;
-    if(file.size > maxMB*1024*1024){
-      setGateErr(L(`Max. ${maxMB}MB erlaubt`,`Max. ${maxMB}MB allowed`,`Max. ${maxMB}MB autorisé`,`Max. ${maxMB}MB consentiti`));
+  // Gate submit
+  const submitGate = () => {
+    if (!gateEmail.includes("@") || gateEmail.length < 5) {
+      setGateErr(L("Bitte gültige E-Mail eingeben", "Please enter a valid email", "E-mail invalide", "Email non valida"));
       return;
     }
-    setUploadedFile(file);
-    const ext = file.name.split(".").pop().toLowerCase();
-    const allowedText = ["txt","md","csv","json"];
-    if(allowedText.includes(ext)){
-      const text = await file.text();
-      setUploadedText(text.slice(0,3000));
-    } else {
-      // For PDF/Word/Excel/PPT - just send filename + type as context
-      setUploadedText(`[Datei hochgeladen: ${file.name} (${(file.size/1024).toFixed(0)} KB)]`);
-    }
-    setMsgs(m=>[...m,{r:"sys",t:`📎 ${file.name} hochgeladen`}]);
+    setGateLoading(true);
+    setTimeout(() => {
+      try { localStorage.setItem("stf_chat_email", gateEmail); } catch {}
+      setChatEmail(gateEmail);
+      setGateLoading(false);
+      setMsgs([{ r: "ai", t: L(
+        `Hallo ${gateEmail.split("@")[0]} 👋 Ich bin Stella, deine KI-Karriere-Assistentin von Stellify! Ich helfe dir mit Bewerbungen, LinkedIn, Gehaltsverhandlungen und mehr. Du kannst auch Dokumente hochladen (📎). Wie kann ich dir helfen?`,
+        `Hi ${gateEmail.split("@")[0]} 👋 I'm Stella, your AI career assistant from Stellify! I can help with applications, LinkedIn, salary negotiations and more. You can also upload documents (📎). How can I help?`,
+        `Bonjour ${gateEmail.split("@")[0]} 👋 Je suis Stella, votre assistante carrière IA! Comment puis-je vous aider?`,
+        `Ciao ${gateEmail.split("@")[0]} 👋 Sono Stella, la tua assistente di carriera IA! Come posso aiutarti?`
+      ) }]);
+    }, 500);
   };
 
-  // ── Dokument-Download ─────────────────────────────────
-  const downloadAsText = (text, filename) => {
-    const blob = new Blob([text], {type:"text/plain;charset=utf-8"});
+  // File handler
+  const handleFile = async (file) => {
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      alert(L("Max. 5MB erlaubt", "Max. 5MB allowed", "Max. 5MB autorisé", "Max. 5MB consentiti"));
+      return;
+    }
+    setUploadFile(file);
+    const ext = file.name.split(".").pop().toLowerCase();
+    if (["txt", "md", "csv"].includes(ext)) {
+      const text = await file.text();
+      setUploadText(text.slice(0, 3000));
+    } else {
+      setUploadText(`[Datei: ${file.name} (${(file.size / 1024).toFixed(0)} KB) – bitte analysieren]`);
+    }
+  };
+
+  // Download last AI answer
+  const downloadAnswer = () => {
+    const last = [...msgs].reverse().find(m => m.r === "ai");
+    if (!last) return;
+    const blob = new Blob([last.t], { type: "text/plain;charset=utf-8" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement("a"); a.href=url; a.download=filename; a.click();
+    const a = document.createElement("a");
+    a.href = url; a.download = "Stellify-Antwort.txt"; a.click();
     URL.revokeObjectURL(url);
   };
 
-  const downloadLastAnswer = () => {
-    const lastAI = [...msgs].reverse().find(m=>m.r==="ai");
-    if(!lastAI) return;
-    downloadAsText(lastAI.t, "Stellify-Antwort.txt");
-  };
-
-  const SYSTEM = `Du bist Stella, die KI-Karriere-Assistentin von Stellify. Du hast tiefes Wissen über Karriere, Bewerbungen, den Schweizer Arbeitsmarkt und Produktivität.
-
-Dein Wissen umfasst: Schweizer Bewerbungsunterlagen (Motivationsschreiben, Lebenslauf mit Foto, 1-2 Seiten), ATS-Optimierung, Schweizer Arbeitsrecht (Kündigungsfristen, Sperrfristen, Zeugnis-Code: "stets zu vollsten Zufriedenheit"=sehr gut), Gehälter nach Branche/Erfahrung, LinkedIn-Optimierung, Interview-Vorbereitung (STAR-Methode), Gehaltsverhandlungs-Taktiken, Schweizer Bildungssystem (EFZ, FH, Uni, CAS/MAS).
-
-Tools von Stellify:
-✍️ Bewerbungen (1× gratis), 💼 LinkedIn Optimierung, 🤖 ATS-Simulation, 📜 Zeugnis-Analyse, 🎯 Job-Matching, 🎤 Interview-Coach, 📊 Excel-Generator, 📽️ PowerPoint-Maker, 💰 Gehaltsverhandlung, 🤝 Networking-Nachricht, 📤 Kündigung schreiben, 🗓️ 30-60-90-Tage-Plan, 🏆 Referenzschreiben, 📚 Lernplan, 📝 Zusammenfassung, 🎓 Lehrstelle, ✉️ E-Mail, 📋 Protokoll, 🌍 Übersetzer
-
-Wenn der Nutzer ein Dokument hochlädt, analysiere es und gib konkrete Verbesserungsvorschläge.
-Wenn du ein Dokument erstellst (Bewerbung, Lebenslauf, etc.), füge am Ende hinzu: "💾 DOKUMENT BEREIT ZUM DOWNLOAD" damit der Download-Button erscheint.
-
-Verhalten: Antworte konkret und umsetzbar (max. 3-4 Sätze im Widget, ausführlicher im Vollbild). Schreib Beispieltexte direkt aus wenn gefragt. Empfehle Tool-Namen exakt wie oben. Sei warm, direkt, wie ein erfahrener Karriere-Coach.`;
+  const SYSTEM = `Du bist Stella, die KI-Karriere-Assistentin von Stellify. Tiefes Wissen über Schweizer Arbeitsmarkt, Bewerbungen, LinkedIn, Gehälter, Interview-Vorbereitung.
+Wenn Nutzer eine Datei hochlädt, analysiere sie und gib konkrete Verbesserungen.
+Wenn du ein Dokument erstellst, schreib am Ende: 💾 DOKUMENT BEREIT ZUM DOWNLOAD
+Antworte auf Deutsch, präzise und umsetzbar. Max. 3-4 Sätze im Widget.
+Tools: ✍️ Bewerbungen, 💼 LinkedIn, 🤖 ATS-Simulation, 📜 Zeugnis-Analyse, 🎯 Job-Matching, 🎤 Interview-Coach, 📊 Excel-Generator, 📽️ PowerPoint-Maker, 💰 Gehaltsverhandlung, 🤝 Networking-Nachricht, 📤 Kündigung schreiben, 🗓️ 30-60-90-Tage-Plan, 🏆 Referenzschreiben, 📚 Lernplan, 📝 Zusammenfassung, 🎓 Lehrstelle, ✉️ E-Mail, 📋 Protokoll, 🌍 Übersetzer`;
 
   const TOOL_MAP = {
-    "bewerbung":["✍️ Bewerbungen","app"], "bewerbungen":["✍️ Bewerbungen","app"],
-    "linkedin":["💼 LinkedIn","linkedin"], "ats":["🤖 ATS-Simulation","ats"],
-    "zeugnis":["📜 Zeugnis-Analyse","zeugnis"], "job-matching":["🎯 Job-Matching","jobmatch"],
-    "interview":["🎤 Interview-Coach","coach"], "excel":["📊 Excel-Generator","excel"],
-    "powerpoint":["📽️ PowerPoint-Maker","pptx"], "gehalt":["💰 Gehaltsverhandlung","gehalt"],
-    "networking":["🤝 Networking","networking"], "kündigung":["📤 Kündigung","kuendigung"],
-    "30-60-90":["🗓️ 30-60-90-Plan","plan306090"], "referenz":["🏆 Referenzschreiben","referenz"],
-    "lernplan":["📚 Lernplan","lernplan"], "zusammenfassung":["📝 Zusammenfassung","zusammenfassung"],
-    "lehrstelle":["🎓 Lehrstelle","lehrstelle"], "e-mail":["✉️ E-Mail","email"],
-    "protokoll":["📋 Protokoll","protokoll"], "übersetzer":["🌍 Übersetzer","uebersetzer"],
+    "bewerbung": ["✍️ Bewerbungen", "app"], "bewerbungen": ["✍️ Bewerbungen", "app"],
+    "linkedin": ["💼 LinkedIn", "linkedin"], "ats-simulation": ["🤖 ATS-Simulation", "ats"],
+    "zeugnis-analyse": ["📜 Zeugnis-Analyse", "zeugnis"], "job-matching": ["🎯 Job-Matching", "jobmatch"],
+    "interview-coach": ["🎤 Interview-Coach", "coach"], "excel-generator": ["📊 Excel-Generator", "excel"],
+    "powerpoint-maker": ["📽️ PowerPoint-Maker", "pptx"], "gehaltsverhandlung": ["💰 Gehaltsverhandlung", "gehalt"],
+    "networking-nachricht": ["🤝 Networking-Nachricht", "networking"], "kündigung schreiben": ["📤 Kündigung schreiben", "kuendigung"],
+    "30-60-90-tage-plan": ["🗓️ 30-60-90-Tage-Plan", "plan306090"], "referenzschreiben": ["🏆 Referenzschreiben", "referenz"],
+    "lernplan": ["📚 Lernplan", "lernplan"], "zusammenfassung": ["📝 Zusammenfassung", "zusammenfassung"],
+    "lehrstelle": ["🎓 Lehrstelle", "lehrstelle"],
   };
 
   const renderMsg = (text) => {
     const hasDoc = text.includes("💾 DOKUMENT BEREIT ZUM DOWNLOAD");
-    const cleanText = text.replace("💾 DOKUMENT BEREIT ZUM DOWNLOAD","");
-    let remaining = cleanText;
-    Object.entries(TOOL_MAP).forEach(([key,[label,page]])=>{
-      remaining = remaining.replace(new RegExp(`(${label.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")})`, "gi"),
-        `<TOOL:${page}:${label}>`);
+    let t2 = text.replace("💾 DOKUMENT BEREIT ZUM DOWNLOAD", "");
+    Object.entries(TOOL_MAP).forEach(([key, [label, page]]) => {
+      t2 = t2.replace(new RegExp(label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi"),
+        `%%TOOL:${page}:${label}%%`);
     });
-    const segments = remaining.split(/(<TOOL:[^>]+>)/);
-    const rendered = segments.map((seg,i)=>{
-      const m = seg.match(/^<TOOL:([^:]+):(.+)>$/);
-      if(m) return <button key={i} onClick={()=>{setOpen(false);navTo(m[1]);}}
-        style={{display:"inline-flex",alignItems:"center",gap:4,background:"rgba(16,185,129,.15)",border:"1px solid rgba(16,185,129,.3)",borderRadius:8,padding:"2px 9px",fontSize:12,fontWeight:700,color:"var(--em)",cursor:"pointer",margin:"1px 2px"}}>
-        {m[2]} →</button>;
-      return <span key={i}>{seg}</span>;
-    });
-    return (<>
-      {rendered}
-      {hasDoc&&<button onClick={downloadLastAnswer}
-        style={{display:"flex",alignItems:"center",gap:6,marginTop:8,background:"rgba(16,185,129,.15)",border:"1.5px solid var(--em)",borderRadius:10,padding:"7px 14px",fontSize:12,fontWeight:700,color:"var(--em)",cursor:"pointer",width:"100%",justifyContent:"center"}}>
-        💾 {L("Dokument herunterladen","Download document","Télécharger le document","Scarica il documento")}
-      </button>}
-    </>);
+    const parts = t2.split(/(%%TOOL:[^%]+%%)/);
+    return (
+      <div>
+        {parts.map((seg, i) => {
+          const m = seg.match(/^%%TOOL:([^:]+):(.+)%%$/);
+          if (m) return (
+            <button key={i} onClick={() => { setOpen(false); navTo(m[1]); }}
+              style={{ display: "inline-flex", alignItems: "center", gap: 4, background: "rgba(16,185,129,.15)", border: "1px solid rgba(16,185,129,.3)", borderRadius: 8, padding: "2px 9px", fontSize: 12, fontWeight: 700, color: "var(--em)", cursor: "pointer", margin: "1px 2px" }}>
+              {m[2]} →
+            </button>
+          );
+          return <span key={i}>{seg}</span>;
+        })}
+        {hasDoc && (
+          <button onClick={downloadAnswer}
+            style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 8, background: "rgba(16,185,129,.12)", border: "1.5px solid var(--em)", borderRadius: 10, padding: "8px 14px", fontSize: 12, fontWeight: 700, color: "var(--em)", cursor: "pointer", width: "100%", justifyContent: "center" }}>
+            💾 {L("Dokument herunterladen", "Download document", "Télécharger", "Scarica")}
+          </button>
+        )}
+      </div>
+    );
   };
 
   const send = async () => {
-    if(!input.trim()||loading) return;
-    if(!canChat){ setPw(true); return; }
-    const userMsg = input.trim();
+    if (!input.trim() || loading) return;
+    if (!canChat) { setPw(true); return; }
+    const userText = input.trim();
     setInput("");
-    let contextMsg = userMsg;
-    if(uploadedText) {
-      contextMsg = userMsg + "\n\n[Hochgeladene Datei: " + (uploadedFile?.name||"Datei") + "]\n" + uploadedText;
-      setUploadedFile(null); setUploadedText("");
+    let msgForApi = userText;
+    if (uploadText) {
+      msgForApi = userText + "\n\n" + uploadText;
+      setUploadFile(null); setUploadText("");
     }
-    const newMsgs = [...msgs.filter(m=>m.r!=="sys"), {r:"u", t:userMsg}];
-    setMsgs([...msgs, {r:"u", t:userMsg}]);
+    const newMsgs = [...msgs.filter(m => m.r !== "sys"), { r: "u", t: userText }];
+    setMsgs(prev => [...prev, { r: "u", t: userText }]);
     setLoading(true);
-    if(!pro){ incChat(); setChatUsage(c=>c+1); }
+    if (!pro) { incChat(); setChatUsage(c => c + 1); }
     try {
       const apiMsgs = [];
-      for(const m of newMsgs) {
-        const role = m.r==="u" ? "user" : "assistant";
-        if(apiMsgs.length > 0 && apiMsgs[apiMsgs.length-1].role === role) continue;
-        apiMsgs.push({role, content: m.r==="u"&&m===newMsgs[newMsgs.length-1] ? contextMsg : m.t});
+      for (const m of newMsgs) {
+        const role = m.r === "u" ? "user" : "assistant";
+        if (apiMsgs.length > 0 && apiMsgs[apiMsgs.length - 1].role === role) continue;
+        apiMsgs.push({ role, content: (m.r === "u" && m === newMsgs[newMsgs.length - 1]) ? msgForApi : m.t });
       }
-      while(apiMsgs.length && apiMsgs[0].role !== "user") apiMsgs.shift();
-      const finalMsgs = apiMsgs.slice(-12);
+      while (apiMsgs.length && apiMsgs[0].role !== "user") apiMsgs.shift();
       const res = await fetch(GROQ_URL, {
         method: "POST",
         headers: groqHeaders(),
         body: JSON.stringify({
           model: C.MODEL_FAST,
           max_tokens: 700,
-          messages: [{role:"system",content:SYSTEM}, ...finalMsgs]
+          messages: [{ role: "system", content: SYSTEM }, ...apiMsgs.slice(-12)]
         })
       });
       const data = await res.json();
-      if(!res.ok) throw new Error(data?.error?.message || `HTTP ${res.status}`);
+      if (!res.ok) throw new Error(data?.error?.message || `HTTP ${res.status}`);
       const reply = data.choices?.[0]?.message?.content || "Bitte nochmals versuchen.";
-      setMsgs(m=>[...m, {r:"ai", t:reply}]);
-    } catch(e) {
-      setMsgs(m=>[...m, {r:"ai", t:`⚠️ ${e.message}`}]);
+      setMsgs(m => [...m, { r: "ai", t: reply }]);
+    } catch (e) {
+      setMsgs(m => [...m, { r: "ai", t: `⚠️ ${e.message}` }]);
     } finally {
       setLoading(false);
     }
   };
 
+  const openChat = () => { setBubble(false); setOpen(o => !o); };
   const remaining = pro ? "∞" : Math.max(0, C.CHAT_FREE_LIMIT - chatUsage);
-  const openChat = () => {
-    setBubble(false);
-    setOpen(o=>!o);
-  };
 
-  // ── E-Mail Gate Screen ────────────────────────────────
-  const GateScreen = () => (
-    <div style={{padding:"28px 20px",display:"flex",flexDirection:"column",alignItems:"center",gap:14,minHeight:260}}>
-      <div style={{fontSize:36}}>✦</div>
-      <div style={{fontFamily:"var(--hd)",fontSize:16,fontWeight:800,color:"white",textAlign:"center"}}>
-        {L("Gratis mit Stella chatten","Chat with Stella for free","Chatter gratuitement avec Stella","Chatta gratuitamente con Stella")}
-      </div>
-      <div style={{fontSize:13,color:"rgba(255,255,255,.5)",textAlign:"center",lineHeight:1.5}}>
-        {L(`${C.CHAT_FREE_LIMIT} Nachrichten gratis · kein Abo nötig`,`${C.CHAT_FREE_LIMIT} messages free · no subscription`,`${C.CHAT_FREE_LIMIT} messages gratuits · sans abonnement`,`${C.CHAT_FREE_LIMIT} messaggi gratis · nessun abbonamento`)}
-      </div>
-      <input
-        type="email"
-        placeholder={L("Deine E-Mail-Adresse","Your email address","Votre adresse e-mail","Il tuo indirizzo email")}
-        value={gateEmail}
-        onChange={e=>{setGateEmail(e.target.value);setGateErr("");}}
-        onKeyDown={e=>e.key==="Enter"&&submitGate()}
-        style={{width:"100%",padding:"11px 14px",border:"1.5px solid rgba(255,255,255,.15)",borderRadius:12,fontSize:13,background:"rgba(255,255,255,.07)",color:"white",outline:"none",boxSizing:"border-box"}}
-        autoFocus
-      />
-      {gateErr&&<div style={{color:"#f87171",fontSize:12,textAlign:"center"}}>{gateErr}</div>}
-      <button onClick={submitGate} disabled={gateSubmitting}
-        style={{width:"100%",padding:"12px",background:"var(--em)",border:"none",borderRadius:12,color:"white",fontWeight:700,fontSize:14,cursor:"pointer"}}>
-        {gateSubmitting?"⏳ …":L("Kostenlos starten →","Start for free →","Commencer gratuitement →","Inizia gratuitamente →")}
-      </button>
-      <div style={{fontSize:11,color:"rgba(255,255,255,.3)",textAlign:"center"}}>
-        {L("Keine Werbemails. Jederzeit abmeldbar.","No spam. Unsubscribe anytime.","Aucun spam. Désinscription possible à tout moment.","Nessuno spam. Disiscrizione possibile in qualsiasi momento.")}
-      </div>
-      <button onClick={()=>setPw(true)}
-        style={{fontSize:12,color:"var(--em)",background:"none",border:"none",cursor:"pointer",fontWeight:600}}>
-        ✦ {L("Bereits Pro? Einloggen →","Already Pro? Login →","Déjà Pro? Se connecter →","Già Pro? Accedi →")}
-      </button>
-    </div>
-  );
-
-  return (<>
-    {cookieDone&&bubble&&!open&&<div
-      style={{position:"fixed",bottom:90,right:20,maxWidth:220,background:"var(--dk2)",border:"1px solid rgba(16,185,129,.3)",borderRadius:"14px 14px 4px 14px",padding:"11px 14px",zIndex:1002,boxShadow:"0 8px 32px rgba(0,0,0,.4)",cursor:"pointer",animation:"fadeSlideUp .4s ease"}}
-      onClick={openChat}>
-      <button onClick={e=>{e.stopPropagation();setBubble(false);}} style={{position:"absolute",top:6,right:8,background:"none",border:"none",color:"rgba(255,255,255,.3)",fontSize:12,cursor:"pointer",lineHeight:1}}>✕</button>
-      <div style={{fontSize:13,color:"rgba(255,255,255,.85)",lineHeight:1.5,paddingRight:12}}>
-        {L("Hallo 👋 Frag Stella – deine Karriere-KI!","Hi 👋 Ask Stella – your career AI!","Bonjour 👋 Demandez à Stella!","Ciao 👋 Chiedi a Stella!")}
-      </div>
-      <div style={{fontSize:11,color:"var(--em)",fontWeight:600,marginTop:5}}>{L("Jetzt kostenlos starten →","Start free now →","Commencer gratuitement →","Inizia gratuitamente →")}</div>
-    </div>}
-
-    {cookieDone&&<button onClick={openChat}
-      style={{position:"fixed",bottom:open?248:24,right:24,width:56,height:56,borderRadius:"50%",background:"var(--em)",border:"none",cursor:"pointer",zIndex:1001,boxShadow:"0 4px 20px rgba(16,185,129,.45)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,transition:"all .3s",transform:open?"rotate(10deg)":"none"}}>
-      {open?"✕":"💬"}
-      {bubble&&!open&&<div style={{position:"absolute",top:0,right:0,width:14,height:14,borderRadius:"50%",background:"#ef4444",border:"2px solid white"}}/>}
-    </button>}
-
-    {open&&<div style={{position:"fixed",bottom:92,right:24,width:340,maxWidth:"calc(100vw - 32px)",background:"var(--dk2)",border:"1px solid rgba(255,255,255,.1)",borderRadius:20,boxShadow:"0 20px 60px rgba(0,0,0,.5)",zIndex:1000,display:"flex",flexDirection:"column",overflow:"hidden"}}>
-
-      {/* Header */}
-      <div style={{background:"linear-gradient(135deg,rgba(16,185,129,.2),rgba(16,185,129,.08))",borderBottom:"1px solid rgba(255,255,255,.07)",padding:"14px 18px",display:"flex",alignItems:"center",gap:12}}>
-        <div style={{width:36,height:36,background:"var(--em)",borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>🤖</div>
-        <div style={{flex:1}}>
-          <div style={{fontFamily:"var(--hd)",fontSize:14,fontWeight:800,color:"white"}}>Stella – Stellify Assistant</div>
-          <div style={{fontSize:11,color:"rgba(255,255,255,.4)"}}>
-            {!chatEmail ? L("Kostenlos registrieren","Register for free","Inscription gratuite","Registrazione gratuita")
-              : pro ? L("Pro · Unbegrenzte Nachrichten","Pro · Unlimited messages","Pro · Messages illimités","Pro · Messaggi illimitati")
-              : L(`${remaining} von ${C.CHAT_FREE_LIMIT} Nachrichten`,`${remaining} of ${C.CHAT_FREE_LIMIT} messages`,`${remaining} sur ${C.CHAT_FREE_LIMIT} messages`,`${remaining} di ${C.CHAT_FREE_LIMIT} messaggi`)}
+  return (
+    <>
+      {/* Bubble */}
+      {cookieDone && bubble && !open && (
+        <div onClick={openChat}
+          style={{ position: "fixed", bottom: 90, right: 20, maxWidth: 220, background: "var(--dk2)", border: "1px solid rgba(16,185,129,.3)", borderRadius: "14px 14px 4px 14px", padding: "11px 14px", zIndex: 1002, boxShadow: "0 8px 32px rgba(0,0,0,.4)", cursor: "pointer", animation: "fadeSlideUp .4s ease" }}>
+          <button onClick={e => { e.stopPropagation(); setBubble(false); }}
+            style={{ position: "absolute", top: 6, right: 8, background: "none", border: "none", color: "rgba(255,255,255,.3)", fontSize: 12, cursor: "pointer" }}>✕</button>
+          <div style={{ fontSize: 13, color: "rgba(255,255,255,.85)", lineHeight: 1.5, paddingRight: 12 }}>
+            {L("Hallo 👋 Frag Stella – deine Karriere-KI!", "Hi 👋 Ask Stella – your career AI!", "Bonjour 👋 Demandez à Stella!", "Ciao 👋 Chiedi a Stella!")}
+          </div>
+          <div style={{ fontSize: 11, color: "var(--em)", fontWeight: 600, marginTop: 5 }}>
+            {L("Jetzt kostenlos starten →", "Start free now →", "Commencer →", "Inizia →")}
           </div>
         </div>
-        {chatEmail&&<button onClick={()=>{setOpen(false);navTo("chat");}}
-          style={{background:"rgba(255,255,255,.08)",border:"1px solid rgba(255,255,255,.1)",borderRadius:8,width:30,height:30,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",fontSize:14,color:"rgba(255,255,255,.6)",flexShrink:0}}>⤢</button>}
-        <div style={{width:8,height:8,borderRadius:"50%",background:"#22c55e",boxShadow:"0 0 6px #22c55e",flexShrink:0}}/>
-      </div>
+      )}
 
-      {/* Gate OR Chat */}
-      {!chatEmail ? <GateScreen/> : (<>
+      {/* Float button */}
+      {cookieDone && (
+        <button onClick={openChat}
+          style={{ position: "fixed", bottom: open ? 248 : 24, right: 24, width: 56, height: 56, borderRadius: "50%", background: "var(--em)", border: "none", cursor: "pointer", zIndex: 1001, boxShadow: "0 4px 20px rgba(16,185,129,.45)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, transition: "all .3s", transform: open ? "rotate(10deg)" : "none" }}>
+          {open ? "✕" : "💬"}
+          {bubble && !open && <div style={{ position: "absolute", top: 0, right: 0, width: 14, height: 14, borderRadius: "50%", background: "#ef4444", border: "2px solid white" }} />}
+        </button>
+      )}
 
-        {/* Messages */}
-        <div style={{flex:1,overflowY:"auto",padding:14,display:"flex",flexDirection:"column",gap:10,maxHeight:280,minHeight:180}}>
-          {msgs.map((m,i)=>(
-            m.r==="sys"
-              ? <div key={i} style={{textAlign:"center",fontSize:11,color:"rgba(255,255,255,.3)",padding:"4px 0"}}>📎 {m.t}</div>
-              : <div key={i} style={{display:"flex",gap:8,flexDirection:m.r==="u"?"row-reverse":"row",alignItems:"flex-start"}}>
-                  <div style={{width:28,height:28,borderRadius:"50%",background:m.r==="u"?"rgba(16,185,129,.2)":"rgba(255,255,255,.08)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,flexShrink:0}}>{m.r==="u"?"👤":"🤖"}</div>
-                  <div style={{maxWidth:"78%",background:m.r==="u"?"rgba(16,185,129,.15)":"rgba(255,255,255,.05)",border:`1px solid ${m.r==="u"?"rgba(16,185,129,.25)":"rgba(255,255,255,.07)"}`,borderRadius:m.r==="u"?"14px 14px 4px 14px":"14px 14px 14px 4px",padding:"9px 12px",fontSize:13,color:"rgba(255,255,255,.85)",lineHeight:1.6}}>
-                    {m.r==="ai"?renderMsg(m.t):m.t}
-                  </div>
-                </div>
-          ))}
-          {loading&&<div style={{display:"flex",gap:8,alignItems:"flex-start"}}>
-            <div style={{width:28,height:28,borderRadius:"50%",background:"rgba(255,255,255,.08)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13}}>🤖</div>
-            <div style={{background:"rgba(255,255,255,.05)",border:"1px solid rgba(255,255,255,.07)",borderRadius:"14px 14px 14px 4px",padding:"9px 12px"}}>
-              <div style={{display:"flex",gap:4}}>{[0,1,2].map(j=><div key={j} style={{width:6,height:6,borderRadius:"50%",background:"var(--em)",opacity:.7,animation:`pulse 1.2s ease-in-out ${j*0.2}s infinite`}}/>)}</div>
+      {/* Chat Window */}
+      {open && (
+        <div style={{ position: "fixed", bottom: 92, right: 24, width: 340, maxWidth: "calc(100vw - 32px)", background: "var(--dk2)", border: "1px solid rgba(255,255,255,.1)", borderRadius: 20, boxShadow: "0 20px 60px rgba(0,0,0,.5)", zIndex: 1000, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+
+          {/* Header */}
+          <div style={{ background: "linear-gradient(135deg,rgba(16,185,129,.2),rgba(16,185,129,.08))", borderBottom: "1px solid rgba(255,255,255,.07)", padding: "14px 18px", display: "flex", alignItems: "center", gap: 12 }}>
+            <div style={{ width: 36, height: 36, background: "var(--em)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, flexShrink: 0 }}>🤖</div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontFamily: "var(--hd)", fontSize: 14, fontWeight: 800, color: "white" }}>Stella – Stellify</div>
+              <div style={{ fontSize: 11, color: "rgba(255,255,255,.4)" }}>
+                {!chatEmail
+                  ? L("Kostenlos registrieren", "Register free", "Inscription gratuite", "Registrazione gratuita")
+                  : pro
+                    ? L("Pro · Unbegrenzte Nachrichten", "Pro · Unlimited", "Pro · Illimité", "Pro · Illimitato")
+                    : L(`${remaining} von ${C.CHAT_FREE_LIMIT} Nachrichten`, `${remaining} of ${C.CHAT_FREE_LIMIT}`, `${remaining} sur ${C.CHAT_FREE_LIMIT}`, `${remaining} di ${C.CHAT_FREE_LIMIT}`)}
+              </div>
             </div>
-          </div>}
-          <div ref={bottomRef}/>
-        </div>
+            {chatEmail && (
+              <button onClick={() => { setOpen(false); navTo("chat"); }}
+                style={{ background: "rgba(255,255,255,.08)", border: "1px solid rgba(255,255,255,.1)", borderRadius: 8, width: 30, height: 30, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: 14, color: "rgba(255,255,255,.6)", flexShrink: 0 }}>⤢</button>
+            )}
+            <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#22c55e", boxShadow: "0 0 6px #22c55e", flexShrink: 0 }} />
+          </div>
 
-        {/* Limit reached */}
-        {!canChat&&<div style={{padding:"10px 14px",background:"rgba(245,158,11,.08)",borderTop:"1px solid rgba(245,158,11,.15)",display:"flex",alignItems:"center",justifyContent:"space-between",gap:10}}>
-          <div style={{fontSize:12,color:"rgba(245,158,11,.8)"}}>{L("Gratis-Limit erreicht","Free limit reached","Limite gratuit atteint","Limite gratuito raggiunto")}</div>
-          <button onClick={()=>setPw(true)} style={{background:"var(--am)",color:"white",border:"none",borderRadius:8,padding:"5px 12px",fontSize:11,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap"}}>Pro {L("freischalten","unlock","activer","sblocca")} →</button>
-        </div>}
-
-        {/* File Upload Bar */}
-        {uploadedFile&&<div style={{padding:"6px 12px",background:"rgba(16,185,129,.08)",borderTop:"1px solid rgba(16,185,129,.15)",display:"flex",alignItems:"center",gap:8,fontSize:12,color:"var(--em)"}}>
-          <span>📎 {uploadedFile.name}</span>
-          <button onClick={()=>{setUploadedFile(null);setUploadedText("");}} style={{marginLeft:"auto",background:"none",border:"none",color:"rgba(255,255,255,.4)",cursor:"pointer",fontSize:14}}>✕</button>
-        </div>}
-
-        {/* Input */}
-        <div style={{borderTop:"1px solid rgba(255,255,255,.07)",padding:"10px 12px",display:"flex",flexDirection:"column",gap:8}}>
-          <div style={{display:"flex",gap:8,alignItems:"flex-end"}}>
-            {/* Upload button */}
-            <input ref={fileRef} type="file"
-              accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.md"
-              style={{display:"none"}}
-              onChange={e=>{ if(e.target.files[0]) handleFile(e.target.files[0]); e.target.value=""; }}
+          {/* GATE: Register / Login */}
+          {!chatEmail ? (
+            <ChatGate lang={lang} L={L} C={C}
+              onSuccess={(email, pwHash) => {
+                try { localStorage.setItem("stf_chat_email", email); if(pwHash) localStorage.setItem("stf_pw_hash", pwHash); } catch {}
+                setChatEmail(email);
+                setMsgs([{ r: "ai", t: L(
+                  `Hallo ${email.split("@")[0]} 👋 Ich bin Stella! Wie kann ich dir helfen? Du kannst auch Dokumente hochladen (📎).`,
+                  `Hi ${email.split("@")[0]} 👋 I'm Stella! How can I help? You can also upload files (📎).`,
+                  `Bonjour ${email.split("@")[0]} 👋 Je suis Stella! Comment puis-je vous aider?`,
+                  `Ciao ${email.split("@")[0]} 👋 Sono Stella! Come posso aiutarti?`
+                ) }]);
+              }}
+              onPro={() => setPw(true)}
             />
-            <button onClick={()=>fileRef.current?.click()}
-              title={L("Datei hochladen","Upload file","Télécharger un fichier","Carica file")}
-              style={{width:36,height:36,borderRadius:10,background:"rgba(255,255,255,.07)",border:"1px solid rgba(255,255,255,.1)",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,flexShrink:0,color:"rgba(255,255,255,.5)"}}>
-              📎
-            </button>
-            <textarea value={input} onChange={e=>setInput(e.target.value)}
-              onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey&&!loading&&canChat){e.preventDefault();send();}}}
-              placeholder={canChat
-                ? L("Frag mich etwas… (Enter = Senden)","Ask me anything… (Enter = send)","Posez-moi une question…","Chiedimi qualcosa…")
-                : L("Pro freischalten für mehr…","Unlock Pro for more…","Activer Pro pour plus…","Sblocca Pro per di più…")}
-              disabled={!canChat||loading}
-              style={{flex:1,background:"rgba(255,255,255,.06)",border:"1px solid rgba(255,255,255,.1)",borderRadius:10,padding:"8px 11px",fontSize:13,color:"white",resize:"none",minHeight:36,maxHeight:90,outline:"none",lineHeight:1.5}}
-              rows={1}/>
-            <button onClick={send} disabled={!input.trim()||loading||!canChat}
-              style={{width:36,height:36,borderRadius:10,background:input.trim()&&canChat?"var(--em)":"rgba(255,255,255,.08)",border:"none",cursor:input.trim()&&canChat?"pointer":"default",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,flexShrink:0,transition:"background .2s"}}>
-              {loading?"⏳":"➤"}
-            </button>
-          </div>
-          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-            <div style={{fontSize:10,color:"rgba(255,255,255,.2)"}}>
-              {L("Stella kann Fehler machen. Wichtige Entscheidungen bitte selbst prüfen.","Stella can make mistakes. Please verify important decisions yourself.","Stella peut faire des erreurs.","Stella può sbagliare.")}
-            </div>
-            {msgs.some(m=>m.r==="ai")&&<button onClick={downloadLastAnswer}
-              style={{fontSize:10,color:"var(--em)",background:"none",border:"none",cursor:"pointer",whiteSpace:"nowrap"}}>
-              💾 {L("Speichern","Save","Enregistrer","Salva")}
-            </button>}
-          </div>
-        </div>
-      </>)}
-    </div>}
+          ) : (
+            <>
+              {/* Messages */}
+              <div style={{ flex: 1, overflowY: "auto", padding: 14, display: "flex", flexDirection: "column", gap: 10, maxHeight: 280, minHeight: 180 }}>
+                {msgs.map((m, i) => (
+                  <div key={i} style={{ display: "flex", gap: 8, flexDirection: m.r === "u" ? "row-reverse" : "row", alignItems: "flex-start" }}>
+                    <div style={{ width: 28, height: 28, borderRadius: "50%", background: m.r === "u" ? "rgba(16,185,129,.2)" : "rgba(255,255,255,.08)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, flexShrink: 0 }}>
+                      {m.r === "u" ? "👤" : "🤖"}
+                    </div>
+                    <div style={{ maxWidth: "78%", background: m.r === "u" ? "rgba(16,185,129,.15)" : "rgba(255,255,255,.05)", border: `1px solid ${m.r === "u" ? "rgba(16,185,129,.25)" : "rgba(255,255,255,.07)"}`, borderRadius: m.r === "u" ? "14px 14px 4px 14px" : "14px 14px 14px 4px", padding: "9px 12px", fontSize: 13, color: "rgba(255,255,255,.85)", lineHeight: 1.6 }}>
+                      {m.r === "ai" ? renderMsg(m.t) : m.t}
+                    </div>
+                  </div>
+                ))}
+                {loading && (
+                  <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
+                    <div style={{ width: 28, height: 28, borderRadius: "50%", background: "rgba(255,255,255,.08)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13 }}>🤖</div>
+                    <div style={{ background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.07)", borderRadius: "14px 14px 14px 4px", padding: "9px 12px" }}>
+                      <div style={{ display: "flex", gap: 4 }}>
+                        {[0, 1, 2].map(j => <div key={j} style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--em)", opacity: .7, animation: `pulse 1.2s ease-in-out ${j * 0.2}s infinite` }} />)}
+                      </div>
+                    </div>
+                  </div>
+                )}
+                <div ref={bottomRef} />
+              </div>
 
-    <style>{`@keyframes pulse{0%,100%{transform:scale(1);opacity:.7}50%{transform:scale(1.3);opacity:1}}@keyframes fadeSlideUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}`}</style>
-  </>);
+              {/* Limit banner */}
+              {!canChat && (
+                <div style={{ padding: "10px 14px", background: "rgba(245,158,11,.08)", borderTop: "1px solid rgba(245,158,11,.15)", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
+                  <div style={{ fontSize: 12, color: "rgba(245,158,11,.8)" }}>{L("Gratis-Limit erreicht", "Free limit reached", "Limite atteint", "Limite raggiunto")}</div>
+                  <button onClick={() => setPw(true)} style={{ background: "var(--am)", color: "white", border: "none", borderRadius: 8, padding: "5px 12px", fontSize: 11, fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap" }}>Pro →</button>
+                </div>
+              )}
+
+              {/* Upload preview */}
+              {uploadFile && (
+                <div style={{ padding: "6px 14px", background: "rgba(16,185,129,.08)", borderTop: "1px solid rgba(16,185,129,.15)", display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "var(--em)" }}>
+                  <span>📎 {uploadFile.name}</span>
+                  <button onClick={() => { setUploadFile(null); setUploadText(""); }} style={{ marginLeft: "auto", background: "none", border: "none", color: "rgba(255,255,255,.4)", cursor: "pointer", fontSize: 14, lineHeight: 1 }}>✕</button>
+                </div>
+              )}
+
+              {/* Input area */}
+              <div style={{ borderTop: "1px solid rgba(255,255,255,.07)", padding: "10px 12px", display: "flex", flexDirection: "column", gap: 6 }}>
+                <div style={{ display: "flex", gap: 8, alignItems: "flex-end" }}>
+                  <input ref={fileRef} type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.md" style={{ display: "none" }}
+                    onChange={e => { if (e.target.files[0]) handleFile(e.target.files[0]); e.target.value = ""; }} />
+                  <button onClick={() => fileRef.current?.click()}
+                    title={L("Datei hochladen", "Upload file", "Télécharger", "Carica")}
+                    style={{ width: 36, height: 36, borderRadius: 10, background: "rgba(255,255,255,.07)", border: "1px solid rgba(255,255,255,.1)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, flexShrink: 0 }}>
+                    📎
+                  </button>
+                  <textarea value={input} onChange={e => setInput(e.target.value)}
+                    onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey && !loading && canChat) { e.preventDefault(); send(); } }}
+                    placeholder={canChat
+                      ? L("Frag mich etwas… (Enter = Senden)", "Ask anything… (Enter = send)", "Posez une question…", "Chiedimi qualcosa…")
+                      : L("Pro freischalten für mehr…", "Unlock Pro for more…", "Activer Pro…", "Sblocca Pro…")}
+                    disabled={!canChat || loading}
+                    style={{ flex: 1, background: "rgba(255,255,255,.06)", border: "1px solid rgba(255,255,255,.1)", borderRadius: 10, padding: "8px 11px", fontSize: 13, color: "white", resize: "none", minHeight: 36, maxHeight: 90, outline: "none", lineHeight: 1.5 }}
+                    rows={1} />
+                  <button onClick={send} disabled={!input.trim() || loading || !canChat}
+                    style={{ width: 36, height: 36, borderRadius: 10, background: input.trim() && canChat ? "var(--em)" : "rgba(255,255,255,.08)", border: "none", cursor: input.trim() && canChat ? "pointer" : "default", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, flexShrink: 0, transition: "background .2s" }}>
+                    {loading ? "⏳" : "➤"}
+                  </button>
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <div style={{ fontSize: 10, color: "rgba(255,255,255,.2)" }}>
+                    {L("Stella kann Fehler machen.", "Stella can make mistakes.", "Stella peut se tromper.", "Stella può sbagliare.")}
+                  </div>
+                  {msgs.some(m => m.r === "ai") && (
+                    <button onClick={downloadAnswer} style={{ fontSize: 10, color: "var(--em)", background: "none", border: "none", cursor: "pointer", whiteSpace: "nowrap" }}>
+                      💾 {L("Speichern", "Save", "Enregistrer", "Salva")}
+                    </button>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      )}
+
+      <style>{`
+        @keyframes pulse { 0%,100%{transform:scale(1);opacity:.7} 50%{transform:scale(1.3);opacity:1} }
+        @keyframes fadeSlideUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+      `}</style>
+    </>
+  );
 }
 
 
@@ -2553,6 +2692,7 @@ export default function App() {
   const [pwEmail,setPwEmail]=useState("");
   const [pwCode,setPwCode]=useState("");
   const [pwErr,setPwErr]=useState("");
+  const [unlimited,setUnlimited]=useState(()=>isUnlimited());
   // app state
   const [step,setStep]=useState(0); const [docType,setDocType]=useState("motivation");
   const [tab,setTab]=useState(0); const [streaming,setStreaming]=useState(false);
@@ -2614,6 +2754,7 @@ export default function App() {
     window.scrollTo(0,0);
     const p=new URLSearchParams(window.location.search);
     if(p.get("pro")==="activated"){actPro();setPro(true);window.history.replaceState({},"",window.location.pathname);}
+    if(p.get("unlimited")==="activated"){actUnlimited();setPro(true);setUnlimited(true);window.history.replaceState({},"",window.location.pathname);}
     const em = p.get("email"); if(em){saveEmail(em); setUserEmail(em);}
     setUsage(getU().count); setProUsage(getProCount()); setPro(isPro());
   },[page]);
@@ -3756,7 +3897,7 @@ NOTE: Incluse in tutte le diapositive`),
               ))}
             </div>
             {/* Price strip – schlank */}
-            <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:12,marginTop:28,flexWrap:"wrap"}}>
+            <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:12,marginTop:16,flexWrap:"wrap"}}>
               <div style={{display:"inline-flex",alignItems:"center",gap:14,background:"white",border:"1.5px solid rgba(16,185,129,.22)",borderRadius:40,padding:"12px 14px 12px 24px",boxShadow:"0 2px 12px rgba(16,185,129,.07)"}}>
                 <div style={{fontSize:13,color:"var(--mu)",fontWeight:500}}>
                   {lang==="de"?"Ab":lang==="fr"?"Dès":lang==="it"?"Da":"From"}{" "}
