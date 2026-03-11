@@ -29,7 +29,7 @@ const C = {
   ADMIN_PW: "Stf!Admin#2025$JTSP",  // ← Sicheres PW
   ADMIN_SECRET: "JTSP_STELLIFY_ADMIN", // ← geheimer Token
   // ── GROQ CONFIG (Backup) ──────────────────────────────
-  GROQ_KEY: "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",
+  GROQ_KEY: "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",
   // ── ANTHROPIC CONFIG ──────────────────────────────────
   // 👉 Hier deinen Anthropic API Key eintragen: https://console.anthropic.com/
   ANTHROPIC_KEY: "YOUR_ANTHROPIC_API_KEY_HERE",
