@@ -6,16 +6,11 @@
   <title>Stellify – KI Karriere Copilot Schweiz</title>
   <meta name="description" content="Bewerbungen schreiben mit KI – Motivationsschreiben, Lebenslauf, Interview Coach und mehr. Für die Schweiz gemacht." />
   <meta name="theme-color" content="#000000" />
-
-  <!-- Open Graph -->
   <meta property="og:title" content="Stellify – KI Karriere Copilot" />
   <meta property="og:description" content="Bewerbungen schreiben mit KI. Für die Schweiz gemacht." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://stellify.ch" />
-
-  <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%2310b981'/><text y='23' x='5' font-size='20' font-family='sans-serif' font-weight='bold' fill='white'>S</text></svg>" />
-
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { background: #000; }
@@ -50,35 +45,26 @@
   </style>
 </head>
 <body>
-  <!-- Ladescreen -->
   <div id="loading">
-    <div class="load-logo">
-      Stellify<div class="load-dot"></div>
-    </div>
+    <div class="load-logo">Stellify<div class="load-dot"></div></div>
     <div class="load-bar"><div class="load-fill"></div></div>
   </div>
-
   <div id="root"></div>
 
-  <!-- React + Babel (für JSX direkt im Browser) -->
+  <!-- React via CDN -->
   <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
-  <!-- Deine App -->
+  <!-- SheetJS + Mammoth -->
   <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js"></script>
-  <script type="text/babel" src="./stellify-v14.jsx"></script>
+  <!-- Compiled Stellify App (no Babel needed!) -->
+  <script src="./stellify-bundle.js"></script>
 
   <script>
-    // Ladescreen ausblenden sobald App bereit
     window.addEventListener('load', () => {
       setTimeout(() => {
         const el = document.getElementById('loading');
-        if (el) {
-          el.classList.add('hide');
-          setTimeout(() => el.remove(), 400);
-        }
+        if (el) { el.classList.add('hide'); setTimeout(() => el.remove(), 400); }
       }, 800);
     });
   </script>
