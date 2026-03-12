@@ -29,7 +29,7 @@ const C = {
   ADMIN_PW: "Stf!Admin#2025$JTSP",  // ← Sicheres PW
   ADMIN_SECRET: "JTSP_STELLIFY_ADMIN", // ← geheimer Token
   // ── GROQ CONFIG (Backup) ──────────────────────────────
-  GROQ_KEY: "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",
+  GROQ_KEY: "GROQ_KEY_PLACEHOLDER",
   // ── ANTHROPIC CONFIG ──────────────────────────────────
   // 👉 Hier deinen Anthropic API Key eintragen: https://console.anthropic.com/
   ANTHROPIC_KEY: "YOUR_ANTHROPIC_API_KEY_HERE",
@@ -168,8 +168,6 @@ function authIsAdmin(email, pw) {
 // ═══════════════════════════════════════════
 // 🧠 AI BACKEND – Groq API (kostenlos, ultraschnell)
 // ═══════════════════════════════════════════
-const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
-const groqHeaders = () => ({
   "Content-Type": "application/json",
   "Authorization": `Bearer ${C.GROQ_KEY}`
 });
@@ -1966,7 +1964,7 @@ async function downloadAsPptx(slides, title, page){
 async function downloadAsExcel(rows, headers, sheetName, page){
   try{
     // SheetJS is already available via import in the app
-    const XLSX=await import("https://cdn.sheetjs.com/xlsx-0.20.2/package/xlsx.mjs");
+    const XLSX=window.XLSX; if(!XLSX){alert("SheetJS nicht geladen"); return;}
     const wsData=[headers,...rows];
     const ws=XLSX.utils.aoa_to_sheet(wsData);
     // Column widths
@@ -2029,7 +2027,7 @@ function GenericToolPage({ tool, lang, pro, setPw, setPage, yearly, C, proUsage,
     setDocLoading(true); setErr("");
     try {
       if (file.name.endsWith(".docx")) {
-        const mammoth = await import("https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js");
+        const mammoth = window.mammoth; if(!mammoth){alert("Mammoth nicht geladen"); return;}
         const ab = await file.arrayBuffer();
         const res = await mammoth.extractRawText({arrayBuffer: ab});
         setDocText(res.value); setDocFile({name:file.name, type:"text", text:res.value});
@@ -2855,7 +2853,7 @@ function DocUpload({lang, onFile, onText, file, onClear}) {
     if(!f)return; setLoading(true);
     try{
       if(f.name.endsWith(".docx")||f.name.endsWith(".doc")){
-        const mammoth=await import("https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js");
+        const mammoth=window.mammoth; if(!mammoth){alert("Mammoth nicht geladen"); return;}
         const ab=await f.arrayBuffer();
         const res=await mammoth.extractRawText({arrayBuffer:ab});
         onText(res.value,f.name);
@@ -4157,7 +4155,7 @@ function ProfileManager({ lang, onClose, onSelect, authSession }) {
 }
 
 // ════════════════════════════════════════
-export default function App() {
+function App() {
   const [lang,setLang]=useState("de"); const t=mkT(lang);
   const [page,setPage]=useState("landing");
   const [pro,setPro]=useState(false); const [usage,setUsage]=useState(0); const [proUsage,setProUsage]=useState(0);
