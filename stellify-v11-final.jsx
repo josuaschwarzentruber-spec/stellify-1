@@ -27,7 +27,7 @@ const C = {
   ADMIN_EMAIL: "admin@stellify.ch",
   ADMIN_PW: "Stellify2025!",
   // ── GROQ CONFIG ──────────────────────────────
-  // GROQ_KEY wird NICHT im Frontend gespeichert – läuft über sicheren /api/ai Proxy
+  // GROQ_KEY wird serverseitig in api/ai.js verwaltet
   MODEL_FAST: "llama-3.1-8b-instant",      // Schnell & günstig
   MODEL_FULL: "llama-3.3-70b-versatile",   // Smart, für Bewerbungen etc.
   REFERRAL_DISCOUNT: 20,   // % Rabatt für geworbene Freunde
@@ -36,11 +36,7 @@ const C = {
   FREE_MAX_TOKENS: 500,
 };
 
-// Sicherer API-Proxy – GROQ_KEY liegt auf dem Server, nicht im Browser
-const API_URL = "/api/ai";
-
-// Legacy-Compat: Falls direkt aufgerufen (lokale Dev ohne Proxy)
-const GROQ_URL = API_URL;
+const GROQ_URL = "/api/ai";
 const groqHeaders = () => ({ "Content-Type": "application/json" });
 
 const getWeekKey = () => {
@@ -727,34 +723,34 @@ const mkT = (lang) => {
          btn:L("Kostenlos starten","Commencer gratuitement","Inizia gratis","Start for free"),btnS:"b-out"},
         {id:"pro",name:"Pro",priceM:19.90,priceY:14.90,best:true,
          note:L("Monatlich kündbar · Erneuerung jeden Montag 07:00","Monthly · Erneuerung every Monday 07:00","Mensuel · Rechargement lundi 07:00","Mensile · Ricarica lunedì 07:00"),
-         yearNote:L("🎁 Jahresabo – 2 Monate gratis · nur CHF 14.90/Mo.","🎁 Annual plan – 2 months free · CHF 14.90/mo","🎁 Abonnement annuel – 2 mois offerts · CHF 14.90/mois","🎁 Abbonamento annuale – 2 mesi gratis · CHF 14.90/mese"),
+         yearNote:L("🎁 Jahresabo – 2 Monate gratis · CHF 14.90/Mo.","🎁 Annual plan – 2 months free · CHF 14.90/mo","🔥 CHF 14.90/mois avec abonnement annuel","🔥 CHF 14.90/mese con abbonamento annuale"),
          desc:L(
            "Pro ist limitiert – du hast ein wöchentliches Nutzungsvolumen, das jeden Montag automatisch aufgefüllt wird.",
-           "Pro is limited – you have a weekly volumen that erneuerungs automatically every Monday.",
-           "Pro est limité – vous avez un volumen hebdomadaire rechargé automatiquement chaque lundi.",
-           "Pro è limitato – hai una volumen settimanale che si ricarica automaticamente ogni lunedì."
+           "Pro is limited – you have a weekly volume that erneuerungs automatically every Monday.",
+           "Pro est limité – vous avez un volume hebdomadaire rechargé automatiquement chaque lundi.",
+           "Pro è limitato – hai una volume settimanale che si ricarica automaticamente ogni lunedì."
          ),
          list:L(
            ["Alle 20+ Tools sind vollständig freigeschaltet – keine Einschränkungen.","Du siehst im Profil jederzeit wie viel deines Wochennutzungsvolumens noch übrig ist.","Jeden Montag um 07:00 Uhr wird dein Nutzungsvolumen automatisch aufgefüllt.","Die KI optimiert dein LinkedIn-Profil gezielt für Schweizer Recruiter.","Der ATS-Check prüft ob dein CV durch Recruiter-Software kommt und gibt dir einen Score.","Die Zeugnis-Analyse entschlüsselt den versteckten Code in Schweizer Arbeitszeugnissen.","Job-Matching zeigt dir die fünf Stellen die am besten zu deinem Profil passen.","Der Interview-Coach simuliert echte Fragen und bewertet deine Antworten mit 0–100.","Im Bewerbungs-Tracker behältst du alle laufenden Bewerbungen im Überblick.","Der Swiss Bias-Checker prüft deinen Text auf unbewusste Formulierungen.","Die Skill-Gap-Analyse zeigt dir was dir für eine Stelle noch fehlt – und wie du es schliesst."],
-           ["All 20+ tools are fully unlocked – no restrictions.","Your profile always shows how much of your weekly volumen is left.","Every Monday at 07:00 your volumen is automatically erneuerunged.","The AI optimises your LinkedIn profile specifically for Swiss recruiters.","The ATS check tests if your CV passes recruiter software and gives you a score.","The reference analysis decodes the hidden language in Swiss work references.","Job matching shows the five positions that fit your profile best.","The interview coach simulates real questions and scores your answers 0–100.","The application tracker gives you a clear overview of all ongoing applications.","The Swiss bias checker reviews your text for unconscious phrasing.","The skill gap analysis shows what you need for a role – and how to get there."],
-           ["Tous les 20+ outils entièrement débloqués – sans restrictions.","Votre profil indique toujours combien de votre volumen hebdomadaire il vous reste.","Chaque lundi à 07h00, votre volumen est automatiquement rechargé.","L'IA optimise votre profil LinkedIn pour les recruteurs suisses.","Le contrôle ATS vérifie si votre CV passe les logiciels RH et vous donne un score.","L'analyse de certificat déchiffre le langage caché des certificats suisses.","Le matching emploi montre les cinq postes qui correspondent le mieux à votre profil.","Le coach entretien simule de vraies questions et note vos réponses de 0 à 100.","Le tracker candidatures vous donne une vue d'ensemble de toutes vos candidatures.","Le vérificateur de biais suisse analyse vos formulations inconscientes.","L'analyse des lacunes montre ce qu'il vous manque pour un poste."],
-           ["Tutti i 20+ strumenti completamente sbloccati – senza restrizioni.","Il tuo profilo mostra sempre quanto del tuo volumen settimanale rimane.","Ogni lunedì alle 07:00 il tuo volumen viene ricaricato automaticamente.","L'IA ottimizza il tuo profilo LinkedIn per i recruiter svizzeri.","Il controllo ATS verifica se il tuo CV supera i software HR e ti dà un punteggio.","L'analisi del certificato decodifica il linguaggio nascosto dei certificati svizzeri.","Il job matching mostra i cinque posti che si adattano meglio al tuo profilo.","Il coach colloquio simula domande reali e valuta le tue risposte da 0 a 100.","Il tracker candidature ti dà una panoramica di tutte le candidature in corso.","Il controllo bias svizzero esamina le tue formulazioni inconsce.","L'analisi skill gap mostra cosa ti manca per un posto e come colmare il divario."]
+           ["All 20+ tools are fully unlocked – no restrictions.","Your profile always shows how much of your weekly volume is left.","Every Monday at 07:00 your volume is automatically erneuerunged.","The AI optimises your LinkedIn profile specifically for Swiss recruiters.","The ATS check tests if your CV passes recruiter software and gives you a score.","The reference analysis decodes the hidden language in Swiss work references.","Job matching shows the five positions that fit your profile best.","The interview coach simulates real questions and scores your answers 0–100.","The application tracker gives you a clear overview of all ongoing applications.","The Swiss bias checker reviews your text for unconscious phrasing.","The skill gap analysis shows what you need for a role – and how to get there."],
+           ["Tous les 20+ outils entièrement débloqués – sans restrictions.","Votre profil indique toujours combien de votre volume hebdomadaire il vous reste.","Chaque lundi à 07h00, votre volume est automatiquement rechargé.","L'IA optimise votre profil LinkedIn pour les recruteurs suisses.","Le contrôle ATS vérifie si votre CV passe les logiciels RH et vous donne un score.","L'analyse de certificat déchiffre le langage caché des certificats suisses.","Le matching emploi montre les cinq postes qui correspondent le mieux à votre profil.","Le coach entretien simule de vraies questions et note vos réponses de 0 à 100.","Le tracker candidatures vous donne une vue d'ensemble de toutes vos candidatures.","Le vérificateur de biais suisse analyse vos formulations inconscientes.","L'analyse des lacunes montre ce qu'il vous manque pour un poste."],
+           ["Tutti i 20+ strumenti completamente sbloccati – senza restrizioni.","Il tuo profilo mostra sempre quanto del tuo volume settimanale rimane.","Ogni lunedì alle 07:00 il tuo volume viene ricaricato automaticamente.","L'IA ottimizza il tuo profilo LinkedIn per i recruiter svizzeri.","Il controllo ATS verifica se il tuo CV supera i software HR e ti dà un punteggio.","L'analisi del certificato decodifica il linguaggio nascosto dei certificati svizzeri.","Il job matching mostra i cinque posti che si adattano meglio al tuo profilo.","Il coach colloquio simula domande reali e valuta le tue risposte da 0 a 100.","Il tracker candidature ti dà una panoramica di tutte le candidature in corso.","Il controllo bias svizzero esamina le tue formulazioni inconsce.","L'analisi skill gap mostra cosa ti manca per un posto e come colmare il divario."]
          ),
          btn:L("Pro werden → CHF 19.90/Mo.","Become Pro → CHF 19.90/mo","Devenir Pro → CHF 19.90/mois","Diventa Pro → CHF 19.90/mese"),btnS:"b-em"},
         {id:"ultimate",name:L("Ultimate ♾️","Ultimate ♾️","Ultimate ♾️","Ultimate ♾️"),priceM:49.90,priceY:39.90,best:false,
          note:L("Absolut keine Limits – für tägliche Intensivnutzung.","Absolutely no limits – for daily intensive use.","Aucune limite – pour une utilisation quotidienne intensive.","Nessun limite – per un uso intensivo quotidiano."),
-         yearNote:L("🎁 Jahresabo – 2 Monate gratis · nur CHF 39.90/Mo.","🎁 Annual plan – 2 months free · CHF 39.90/mo","🎁 Abonnement annuel – 2 mois offerts · CHF 39.90/mois","🎁 Abbonamento annuale – 2 mesi gratis · CHF 39.90/mese"),
+         yearNote:L("🎁 Jahresabo – 2 Monate gratis · CHF 39.90/Mo.","🎁 Annual plan – 2 months free · CHF 39.90/mo","🔥 CHF 39.90/mois avec abonnement annuel","🔥 CHF 39.90/mese con abbonamento annuale"),
          desc:L(
            "Ultimate ist unlimitiert – keine Limits, kein Nutzungsvolumen, kein Warten.",
-           "Ultimate is unlimited – no limits, no volumen, no waiting.",
-           "Ultimate est illimité – aucune limite, aucun volumen, aucune attente.",
-           "Ultimate è illimitato – nessun limite, nessuna volumen, nessuna attesa."
+           "Ultimate is unlimited – no limits, no volume, no waiting.",
+           "Ultimate est illimité – aucune limite, aucun volume, aucune attente.",
+           "Ultimate è illimitato – nessun limite, nessuna volume, nessuna attesa."
          ),
          list:L(
            ["Kein Nutzungsvolumen, kein Erneuerung, kein Warten – du nutzt Stellify ohne jede Einschränkung.","Alle 20+ Tools in allen vier Sprachen sind jederzeit und unbegrenzt verfügbar.","Der Swiss Bias-Checker prüft deine Texte auf unbewusste Formulierungen.","Die Skill-Gap-Analyse zeigt dir konkret was dir für eine Stelle noch fehlt.","Die KI optimiert dein LinkedIn-Profil gezielt für den Schweizer Markt.","Der ATS-Check gibt dir einen Score und zeigt welche Keywords noch fehlen.","Die Zeugnis-Analyse entschlüsselt den versteckten Code in Schweizer Arbeitszeugnissen.","Job-Matching findet die fünf Stellen die am besten zu deinem Profil passen.","Der Interview-Coach simuliert echte Gespräche und gibt dir eine Bewertung 0–100.","Priority Support – bei Fragen antwortet das Stellify-Team bevorzugt."],
-           ["No volumen, no erneuerung, no waiting – use Stellify without any restrictions.","All 20+ tools in all four languages are available at any time without limits.","The Swiss bias checker reviews your texts for unconscious phrasing.","The skill gap analysis shows you exactly what you need for a position.","The AI optimises your LinkedIn profile specifically for the Swiss market.","The ATS check gives you a score and shows which keywords are missing.","The reference analysis decodes the hidden language in Swiss work references.","Job matching finds the five positions that fit your profile best.","The interview coach simulates real conversations and scores you 0–100.","Priority support – the Stellify team responds to your questions first."],
-           ["Aucun volumen, aucune recharge, aucune attente – utilisez Stellify sans aucune restriction.","Tous les 20+ outils dans les quatre langues sont disponibles à tout moment.","Le vérificateur de biais suisse analyse vos formulations inconscientes.","L'analyse des lacunes vous montre exactement ce qu'il vous manque pour un poste.","L'IA optimise votre profil LinkedIn pour le marché suisse.","Le contrôle ATS vous donne un score et montre les mots-clés manquants.","L'analyse de certificat déchiffre le langage caché des certificats suisses.","Le matching emploi trouve les cinq postes qui correspondent le mieux à votre profil.","Le coach entretien simule de vraies conversations et vous note de 0 à 100.","Support prioritaire – l'équipe Stellify répond à vos questions en premier."],
-           ["Nessuna volumen, nessuna ricarica, nessuna attesa – usa Stellify senza alcuna restrizione.","Tutti i 20+ strumenti in tutte e quattro le lingue sono sempre disponibili.","Il controllo bias svizzero esamina le tue formulazioni inconsce.","L'analisi skill gap mostra esattamente cosa ti manca per un posto.","L'IA ottimizza il tuo profilo LinkedIn per il mercato svizzero.","Il controllo ATS ti dà un punteggio e mostra le keyword mancanti.","L'analisi del certificato decodifica il linguaggio nascosto dei certificati svizzeri.","Il job matching trova i cinque posti che si adattano meglio al tuo profilo.","Il coach colloquio simula conversazioni reali e ti valuta da 0 a 100.","Supporto prioritario – il team Stellify risponde alle tue domande per primo."]
+           ["No volume, no erneuerung, no waiting – use Stellify without any restrictions.","All 20+ tools in all four languages are available at any time without limits.","The Swiss bias checker reviews your texts for unconscious phrasing.","The skill gap analysis shows you exactly what you need for a position.","The AI optimises your LinkedIn profile specifically for the Swiss market.","The ATS check gives you a score and shows which keywords are missing.","The reference analysis decodes the hidden language in Swiss work references.","Job matching finds the five positions that fit your profile best.","The interview coach simulates real conversations and scores you 0–100.","Priority support – the Stellify team responds to your questions first."],
+           ["Aucun volume, aucune recharge, aucune attente – utilisez Stellify sans aucune restriction.","Tous les 20+ outils dans les quatre langues sont disponibles à tout moment.","Le vérificateur de biais suisse analyse vos formulations inconscientes.","L'analyse des lacunes vous montre exactement ce qu'il vous manque pour un poste.","L'IA optimise votre profil LinkedIn pour le marché suisse.","Le contrôle ATS vous donne un score et montre les mots-clés manquants.","L'analyse de certificat déchiffre le langage caché des certificats suisses.","Le matching emploi trouve les cinq postes qui correspondent le mieux à votre profil.","Le coach entretien simule de vraies conversations et vous note de 0 à 100.","Support prioritaire – l'équipe Stellify répond à vos questions en premier."],
+           ["Nessuna volume, nessuna ricarica, nessuna attesa – usa Stellify senza alcuna restrizione.","Tutti i 20+ strumenti in tutte e quattro le lingue sono sempre disponibili.","Il controllo bias svizzero esamina le tue formulazioni inconsce.","L'analisi skill gap mostra esattamente cosa ti manca per un posto.","L'IA ottimizza il tuo profilo LinkedIn per il mercato svizzero.","Il controllo ATS ti dà un punteggio e mostra le keyword mancanti.","L'analisi del certificato decodifica il linguaggio nascosto dei certificati svizzeri.","Il job matching trova i cinque posti che si adattano meglio al tuo profilo.","Il coach colloquio simula conversazioni reali e ti valuta da 0 a 100.","Supporto prioritario – il team Stellify risponde alle tue domande per primo."]
          ),
          btn:L("Ultimate starten → CHF 49.90/Mo.","Start Ultimate → CHF 49.90/mo","Démarrer Ultimate → CHF 49.90/mois","Avvia Ultimate → CHF 49.90/mese"),btnS:"b-out"},
       ],
@@ -769,7 +765,7 @@ const mkT = (lang) => {
     payments:{
       label:L("Bezahle wie du willst","Payez comme vous voulez","Paga come vuoi","Pay your way"),
       sub:L("Sicher via Stripe verarbeitet.","Traitement sécurisé via Stripe.","Elaborazione sicura via Stripe.","Securely processed via Stripe."),
-      methods:["🇨🇭 Twint","💳 Visa","💳 Mastercard","💳 Amex","🍎 Apple Pay","🤖 Google Pay","🏦 SEPA-Lastschrift","🛒 Klarna","💳 PostFinance"],
+      methods:["🇨🇭 Twint","💳 Visa","💳 Mastercard","💳 Amex","🍎 Apple Pay","🤖 Google Pay","🏦 SEPA","🏦 PostFinance","🛒 Klarna"],
     },
     cta:{
       title:L("Deine Karriere verdient","Votre carrière mérite","La tua carriera merita","Your career deserves"),
@@ -963,7 +959,7 @@ const mkT = (lang) => {
       tagline:L(`${C.tagline} – Schweizer Standard.`,`${C.tagline} – Standard suisse.`,`${C.tagline} – Standard svizzero.`,`${C.tagline} – Swiss standard.`),
     },
     motivPrompt:(j,p)=>L(
-      `Du bist ein erfahrener Schweizer HR-Berater. Schreibe ein überzeugendes, individuelles Motivationsschreiben auf Schweizer Hochdeutsch (kein ß). Aufbau: persönliche Anrede → Einstieg mit Bezug zur Stelle → Kompetenzen mit konkreten Erfolgen → Motivation für genau diese Firma → professioneller Abschluss. Max. 1 Seite, kein ß.\nStelle: ${j.title} bei ${j.company} | Branche: ${j.branch||"k.A."} | Inserat: ${j.desc||"k.A."}\n${p.name} | ${p.beruf} | ${p.erfahrung} J. | Skills: ${p.skills} | Sprachen: ${p.sprachen} | Ausbildung: ${p.ausbildung}\n~350 Wörter, direkt mit Brief beginnen (Ort/Datum/Anschrift).`,
+      `Erfahrener Karrierecoach: Professionelles Motivationsschreiben Schweizer Hochdeutsch (kein ß).\nStelle: ${j.title} bei ${j.company} | Branche: ${j.branch||"k.A."} | Inserat: ${j.desc||"k.A."}\n${p.name} | ${p.beruf} | ${p.erfahrung} J. | Skills: ${p.skills} | Sprachen: ${p.sprachen} | Ausbildung: ${p.ausbildung}\n~350 Wörter, direkt mit Brief beginnen (Ort/Datum/Anschrift).`,
       `Coach carrière: Lettre de motivation française pour le marché suisse.\nPoste: ${j.title} chez ${j.company} | ${p.name} | ${p.beruf} | ${p.erfahrung} ans | ${p.skills}\n~350 mots, commencer directement par la lettre.`,
       `Coach carriera: Lettera di motivazione italiana per il mercato svizzero.\nPosto: ${j.title} presso ${j.company} | ${p.name} | ${p.beruf} | ${p.erfahrung} anni | ${p.skills}\n~350 parole, iniziare direttamente con la lettera.`,
       `Career coach: Professional English cover letter for Swiss job market.\nPosition: ${j.title} at ${j.company} | ${p.name} | ${p.beruf} | ${p.erfahrung} years | ${p.skills}\n~350 words, start directly with the letter.`
@@ -1071,7 +1067,7 @@ const GENERIC_TOOLS = [
       {k:"staerken",lbl:{de:"Stärken & Interessen",en:"Strengths & interests",fr:"Points forts & intérêts",it:"Punti di forza & interessi"},ph:{de:"z.B. Mathe gut, fleissig, computererfahren",en:"e.g. Good at maths, hardworking, computer savvy",fr:"ex. Bon en maths, travailleur, à l'aise en informatique",it:"es. Bravo in matematica, laborioso, esperto di computer"},type:"textarea",req:false},
     ],
     prompt:(v,l)=>({
-      de:`Du bist ein Berufsberater für Schweizer Jugendliche. Schreibe ein Motivationsschreiben für eine Lehrstelle auf Schweizer Hochdeutsch (kein ß): authentisch jugendlich aber professionell, erkläre WARUM genau dieser Lehrberuf und diese Firma, belege Stärken mit Beispielen aus Schule/Hobby, zeige Enthusiasmus und Lernbereitschaft, max. 250 Wörter.\nLehrberuf: ${v.beruf} | Firma: ${v.firma} | Name: ${v.name} | Alter: ${v.alter||"nicht angegeben"} | Stärken: ${v.staerken||"nicht angegeben"}\nTon: jugendlich aber professionell, authentisch, enthusiastisch. Schweizer Lehrstellenformat. ~250 Wörter.`,
+      de:`Schreibe ein professionelles Motivationsschreiben für eine Lehrstelle auf Schweizer Hochdeutsch (kein ß).\nLehrberuf: ${v.beruf} | Firma: ${v.firma} | Name: ${v.name} | Alter: ${v.alter||"nicht angegeben"} | Stärken: ${v.staerken||"nicht angegeben"}\nTon: jugendlich aber professionell, authentisch, enthusiastisch. Schweizer Lehrstellenformat. ~250 Wörter.`,
       en:`Write a professional motivation letter for an apprenticeship in English for the Swiss system.\nTrade: ${v.beruf} | Company: ${v.firma} | Name: ${v.name} | Age: ${v.alter||"not provided"} | Strengths: ${v.staerken||"not provided"}\nTone: youthful but professional, authentic, enthusiastic. ~250 words.`,
       fr:`Rédige une lettre de motivation pour un apprentissage en français pour le système suisse.\nMétier: ${v.beruf} | Entreprise: ${v.firma} | Nom: ${v.name} | Âge: ${v.alter||"n/a"} | Points forts: ${v.staerken||"n/a"}\nTon: jeune mais professionnel, authentique. ~250 mots.`,
       it:`Scrivi una lettera di motivazione per un apprendistato in italiano per il sistema svizzero.\nMestiere: ${v.beruf} | Azienda: ${v.firma} | Nome: ${v.name} | Età: ${v.alter||"n/d"} | Punti di forza: ${v.staerken||"n/d"}\nTono: giovanile ma professionale, autentico. ~250 parole.`,
@@ -1672,7 +1668,7 @@ function GenericToolPage({ tool, lang, pro, setPw, setPage, yearly, C, proUsage,
         {limitHit&&(
           <div style={{background:"rgba(245,158,11,.1)",border:"1px solid rgba(245,158,11,.3)",borderRadius:12,padding:"16px 20px",marginBottom:16,textAlign:"center"}}>
             <div style={{fontSize:24,marginBottom:6}}>⏳</div>
-            <div style={{fontFamily:"var(--hd)",fontSize:16,fontWeight:800,marginBottom:4}}>{L("Monatliches Nutzungsvolumen aufgebraucht","Monthly volumen used up","Volumen mensuel épuisé","Volumen mensile esaurito")}</div>
+            <div style={{fontFamily:"var(--hd)",fontSize:16,fontWeight:800,marginBottom:4}}>{L("Monatliches Nutzungsvolumen aufgebraucht","Monthly volume used up","Volume mensuel épuisé","Volume mensile esaurito")}</div>
             <div style={{fontSize:13,color:"var(--mu)"}}>{L("Nächster Reset:","Next reset:","Prochaine réinitialisation:","Prossimo reset:")} <strong>{nextReset()}</strong></div>
           </div>
         )}
@@ -2408,7 +2404,7 @@ function FaqSection({lang, email}) {
   ]:lang==="fr"?[
     {q:"Mes données sont-elles sécurisées?",a:"Vos données ne sont pas stockées. Chaque requête est envoyée directement à l'API Anthropic et n'est pas enregistrée."},
     {q:"Puis-je résilier à tout moment?",a:"Oui – résiliation mensuelle possible, sans durée minimale ni frais cachés."},
-    {q:"Combien de générations par plan?",a:"Gratuit: 1 génération. Pro: 60/mois par personne. Famille: 60/mois par personne (3 personnes). Unlimited: 60/mois par personne, membres illimités. Le volumen se renouvelle automatiquement le 1er du mois suivant."},
+    {q:"Combien de générations par plan?",a:"Gratuit: 1 génération. Pro: 60/mois par personne. Famille: 60/mois par personne (3 personnes). Unlimited: 60/mois par personne, membres illimités. Le volume se renouvelle automatiquement le 1er du mois suivant."},
     {q:"Fonctionne pour tous les secteurs?",a:"Oui. L'IA connaît les habitudes du marché suisse dans tous les secteurs."},
     {q:"Quelles langues sont supportées?",a:"Allemand, anglais, français et italien – idéal pour toutes les régions linguistiques."},
     {q:"Y a-t-il une réduction étudiants?",a:"Pas actuellement, mais le prix annuel (CHF 18.90/mois) est accessible à tous."},
@@ -2803,22 +2799,9 @@ function ChatBot({ lang, pro, setPw, navTo, authSession, onAuthOpen }) {
   const canChat = isLoggedIn && (pro || chatUsage < C.CHAT_FREE_LIMIT);
   const needsLogin = !isLoggedIn;
 
-  const SYSTEM = `Du bist Stella, die KI-Karriere-Assistentin von Stellify – dem führenden Schweizer Career Copilot. Du begleitest ALLE Karrierephasen:
+  const SYSTEM = `Du bist Stella, die KI-Karriere-Assistentin von Stellify. Du hast tiefes Wissen über Karriere, Bewerbungen, den Schweizer Arbeitsmarkt und Produktivität.
 
-🎓 JUGENDLICHE (14-18): Lehrstellen-Suche, Bewerbungsmappe, Schnupperlehre anfragen, Stärken entdecken. Sprich sie direkt, einfach und ermutigend an.
-🚀 BERUFSEINSTEIGER (18-25): Erster Job, Lohn verhandeln, LinkedIn aufbauen, EFZ/FH/Uni-Abschluss optimal präsentieren.
-💼 BERUFSTÄTIGE (25-45): Jobwechsel strategisch planen, Lohnerhöhung, Führungsrollen, CAS/MAS, Kündigung professionell gestalten.
-🔄 ERFAHRENE (50+): Wiedereinstieg, Age-Bias überwinden, Erfahrung als Stärke positionieren, Teilzeitmodelle.
-
-Fachwissen:
-- Schweizer Bewerbung: Foto obligatorisch, max. 2 Seiten CV, kein ß
-- ATS-Score: Keywords aus Stelleninserat, 70%+ anstreben
-- Zeugnis-Code: "zu vollster Zufriedenheit"=sehr gut, "zu voller Zufriedenheit"=gut, "zu Zufriedenheit"=genügend
-- Lohnbenchmarks CH 2025: IT 95-150k, Finance 90-140k, Marketing 80-110k, Gesundheit 70-95k
-- Schweizer Arbeitsrecht: Probezeit 1-3 Monate, Kündigungsfristen 1-3 Monate, Sperrfristen bei Krankheit
-- Bildungssystem: EFZ=Lehre, HMS/BMS=Berufsmaturität, FH=Fachhochschule, ETH/Uni=Universität
-
-Verhalten: Erkenne die Karrierephase des Nutzers und passe Sprache und Tiefe an. Antworte konkret, umsetzbar, max. 3-4 Sätze im Chat.
+Dein Wissen umfasst: Schweizer Bewerbungsunterlagen (Motivationsschreiben, Lebenslauf mit Foto, 1-2 Seiten), ATS-Optimierung, Schweizer Arbeitsrecht (Kündigungsfristen, Sperrfristen, Zeugnis-Code: \"stets zu vollsten Zufriedenheit\"=sehr gut), Gehälter nach Branche/Erfahrung, LinkedIn-Optimierung, Interview-Vorbereitung (STAR-Methode), Gehaltsverhandlungs-Taktiken, Schweizer Bildungssystem (EFZ, FH, Uni, CAS/MAS).
 
 Tools von Stellify:
 ✍️ Bewerbungen (1× gratis), 💼 LinkedIn Optimierung, 🤖 ATS-Simulation, 📜 Zeugnis-Analyse, 🎯 Job-Matching, 🎤 Interview-Coach, 📊 Excel-Generator, 📽️ PowerPoint-Maker, 💰 Gehaltsverhandlung, 🤝 Networking-Nachricht, 📤 Kündigung schreiben, 🗓️ 30-60-90-Tage-Plan, 🏆 Referenzschreiben, 📚 Lernplan, 📝 Zusammenfassung, 🎓 Lehrstelle, ✉️ E-Mail, 📋 Protokoll, 🌍 Übersetzer, 💰 KI-Gehaltsrechner Schweiz, 📋 Bewerbungs-Tracker, ✍️ LinkedIn-Post Generator
@@ -3621,7 +3604,10 @@ function ProfileManager({ lang, onClose, onSelect }) {
 }
 
 // ════════════════════════════════════════
-// Nav und Footer sind innerhalb von App() definiert (weiter unten)
+  // Nav wird weiter unten in App() definiert
+
+  // Footer wird weiter unten in App() definiert
+
 export default function App() {
   const [lang,setLang]=useState("de");
   const t = React.useMemo(()=>mkT(lang), [lang]);
@@ -3689,7 +3675,6 @@ export default function App() {
   const uj=(k,v)=>setJob(p=>({...p,[k]:v})); const up=(k,v)=>setProf(p=>({...p,[k]:v}));
   const L=(d,e,f,i)=>({de:d,en:e,fr:f,it:i}[lang]);
   const stripeLink=()=>yearly?C.stripeYearly:C.stripeMonthly;
-  const stripeLinkUltimate=()=>yearly?C.stripeUltimateYearly:C.stripeUltimate;
   const canGen=()=>pro?(proUsage<C.PRO_LIMIT):(usage<C.FREE_LIMIT);
   const canGenPro=()=>authSession?.plan==="ultimate"||proUsage<C.PRO_LIMIT;
   const nextReset=()=>{const d=new Date();d.setMonth(d.getMonth()+1);d.setDate(1);return d.toLocaleDateString(lang==="de"?"de-CH":lang==="fr"?"fr-CH":lang==="it"?"it-CH":"en-CH",{day:"numeric",month:"long",year:"numeric"});};
@@ -3703,47 +3688,30 @@ export default function App() {
     setPage(p);
   };
 
-  // ── GOOGLE LOGIN ──
   const handleGoogleLogin = () => {
     const clientId = "370460173343-bnc71e8tib764unofcd6sqf7slesehih.apps.googleusercontent.com";
-    if (clientId === "370460173343-bnc71e8tib764unofcd6sqf7slesehih.apps.googleusercontent.com") {
-      // Fallback: normales Login wenn Google nicht konfiguriert
-      setAuthMode("login"); setShowAuth(true); return;
-    }
     const redirect = encodeURIComponent(window.location.origin + "/api/auth/google");
     window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirect}&response_type=code&scope=email%20profile&prompt=select_account`;
   };
 
   useEffect(()=>{
-    // Initialen History-Eintrag setzen
     const hash = window.location.hash.replace("#","") || "landing";
     window.history.replaceState({page:hash},"",window.location.href);
     const onPop = (e) => setPage(e.state?.page || "landing");
     window.addEventListener("popstate", onPop);
-
-    // Google OAuth Session lesen
+    // Google OAuth Session
     const params = new URLSearchParams(window.location.search);
-    const googleSession = params.get("google_session");
-    const authError = params.get("auth_error");
-    if (googleSession) {
+    const gs = params.get("google_session");
+    if (gs) {
       try {
-        const sessionData = JSON.parse(atob(decodeURIComponent(googleSession)));
-        // Nutzer registrieren/einloggen
+        const sd = JSON.parse(atob(decodeURIComponent(gs)));
         const users = authGetUsers();
-        const existing = users.find(u => u.email === sessionData.email);
-        if (!existing) {
-          authRegister(sessionData.email, "google-oauth-" + Date.now(), "free");
-        }
-        const sess = { email: sessionData.email, plan: existing?.plan || "free", name: sessionData.name, picture: sessionData.picture };
-        authSetSession(sess);
-        setAuthSession(sess);
-        if (sess.plan === "pro" || sess.plan === "ultimate") setPro(true);
-      } catch(e) { console.error("Google Session Fehler:", e); }
-      window.history.replaceState({}, "", window.location.pathname);
-    }
-    if (authError) {
-      console.error("Google Auth Fehler:", authError);
-      window.history.replaceState({}, "", window.location.pathname);
+        if (!users.find(u=>u.email===sd.email)) authRegister(sd.email,"google-"+Date.now(),"free");
+        const sess = {email:sd.email, plan:authGetUser(sd.email)?.plan||"free", name:sd.name||""};
+        authSetSession(sess); setAuthSession(sess);
+        if(sess.plan==="pro"||sess.plan==="ultimate") setPro(true);
+      } catch(e) { console.error(e); }
+      window.history.replaceState({},"",window.location.pathname);
     }
     return ()=>window.removeEventListener("popstate", onPop);
   },[]);
@@ -3850,13 +3818,12 @@ Antworte NUR mit JSON:
 
   // ── SHARED COMPONENTS ──
   const LangSw=()=><div className="ls">{LANGS.map(l=><button key={l} className={`lb ${lang===l?"on":""}`} onClick={()=>setLang(l)}>{FLAGS[l]}</button>)}</div>;
-
-  // ── NAV (innerhalb App, hat Zugriff auf lang, navTo, t, pro, authSession) ──
+  // ── NAV (innerhalb App) ──────────────────────────────
   const Nav=({dark})=>{
     const [mOpen,setMOpen]=useState(false);
     const lc=dark?"rgba(255,255,255,.38)":"var(--mu)";
     return(
-    <nav style={dark?{background:"rgba(7,7,14,.82)",backdropFilter:"blur(24px) saturate(160%)",WebkitBackdropFilter:"blur(24px) saturate(160%)",borderColor:"rgba(255,255,255,.07)"}:{}}>
+    <nav style={dark?{background:"rgba(7,7,14,.82)",backdropFilter:"blur(24px)",WebkitBackdropFilter:"blur(24px)",borderColor:"rgba(255,255,255,.07)"}:{}}>
       <div className="ni">
         <div className="logo" onClick={()=>{navTo("landing");setMOpen(false);}} style={dark?{color:"white"}:{}}>{C.name}<div className="logo-dot"/>{pro&&<span className="pb">PRO</span>}</div>
         <div className="nl nl-desk">
@@ -3864,37 +3831,29 @@ Antworte NUR mit JSON:
           <button className="nlk" style={{color:lc}} onClick={()=>{navTo("landing");setTimeout(()=>document.getElementById("tools")?.scrollIntoView({behavior:"smooth"}),100)}}>{t.nav.tools}</button>
           <button className="nlk" style={{color:lc}} onClick={()=>{navTo("landing");setTimeout(()=>document.getElementById("preise")?.scrollIntoView({behavior:"smooth"}),100)}}>{t.nav.prices}</button>
           <button className="nlk" style={{color:"var(--em)",fontWeight:700}} onClick={()=>navTo("chat")}>💬 Stella</button>
-          <button onClick={()=>setShowProfiles(true)}
-            style={{display:"flex",alignItems:"center",gap:6,background:activeProfile?"rgba(16,185,129,.12)":"rgba(11,11,18,.06)",border:"1.5px solid",borderColor:activeProfile?"rgba(16,185,129,.25)":"var(--bo)",borderRadius:20,padding:"5px 12px",cursor:"pointer",fontFamily:"var(--bd)",fontSize:12,fontWeight:600,color:activeProfile?"var(--em2)":dark?"rgba(255,255,255,.5)":"var(--mu)",transition:"all .2s"}}
-            onMouseEnter={e=>e.currentTarget.style.borderColor="var(--em)"}
-            onMouseLeave={e=>e.currentTarget.style.borderColor=activeProfile?"rgba(16,185,129,.25)":"var(--bo)"}>
+          <button onClick={()=>setShowProfiles(true)} style={{display:"flex",alignItems:"center",gap:6,background:activeProfile?"rgba(16,185,129,.12)":"rgba(11,11,18,.06)",border:"1.5px solid",borderColor:activeProfile?"rgba(16,185,129,.25)":"var(--bo)",borderRadius:20,padding:"5px 12px",cursor:"pointer",fontFamily:"var(--bd)",fontSize:12,fontWeight:600,color:activeProfile?"var(--em2)":dark?"rgba(255,255,255,.5)":"var(--mu)",transition:"all .2s"}} onMouseEnter={e=>e.currentTarget.style.borderColor="var(--em)"} onMouseLeave={e=>e.currentTarget.style.borderColor=activeProfile?"rgba(16,185,129,.25)":"var(--bo)"}>
             <span style={{fontSize:14}}>{activeProfile?.emoji||"👤"}</span>
-            <span style={{maxWidth:80,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{activeProfile?.name||(lang==="fr"?"Profil":lang==="it"?"Profilo":"Profil")}</span>
+            <span style={{maxWidth:80,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{activeProfile?.name||(lang==="de"?"Profil":"Profile")}</span>
             <span style={{fontSize:10,opacity:.6}}>▾</span>
           </button>
           {authSession ? (
             <div style={{display:"flex",alignItems:"center",gap:6}}>
               {authSession.isAdmin&&<button onClick={()=>setShowAdmin(true)} style={{padding:"5px 10px",borderRadius:8,border:"1px solid rgba(245,158,11,.3)",background:"rgba(245,158,11,.1)",color:"#f59e0b",fontSize:11,fontWeight:700,cursor:"pointer"}}>🛡️ Admin</button>}
               {authSession&&<button onClick={()=>setShowReferral(true)} style={{padding:"5px 10px",borderRadius:8,border:"1px solid rgba(245,158,11,.3)",background:"rgba(245,158,11,.06)",color:"#f59e0b",fontSize:11,fontWeight:700,cursor:"pointer"}}>🎁 {lang==="de"?"Freunde":"Refer"}</button>}
-              <button onClick={()=>{if(window.confirm(lang==="de"?`Abmelden von ${authSession.email}?`:`Sign out from ${authSession.email}?`)){authClearSession();setAuthSession(null);if(!isPro())setPro(false);}}}
-                style={{display:"flex",alignItems:"center",gap:7,background:"linear-gradient(135deg,rgba(16,185,129,.18),rgba(16,185,129,.06))",border:"1.5px solid rgba(16,185,129,.35)",borderRadius:24,padding:"5px 14px 5px 5px",cursor:"pointer",fontFamily:"var(--bd)",fontSize:12,fontWeight:700,color:"var(--em2)"}}>
+              <button onClick={()=>{if(window.confirm(lang==="de"?`Abmelden?`:`Sign out?`)){authClearSession();setAuthSession(null);if(!isPro())setPro(false);}}} style={{display:"flex",alignItems:"center",gap:7,background:"linear-gradient(135deg,rgba(16,185,129,.18),rgba(16,185,129,.06))",border:"1.5px solid rgba(16,185,129,.35)",borderRadius:24,padding:"5px 14px 5px 5px",cursor:"pointer",fontFamily:"var(--bd)",fontSize:12,fontWeight:700,color:"var(--em2)"}}>
                 <div style={{width:24,height:24,borderRadius:"50%",background:"linear-gradient(135deg,var(--em),#059669)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:800,color:"white"}}>{authSession.email[0].toUpperCase()}</div>
                 <span style={{maxWidth:80,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{authSession.email.split("@")[0]}</span>
               </button>
             </div>
           ) : (
             <div style={{display:"flex",gap:6}}>
-              <button onClick={handleGoogleLogin}
-                style={{display:"flex",alignItems:"center",gap:6,background:"white",border:"1.5px solid #dadce0",borderRadius:24,padding:"5px 12px",cursor:"pointer",fontFamily:"var(--bd)",fontSize:12,fontWeight:600,color:"#3c4043",transition:"all .2s",boxShadow:"0 1px 3px rgba(0,0,0,.08)"}}
-                onMouseEnter={e=>e.currentTarget.style.boxShadow="0 2px 8px rgba(0,0,0,.15)"}
-                onMouseLeave={e=>e.currentTarget.style.boxShadow="0 1px 3px rgba(0,0,0,.08)"}>
+              <button onClick={()=>handleGoogleLogin()} style={{display:"flex",alignItems:"center",gap:6,background:"white",border:"1.5px solid #dadce0",borderRadius:24,padding:"5px 12px",cursor:"pointer",fontFamily:"var(--bd)",fontSize:12,fontWeight:600,color:"#3c4043",boxShadow:"0 1px 3px rgba(0,0,0,.08)"}}>
                 <svg width="14" height="14" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
                 Google
               </button>
-              <button onClick={()=>{setAuthMode("login");setShowAuth(true);}}
-                style={{display:"flex",alignItems:"center",gap:7,background:"linear-gradient(135deg,rgba(16,185,129,.15),rgba(16,185,129,.05))",border:"1.5px solid rgba(16,185,129,.3)",borderRadius:24,padding:"6px 14px 6px 6px",cursor:"pointer",fontFamily:"var(--bd)",fontSize:12,fontWeight:700,color:"var(--em2)"}}>
+              <button onClick={()=>{setAuthMode("login");setShowAuth(true);}} style={{display:"flex",alignItems:"center",gap:7,background:"linear-gradient(135deg,rgba(16,185,129,.15),rgba(16,185,129,.05))",border:"1.5px solid rgba(16,185,129,.3)",borderRadius:24,padding:"6px 14px 6px 6px",cursor:"pointer",fontFamily:"var(--bd)",fontSize:12,fontWeight:700,color:"var(--em2)"}}>
                 <div style={{width:24,height:24,borderRadius:"50%",background:"rgba(16,185,129,.2)",border:"1px solid rgba(16,185,129,.4)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12}}>👤</div>
-                {lang==="de"?"E-Mail":lang==="fr"?"E-mail":lang==="it"?"E-mail":"Email"}
+                {lang==="de"?"E-Mail":"Email"}
               </button>
             </div>
           )}
@@ -3909,30 +3868,25 @@ Antworte NUR mit JSON:
       {mOpen&&<div style={{background:dark?"#0f0f1a":"white",borderTop:"1px solid",borderColor:dark?"rgba(255,255,255,.08)":"var(--bo)",padding:"12px 20px 16px",display:"flex",flexDirection:"column",gap:2}}>
         <LangSw/>
         <div style={{height:10}}/>
-        {[[()=>navTo("app"),lang==="de"?"✍️ Bewerbung":lang==="fr"?"✍️ Candidature":"✍️ Application"],
-          [()=>{navTo("landing");setTimeout(()=>document.getElementById("tools")?.scrollIntoView({behavior:"smooth"}),100);setMOpen(false);},lang==="de"?"🔧 Alle Tools":"🔧 All tools"],
-          [()=>{navTo("landing");setTimeout(()=>document.getElementById("preise")?.scrollIntoView({behavior:"smooth"}),100);setMOpen(false);},lang==="de"?"💶 Preise":"💶 Pricing"],
-          [()=>{navTo("landing");setTimeout(()=>document.getElementById("faq")?.scrollIntoView({behavior:"smooth"}),100);setMOpen(false);},"❓ FAQ"],
-        ].map(([fn,lbl],i)=>(
-          <button key={i} onClick={()=>{fn();setMOpen(false);}} style={{background:"none",border:"none",cursor:"pointer",fontFamily:"var(--bd)",fontSize:14,fontWeight:500,color:dark?"rgba(255,255,255,.7)":"var(--ink)",textAlign:"left",padding:"10px 0",borderBottom:i<3?"1px solid":"none",borderColor:dark?"rgba(255,255,255,.07)":"var(--bo)"}}>{lbl}</button>
+        {[[()=>navTo("app"),lang==="de"?"✍️ Bewerbung":"✍️ Application"],[()=>{navTo("landing");setTimeout(()=>document.getElementById("tools")?.scrollIntoView({behavior:"smooth"}),100);setMOpen(false);},lang==="de"?"🔧 Alle Tools":"🔧 All tools"],[()=>{navTo("landing");setTimeout(()=>document.getElementById("preise")?.scrollIntoView({behavior:"smooth"}),100);setMOpen(false);},lang==="de"?"💶 Preise":"💶 Pricing"]].map(([fn,lbl],i)=>(
+          <button key={i} onClick={()=>{fn();setMOpen(false);}} style={{background:"none",border:"none",cursor:"pointer",fontFamily:"var(--bd)",fontSize:14,fontWeight:500,color:dark?"rgba(255,255,255,.7)":"var(--ink)",textAlign:"left",padding:"10px 0",borderBottom:i<2?"1px solid":"none",borderColor:dark?"rgba(255,255,255,.07)":"var(--bo)"}}>{lbl}</button>
         ))}
         <button className="btn b-em" style={{marginTop:10,justifyContent:"center"}} onClick={()=>{navTo("app");setMOpen(false);}}>{lang==="de"?"Kostenlos starten →":"Start free →"}</button>
       </div>}
     </nav>);
   };
 
-  // ── FOOTER (innerhalb App, hat Zugriff auf lang, navTo, t) ──
+  // ── FOOTER (innerhalb App) ────────────────────────────
   const Footer=()=>(
     <footer>
-      <div style={{background:"rgba(255,255,255,.025)",borderTop:"1px solid rgba(255,255,255,.05)",borderBottom:"1px solid rgba(255,255,255,.05)",padding:"12px 24px",marginBottom:40}}>
+      <div style={{borderBottom:"1px solid rgba(255,255,255,.05)",padding:"12px 24px",marginBottom:40}}>
         <div style={{display:"flex",flexWrap:"wrap",justifyContent:"center",gap:"8px 36px",maxWidth:900,margin:"0 auto"}}>
           {[{ico:"🔒",txt:lang==="de"?"Keine Datenspeicherung":"No data storage"},
             {ico:"🇨🇭",txt:lang==="de"?"Schweizer Unternehmen · Zug":"Swiss company · Zug"},
-            
             {ico:"🔐",txt:lang==="de"?"Sichere Zahlung via Stripe":"Secure payment via Stripe"},
           ].map((tr,i)=>(
             <div key={i} style={{display:"flex",alignItems:"center",gap:6,fontSize:11,color:"rgba(255,255,255,.32)",fontWeight:500}}>
-              <span style={{fontSize:13}}>{tr.ico}</span><span>{tr.txt}</span>
+              <span>{tr.ico}</span><span>{tr.txt}</span>
             </div>
           ))}
         </div>
@@ -3955,11 +3909,9 @@ Antworte NUR mit JSON:
           <button onClick={()=>navTo("ats")}>🤖 ATS-Check</button>
           <button onClick={()=>navTo("zeugnis")}>📜 {lang==="de"?"Zeugnis-Analyse":"Reference"}</button>
           <button onClick={()=>navTo("jobmatch")}>🎯 Job-Matching</button>
-          <button onClick={()=>navTo("excel")}>📊 Excel</button>
-          <button onClick={()=>navTo("pptx")}>📽️ PowerPoint</button>
-          <button onClick={()=>navTo("coach")}>🎤 {lang==="de"?"Interview-Coach":"Interview Coach"}</button>
-          <button onClick={()=>navTo("gehaltsrechner")}>💰 {lang==="de"?"Gehaltsrechner":"Salary calculator"}</button>
-          <button onClick={()=>navTo("tracker")}>📋 {lang==="de"?"Bewerbungs-Tracker":"Application Tracker"}</button>
+          <button onClick={()=>navTo("coach")}>🎤 Interview-Coach</button>
+          <button onClick={()=>navTo("gehaltsrechner")}>💰 {lang==="de"?"Gehaltsrechner":"Salary"}</button>
+          <button onClick={()=>navTo("tracker")}>📋 {lang==="de"?"Bewerbungs-Tracker":"Tracker"}</button>
         </div>
         <div className="fcol">
           <h5>{lang==="de"?"Schule & Produktivität":"School & Productivity"}</h5>
@@ -3969,23 +3921,18 @@ Antworte NUR mit JSON:
           <button onClick={()=>navTo("agb")}>{t.legal.agb}</button>
           <button onClick={()=>navTo("datenschutz")}>{t.legal.privacy}</button>
           <button onClick={()=>navTo("impressum")}>{t.legal.imprint}</button>
-
         </div>
       </div>
       <div className="fbot">
         <div>© {new Date().getFullYear()} {C.name} · {C.owner} · {C.address}</div>
         <div style={{display:"flex",gap:12}}>{[["agb",t.legal.agb],["datenschutz",t.legal.privacy],["impressum",t.legal.imprint]].map(([p,l])=><button key={p} onClick={()=>navTo(p)} style={{background:"none",border:"none",color:"rgba(255,255,255,.2)",fontSize:11,cursor:"pointer",fontFamily:"var(--bd)"}}>{l}</button>)}</div>
       </div>
-      <div style={{textAlign:"center",fontSize:10,color:"rgba(255,255,255,.12)",paddingTop:12,paddingBottom:8}}>
-        {lang==="de"?"KI-Inhalte sind Entwürfe ohne Rechtsverbindlichkeit · Details in den AGB":
-         lang==="fr"?"Les contenus IA sont des ébauches sans valeur juridique · Voir CGV":
-         lang==="it"?"I contenuti IA sono bozze senza valore legale · Vedi CG":
-         "AI content is non-binding · See Terms"}
-      </div>
     </footer>
   );
 
-  // ── PAYWALL MODAL ──
+
+  // Nav & Footer defined above App
+
   const PW=()=>(
     <div className="mbg" onClick={e=>e.target===e.currentTarget&&setPw(false)}>
       <div className="mod">
@@ -4010,7 +3957,7 @@ Antworte NUR mit JSON:
     </div>
   ):proUsage>=C.PRO_LIMIT?(
     <div style={{background:"rgba(245,158,11,.1)",border:"1px solid rgba(245,158,11,.25)",borderRadius:10,padding:"10px 16px",fontSize:13,display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,flexWrap:"wrap"}}>
-      <span>⏳ {L("Monatliches Nutzungsvolumen aufgebraucht","Monthly volumen used up","Volumen mensuel épuisé","Monthly volumen used up")} · {L("Reset am","Reset on","Réinitialisation le","Reset on")} <strong>{nextReset()}</strong></span>
+      <span>⏳ {L("Monatliches Nutzungsvolumen aufgebraucht","Monthly volume used up","Volume mensuel épuisé","Monthly volume used up")} · {L("Reset am","Reset on","Réinitialisation le","Reset on")} <strong>{nextReset()}</strong></span>
     </div>
   ):(
     <div className="ubar">
@@ -5282,7 +5229,7 @@ NOTE: Incluse in tutte le diapositive`),
                 </ul>
                 {tier.id==="free"&&<button className="btn b-out b-w" style={{borderColor:"rgba(255,255,255,.18)",color:"white"}} onClick={()=>navTo("app")}>{tier.btn}</button>}
                 {tier.id==="pro"&&<button className={`btn ${tier.btnS} b-w`} onClick={()=>window.open(stripeLink(),"_blank")}>{tier.btn}</button>}
-                {tier.id==="ultimate"&&<button className={`btn b-out b-w`} style={{borderColor:"rgba(245,158,11,.4)",color:"rgba(245,158,11,.85)"}} onClick={()=>window.open(stripeLinkUltimate(),"_blank")}>{tier.btn}</button>}
+                {tier.id==="ultimate"&&<button className={`btn b-out b-w`} style={{borderColor:"rgba(245,158,11,.4)",color:"rgba(245,158,11,.85)"}} onClick={()=>window.open(C.stripeUltimate,"_blank")}>{tier.btn}</button>}
               </div>
             ))}
           </div>
@@ -6219,15 +6166,14 @@ VERHALTEN:
     <h2>2. Leistungen</h2><p>{C.name} ist ein KI-gestützter All-in-One Career & Produktivitäts-Copilot mit 20+ Tools, u.a.: Bewerbungsgenerator, LinkedIn-Optimierung, ATS-Simulation, Zeugnis-Analyse, Job-Matching, Interview-Coach, Excel-Generator, PowerPoint-Maker, Gehaltsverhandlungs-Coach, Networking-Nachrichten, Kündigung, 30-60-90-Tage-Plan, Referenzschreiben, Lehrstellen-Bewerbung, Lernplan, Zusammenfassung, E-Mail-Assistent, Meeting-Protokoll, Übersetzer. Es wird kein Erfolg garantiert.</p>
     <h2>3. Abonnement & Zahlung</h2><p>Gratis: 1 Bewerbungsgenerierung/Monat. Pro: CHF 19.90/Monat (monatlich kündbar) oder CHF 14.90/Monat (jährlich = CHF 178.80/Jahr). Ultimate: CHF 49.90/Monat oder CHF 39.90/Monat (jährlich = CHF 478.80/Jahr). Pro enthält: Unbegrenzte Bewerbungen, LinkedIn-Optimierung, ATS-Simulation, Zeugnis-Analyse, Job-Matching, Interview-Coach, Excel-Generator, PowerPoint-Maker. Zahlung via Stripe (Twint, Visa, Mastercard, Amex, PayPal, Apple Pay, Google Pay, SEPA, Klarna). Automatische Verlängerung. Kündigung jederzeit per E-Mail.</p>
     <h2>4. Haftung</h2><p>Keine Haftung für Qualität generierter Inhalte, Vollständigkeit der KI-Analysen oder indirekte Schäden.</p>
-    <h2>5. Haftungsausschluss KI-Inhalte</h2><p>Stellify ist kein Rechts-, Karriere- oder Finanzberater. Alle KI-generierten Inhalte (Bewerbungsunterlagen, Analysen, Empfehlungen) sind unverbindliche Entwürfe und ersetzen keine professionelle Beratung. Keine Garantie auf Vollständigkeit oder Richtigkeit. Nutzung auf eigene Verantwortung.</p>
-    <h2>6. Recht & Gerichtsstand</h2><p>Schweizer Recht (OR/DSG). Gerichtsstand: Zürich. Kontakt: <a href={`mailto:${C.email}`}>{C.email}</a></p>
+    <h2>5. Haftung für KI-generierte Inhalte</h2><p>Stellify ist kein Rechts-, Karriere- oder Finanzberater. Alle KI-generierten Inhalte sind unverbindliche Entwürfe ohne Rechtsverbindlichkeit. Nutzung auf eigene Verantwortung.</p><h2>6. Recht & Gerichtsstand</h2><p>Schweizer Recht (OR/DSG). Gerichtsstand: Zürich. Kontakt: <a href={`mailto:${C.email}`}>{C.email}</a></p>
   </>}/>;
   if(page==="datenschutz") return <LS ch={<>
     <h1>Datenschutz / Privacy</h1><div className="legal-d">DSG (CH) · DSGVO (EU) · Stand: {LD()}</div>
     <h2>Verantwortlich</h2><p>{C.owner}, {C.address} · <a href={`mailto:${C.email}`}>{C.email}</a></p>
     <h2>Erhobene Daten</h2><ul><li>Eingabedaten (Lebenslauf, Zeugnisse, Profildaten) – werden nicht dauerhaft gespeichert</li><li>Nutzungsstatistiken: IP-Adresse (anonymisiert, 30 Tage)</li><li>Zahlungsdaten: ausschliesslich via Stripe (PCI-DSS-konform)</li></ul>
-    <h2>KI-Verarbeitung</h2><p>Eingaben werden zur KI-Verarbeitung temporär an Groq Inc. (groq.com) übermittelt und nicht dauerhaft gespeichert. Groq verarbeitet keine Daten für eigene Zwecke.</p>
-    <h2>Drittanbieter</h2><p>Stripe (stripe.com/privacy) · Groq (groq.com/privacy)</p>
+    <h2>KI-Verarbeitung</h2><p>Eingaben werden zur Verarbeitung an Anthropic (anthropic.com) übermittelt. Anthropic verarbeitet keine Daten für eigene Zwecke.</p>
+    <h2>Drittanbieter</h2><p>Stripe (stripe.com/privacy) · Anthropic (anthropic.com/privacy)</p>
     <h2>Deine Rechte</h2><p>Auskunft, Berichtigung, Löschung jederzeit: <a href={`mailto:${C.email}`}>{C.email}</a></p>
     <h2>Sicherheit</h2><p>HTTPS/TLS. Keine Marketing-Cookies. Kein Verkauf von Daten.</p>
   </>}/>;
@@ -6268,6 +6214,5 @@ VERHALTEN:
 }
 
 import { createRoot } from "react-dom/client";
-const root = document.getElementById("root");
-if (root) createRoot(root).render(<App />);
-
+const _root = document.getElementById("root");
+if (_root) createRoot(_root).render(<App />);
