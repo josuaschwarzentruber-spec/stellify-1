@@ -3922,7 +3922,8 @@ Antworte NUR mit JSON:
     </footer>
   );
 
-  // Nav & Footer defined above App – Kommentar entfernt (jetzt korrekt hier)=>(
+  // ── PAYWALL MODAL ──
+  const PW=()=>(
     <div className="mbg" onClick={e=>e.target===e.currentTarget&&setPw(false)}>
       <div className="mod">
         <div style={{fontSize:32,marginBottom:10}}>✦</div>
