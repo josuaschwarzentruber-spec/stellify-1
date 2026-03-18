@@ -623,6 +623,11 @@ footer{background:var(--dk);padding:50px 28px 24px}
   .ubar{flex-direction:column;align-items:flex-start;gap:8px}
   .hbtns .btn{width:100%}
 }
+/* ── HERO TWO-COLUMN ── */
+.hero-inner{display:grid;grid-template-columns:1fr 440px;gap:60px;align-items:center}
+.hero-text{min-width:0}
+.hero-preview{display:flex;justify-content:flex-end;align-items:center}
+@media(max-width:1060px){.hero-inner{grid-template-columns:1fr}.hero-preview{display:none}}
 /* ── SCROLL REVEAL ── */
 .reveal{opacity:0;transform:translateY(30px);transition:opacity .6s cubic-bezier(.4,0,.2,1),transform .65s cubic-bezier(.34,1.2,.64,1)}
 .reveal.on{opacity:1;transform:none}
@@ -2447,6 +2452,55 @@ Next step: Apply for Nestlé →`,
 }
 
 
+// ── ANIMATED STAT BOX (count-up on scroll into view) ──────────────────
+function AnimatedStatBox({ n, l }) {
+  const [displayed, setDisplayed] = useState("");
+  const [started, setStarted] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(()=>{
+    const obs = new IntersectionObserver(([e])=>{ if(e.isIntersecting){ setStarted(true); obs.disconnect(); }},{threshold:.5});
+    if(ref.current) obs.observe(ref.current);
+    return ()=>obs.disconnect();
+  },[]);
+
+  useEffect(()=>{
+    if(!started){ setDisplayed("0"); return; }
+    // Parse value: "3'000+" → prefix="", num=3000, suffix="+"
+    //              "CHF 19.90" → prefix="CHF ", num=19.90, suffix=""
+    //              "18+" → prefix="", num=18, suffix="+"
+    const clean = n.replace(/'/g,"");
+    const m = clean.match(/^([^0-9]*)([0-9]+(?:\.[0-9]+)?)([^0-9]*)$/);
+    if(!m){ setDisplayed(n); return; }
+    const [, pre, numStr, suf] = m;
+    const target = parseFloat(numStr);
+    const isFloat = numStr.includes(".");
+    const hasSwissThousands = n.includes("'");
+    const duration = 1400;
+    const start = Date.now();
+    const fmt = (v) => {
+      const rounded = isFloat ? v.toFixed(2) : Math.floor(v);
+      const str = hasSwissThousands ? String(rounded).replace(/\B(?=(\d{3})+(?!\d))/g,"'") : String(rounded);
+      return `${pre}${str}${suf}`;
+    };
+    setDisplayed(fmt(0));
+    const timer = setInterval(()=>{
+      const p = Math.min((Date.now()-start)/duration, 1);
+      const eased = 1 - Math.pow(1-p, 3);
+      setDisplayed(fmt(eased * target));
+      if(p>=1) clearInterval(timer);
+    }, 16);
+    return ()=>clearInterval(timer);
+  },[started, n]);
+
+  return (
+    <div ref={ref}>
+      <div className="stat-n">{displayed || n}</div>
+      <div className="stat-l">{l}</div>
+    </div>
+  );
+}
+
 function FaqSection({lang, email}) {
   const [open,setOpen]=useState(null);
   const faqs=lang==="de"?[
@@ -2479,26 +2533,41 @@ function FaqSection({lang, email}) {
     {q:"Is there a student discount?",a:"Not currently, but the annual price (CHF 18.90/mo.) makes the subscription affordable for everyone."},
   ];
   return(
-    <section className="sec sec-w" id="faq">
+    <section style={{padding:"88px 0",background:"var(--dk)",position:"relative",overflow:"hidden"}} id="faq">
+      <div style={{position:"absolute",top:-100,right:-80,width:400,height:400,background:"radial-gradient(circle,rgba(16,185,129,.07),transparent)",pointerEvents:"none"}}/>
       <div className="con">
         <div className="sh shc">
-          <div className="seye">{lang==="de"?"✦ Häufige Fragen":lang==="fr"?"✦ Questions fréquentes":lang==="it"?"✦ Domande frequenti":"✦ Frequently Asked Questions"}</div>
-          <h2 className="st">{lang==="de"?"Alles was du wissen musst":lang==="fr"?"Tout ce que vous devez savoir":lang==="it"?"Tutto quello che devi sapere":"Everything you need to know"}</h2>
+          <div className="seye">{lang==="de"?"✦ FAQ":lang==="fr"?"✦ FAQ":lang==="it"?"✦ FAQ":"✦ FAQ"}</div>
+          <h2 className="st">{lang==="de"?"Häufige Fragen":lang==="fr"?"Questions fréquentes":lang==="it"?"Domande frequenti":"Frequently asked questions"}</h2>
+          <p className="ss">{lang==="de"?"Alles was du wissen musst – klar und ehrlich.":lang==="fr"?"Tout ce que vous devez savoir – clairement.":lang==="it"?"Tutto quello che devi sapere.":"Everything you need to know – clear and honest."}</p>
         </div>
-        <div style={{maxWidth:740,margin:"0 auto",display:"flex",flexDirection:"column",gap:8}}>
+        <div style={{maxWidth:760,margin:"0 auto",display:"flex",flexDirection:"column",gap:6}}>
           {faqs.map((faq,i)=>(
-            <div key={i} style={{border:"1.5px solid",borderRadius:14,overflow:"hidden",transition:"border-color .2s",borderColor:open===i?"rgba(16,185,129,.4)":"var(--bo)"}}>
-              <button onClick={()=>setOpen(open===i?null:i)} style={{width:"100%",background:open===i?"rgba(16,185,129,.04)":"white",border:"none",cursor:"pointer",padding:"18px 22px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:16,textAlign:"left",fontFamily:"var(--bd)",transition:"background .18s"}}>
-                <span style={{fontSize:15,fontWeight:700,color:"var(--ink)",lineHeight:1.4}}>{faq.q}</span>
-                <span style={{fontSize:20,color:"var(--em)",flexShrink:0,transform:open===i?"rotate(45deg)":"none",transition:"transform .2s",fontWeight:300,lineHeight:1}}>+</span>
+            <div key={i} className="reveal" style={{transitionDelay:`${i*0.06}s`,
+              background:open===i?"rgba(16,185,129,.06)":"rgba(255,255,255,.03)",
+              border:`1.5px solid ${open===i?"rgba(16,185,129,.3)":"rgba(255,255,255,.07)"}`,
+              borderRadius:16,overflow:"hidden",transition:"border-color .22s,background .22s"}}>
+              <button onClick={()=>setOpen(open===i?null:i)}
+                style={{width:"100%",background:"none",border:"none",cursor:"pointer",padding:"20px 24px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:16,textAlign:"left",fontFamily:"var(--bd)"}}>
+                <span style={{fontSize:15,fontWeight:700,color:"white",lineHeight:1.4}}>{faq.q}</span>
+                <div style={{width:28,height:28,borderRadius:"50%",background:open===i?"var(--em)":"rgba(255,255,255,.08)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,transition:"background .2s,transform .2s",transform:open===i?"rotate(45deg)":"none"}}>
+                  <span style={{fontSize:16,color:open===i?"white":"rgba(255,255,255,.4)",lineHeight:1,fontWeight:300}}>+</span>
+                </div>
               </button>
-              {open===i&&<div style={{padding:"14px 22px 18px",fontSize:14,color:"var(--mu)",lineHeight:1.75,borderTop:"1px solid var(--bo)",background:"rgba(16,185,129,.02)"}}>{faq.a}</div>}
+              {open===i&&<div style={{padding:"0 24px 20px",fontSize:14,color:"rgba(255,255,255,.55)",lineHeight:1.85,borderTop:"1px solid rgba(255,255,255,.07)",paddingTop:16,marginTop:0}}>
+                {faq.a}
+              </div>}
             </div>
           ))}
         </div>
-        <div style={{textAlign:"center",marginTop:32}}>
-          <span style={{fontSize:13,color:"var(--mu)"}}>{lang==="de"?"Noch Fragen? ":lang==="fr"?"D'autres questions? ":lang==="it"?"Altre domande? ":"More questions? "}</span>
-          <a href={`mailto:${email}`} style={{fontSize:13,color:"var(--em)",fontWeight:600,textDecoration:"underline"}}>{email}</a>
+        <div style={{textAlign:"center",marginTop:44}}>
+          <div style={{display:"inline-flex",alignItems:"center",gap:12,background:"rgba(255,255,255,.04)",border:"1px solid rgba(255,255,255,.08)",borderRadius:16,padding:"16px 28px"}}>
+            <span style={{fontSize:22}}>💬</span>
+            <div style={{textAlign:"left"}}>
+              <div style={{fontSize:14,fontWeight:600,color:"white",marginBottom:2}}>{lang==="de"?"Noch Fragen?":lang==="fr"?"D'autres questions?":lang==="it"?"Altre domande?":"Still have questions?"}</div>
+              <a href={`mailto:${email}`} style={{fontSize:13,color:"var(--em)",fontWeight:600,textDecoration:"none"}}>{email}</a>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -4225,13 +4294,43 @@ Antworte NUR mit JSON:
           <div style={{width:22,height:2,background:"currentColor",borderRadius:2,transition:"all .2s",transform:mOpen?"rotate(-45deg) translate(4px,-4px)":"none"}}/>
         </button>
       </div>
-      {mOpen&&<div style={{background:dark?"#0f0f1a":"white",borderTop:"1px solid",borderColor:dark?"rgba(255,255,255,.08)":"var(--bo)",padding:"12px 20px 16px",display:"flex",flexDirection:"column",gap:2}}>
-        <LangSw/>
-        <div style={{height:10}}/>
-        {[[()=>navTo("app"),lang==="de"?"✍️ Bewerbung":"✍️ Application"],[()=>{navTo("landing");setTimeout(()=>document.getElementById("tools")?.scrollIntoView({behavior:"smooth"}),100);setMOpen(false);},lang==="de"?"🔧 Alle Tools":"🔧 All tools"],[()=>{navTo("landing");setTimeout(()=>document.getElementById("preise")?.scrollIntoView({behavior:"smooth"}),100);setMOpen(false);},lang==="de"?"💶 Preise":"💶 Pricing"]].map(([fn,lbl],i)=>(
-          <button key={i} onClick={()=>{fn();setMOpen(false);}} style={{background:"none",border:"none",cursor:"pointer",fontFamily:"var(--bd)",fontSize:14,fontWeight:500,color:dark?"rgba(255,255,255,.7)":"var(--ink)",textAlign:"left",padding:"10px 0",borderBottom:i<2?"1px solid":"none",borderColor:dark?"rgba(255,255,255,.07)":"var(--bo)"}}>{lbl}</button>
+      {mOpen&&<div style={{background:"#0a0a16",borderTop:"1px solid rgba(255,255,255,.07)",padding:"8px 0 16px",display:"flex",flexDirection:"column"}}>
+        {/* Nav links */}
+        {[
+          {fn:()=>navTo("app"),ico:"✍️",lbl:lang==="de"?"Bewerbung":lang==="fr"?"Candidature":lang==="it"?"Candidatura":"Application"},
+          {fn:()=>navTo("chat"),ico:"💬",lbl:"Stella AI",badge:lang==="de"?"Neu":"New"},
+          {fn:()=>{navTo("landing");setTimeout(()=>document.getElementById("tools")?.scrollIntoView({behavior:"smooth"}),100);},ico:"🔧",lbl:lang==="de"?"Alle Tools":lang==="fr"?"Outils":lang==="it"?"Strumenti":"All Tools"},
+          {fn:()=>{navTo("landing");setTimeout(()=>document.getElementById("preise")?.scrollIntoView({behavior:"smooth"}),100);},ico:"💶",lbl:lang==="de"?"Preise":lang==="fr"?"Tarifs":lang==="it"?"Prezzi":"Pricing"},
+        ].map(({fn,ico,lbl,badge},i)=>(
+          <button key={i} onClick={()=>{fn();setMOpen(false);}}
+            style={{background:"none",border:"none",cursor:"pointer",fontFamily:"var(--bd)",fontSize:14,fontWeight:500,color:"rgba(255,255,255,.75)",textAlign:"left",padding:"13px 22px",display:"flex",alignItems:"center",gap:12,borderBottom:"1px solid rgba(255,255,255,.04)"}}>
+            <span style={{fontSize:18,width:24,textAlign:"center"}}>{ico}</span>
+            <span style={{flex:1}}>{lbl}</span>
+            {badge&&<span style={{fontSize:10,fontWeight:700,background:"var(--em)",color:"white",padding:"2px 7px",borderRadius:99,letterSpacing:.5}}>{badge}</span>}
+          </button>
         ))}
-        <button className="btn b-em" style={{marginTop:10,justifyContent:"center"}} onClick={()=>{navTo("app");setMOpen(false);}}>{lang==="de"?"Kostenlos starten →":"Start free →"}</button>
+        {/* Auth section */}
+        <div style={{margin:"12px 16px 4px",display:"flex",flexDirection:"column",gap:8}}>
+          {authSession ? (
+            <div style={{display:"flex",alignItems:"center",gap:10,background:"rgba(16,185,129,.08)",border:"1px solid rgba(16,185,129,.2)",borderRadius:12,padding:"12px 14px"}}>
+              <div style={{width:32,height:32,borderRadius:"50%",background:"linear-gradient(135deg,var(--em),#059669)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,fontWeight:800,color:"white",flexShrink:0}}>{authSession.email[0].toUpperCase()}</div>
+              <div style={{flex:1,minWidth:0}}>
+                <div style={{fontSize:13,fontWeight:600,color:"white",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{authSession.email.split("@")[0]}</div>
+                <div style={{fontSize:11,color:"rgba(255,255,255,.35)",textTransform:"capitalize"}}>{authSession.plan||"free"} Plan</div>
+              </div>
+            </div>
+          ) : (
+            <button onClick={()=>{setAuthMode("login");setShowAuth(true);setMOpen(false);}} style={{background:"rgba(16,185,129,.12)",border:"1.5px solid rgba(16,185,129,.3)",borderRadius:12,padding:"12px",color:"var(--em)",fontFamily:"var(--bd)",fontSize:14,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
+              👤 {lang==="de"?"Anmelden / Registrieren":lang==="fr"?"Se connecter":lang==="it"?"Accedi":"Sign in / Register"}
+            </button>
+          )}
+          <button className="btn b-em" style={{justifyContent:"center",padding:"13px"}} onClick={()=>{navTo("app");setMOpen(false);}}>
+            {lang==="de"?"Kostenlos starten →":lang==="fr"?"Commencer →":lang==="it"?"Inizia →":"Start free →"}
+          </button>
+          <div style={{padding:"8px 4px"}}>
+            <LangSw/>
+          </div>
+        </div>
       </div>}
     </nav>);
   };
@@ -5479,53 +5578,92 @@ RISPOSTA: "Sarebbe possibile un bonus di CHF 15k se il budget è limitato?"`)
         <div className="orb" style={{width:380,height:380,background:"radial-gradient(circle,rgba(245,158,11,.15),transparent)",bottom:"-100px",left:"38%",animationDelay:"-7s"}}/>
         <div className="hbg"/><div className="hdots"/>
         <div className="con">
-          <div className="eyebrow">{t.hero.eye}</div>
-          <h1 className="hh">{t.hero.h1a}<br/>{t.hero.h1b} <em>{t.hero.h1c}</em></h1>
-          <p className="hsub">{t.hero.sub}</p>
-          <div className="hctas">
-            <button className="btn b-em b-lg" onClick={()=>navTo("app")}>{t.hero.cta}</button>
-            <button className="btn b-out" onClick={()=>document.getElementById("tools")?.scrollIntoView({behavior:"smooth"})}>{t.hero.how}</button>
-          </div>
-          {/* Gratis-Hinweis – prominent */}
-          <div style={{marginTop:16,display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
-            <button onClick={()=>navTo("app")} style={{display:"inline-flex",alignItems:"center",gap:8,background:"rgba(16,185,129,.13)",border:"1.5px solid rgba(16,185,129,.35)",borderRadius:30,padding:"9px 20px",fontSize:13,fontWeight:700,color:"var(--em)",cursor:"pointer",transition:"all .2s"}}
-              onMouseEnter={e=>{e.currentTarget.style.background="rgba(16,185,129,.22)";e.currentTarget.style.transform="translateY(-1px)";}}
-              onMouseLeave={e=>{e.currentTarget.style.background="rgba(16,185,129,.13)";e.currentTarget.style.transform="none";}}>
-              <span>🎁</span>
-              <span>{lang==="de"?"Jetzt 1× kostenlos testen – ohne Kreditkarte":lang==="en"?"Try 1× for free – no credit card":lang==="fr"?"Essai 1× gratuit – sans carte":"Prova 1× gratis – senza carta"}</span>
-              <span style={{opacity:.6}}>→</span>
-            </button>
-          </div>
-          {/* Trust signals */}
-          <div style={{display:"flex",flexWrap:"wrap",gap:"10px 20px",marginTop:18,alignItems:"center"}}>
-            {[
-              {ico:"🔒", txt:lang==="de"?"Keine Kreditkarte nötig":lang==="fr"?"Sans carte de crédit":lang==="it"?"Senza carta di credito":"No credit card needed"},
-              {ico:"🇨🇭", txt:lang==="de"?"Schweizer Unternehmen":lang==="fr"?"Entreprise suisse":lang==="it"?"Azienda svizzera":"Swiss company"},
-              {ico:"⚡", txt:lang==="de"?"1× gratis ausprobieren":lang==="fr"?"1× gratuit":lang==="it"?"1× gratis":"1× free to try"},
-            ].map((tr,i)=>(
-              <div key={i} style={{display:"flex",alignItems:"center",gap:6,fontSize:12,color:"rgba(255,255,255,.38)",fontWeight:500}}>
-                <span style={{fontSize:13}}>{tr.ico}</span><span>{tr.txt}</span>
+          <div className="hero-inner">
+            {/* Left: Text */}
+            <div className="hero-text">
+              <div className="eyebrow">{t.hero.eye}</div>
+              <h1 className="hh">{t.hero.h1a}<br/>{t.hero.h1b} <em>{t.hero.h1c}</em></h1>
+              <p className="hsub">{t.hero.sub}</p>
+              <div className="hctas">
+                <button className="btn b-em b-lg" onClick={()=>navTo("app")}>{t.hero.cta}</button>
+                <button className="btn b-out" onClick={()=>document.getElementById("tools")?.scrollIntoView({behavior:"smooth"})}>{t.hero.how}</button>
               </div>
-            ))}
-          </div>
-          <div className="hstats">{t.hero.stats.map((s,i)=><div key={i}><div className="stat-n">{s.n}</div><div className="stat-l">{s.l}</div></div>)}</div>
+              {/* Trust signals */}
+              <div style={{display:"flex",flexWrap:"wrap",gap:"8px 18px",marginTop:20,alignItems:"center"}}>
+                {[
+                  {ico:"🔒", txt:lang==="de"?"Keine Kreditkarte":lang==="fr"?"Sans carte":lang==="it"?"Senza carta":"No credit card"},
+                  {ico:"🇨🇭", txt:lang==="de"?"Schweizer Unternehmen":lang==="fr"?"Entreprise suisse":lang==="it"?"Azienda svizzera":"Swiss company"},
+                  {ico:"⚡", txt:lang==="de"?"1× gratis testen":lang==="fr"?"1× gratuit":lang==="it"?"1× gratis":"1× free"},
+                ].map((tr,i)=>(
+                  <div key={i} style={{display:"flex",alignItems:"center",gap:5,fontSize:12,color:"rgba(255,255,255,.38)",fontWeight:500}}>
+                    <span style={{fontSize:12}}>{tr.ico}</span><span>{tr.txt}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="hstats">{t.hero.stats.map((s,i)=><AnimatedStatBox key={i} n={s.n} l={s.l}/>)}</div>
+            </div>
 
-          {/* ── SLOGAN STRIP ── */}
-          <div style={{marginTop:48,padding:"18px 24px",background:"linear-gradient(135deg,rgba(16,185,129,.08),rgba(16,185,129,.03))",border:"1px solid rgba(16,185,129,.2)",borderRadius:16,display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:12}}>
-            <div style={{display:"flex",alignItems:"center",gap:14}}>
-              <div style={{fontSize:28}}>🚀</div>
-              <div>
-                <div style={{fontFamily:"var(--hd)",fontSize:18,fontWeight:800,color:"white",letterSpacing:"-0.5px"}}>
-                  {lang==="de"?"Dein nächster Job. KI-schnell.":lang==="fr"?"Votre prochain emploi. Vitesse IA.":lang==="it"?"Il tuo prossimo lavoro. Velocità IA.":"Your next job. AI-fast."}
+            {/* Right: Product Preview Card */}
+            <div className="hero-preview">
+              <div style={{position:"relative",width:"100%",maxWidth:420}}>
+                {/* Glow behind card */}
+                <div style={{position:"absolute",inset:-30,background:"radial-gradient(circle,rgba(16,185,129,.18),transparent 70%)",pointerEvents:"none",zIndex:0}}/>
+                {/* Main card */}
+                <div style={{position:"relative",zIndex:1,background:"rgba(15,15,28,.95)",border:"1px solid rgba(255,255,255,.1)",borderRadius:20,padding:"22px",backdropFilter:"blur(20px)",boxShadow:"0 32px 80px rgba(0,0,0,.6)"}}>
+                  {/* Card header */}
+                  <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:18,paddingBottom:14,borderBottom:"1px solid rgba(255,255,255,.07)"}}>
+                    <div style={{display:"flex",gap:5}}>
+                      <div style={{width:10,height:10,borderRadius:"50%",background:"#ef4444"}}/>
+                      <div style={{width:10,height:10,borderRadius:"50%",background:"#f59e0b"}}/>
+                      <div style={{width:10,height:10,borderRadius:"50%",background:"#10b981"}}/>
+                    </div>
+                    <div style={{flex:1,textAlign:"center",fontSize:11,color:"rgba(255,255,255,.3)",fontWeight:600,letterSpacing:.5}}>
+                      ✦ Stellify AI — {lang==="de"?"Motivationsschreiben":lang==="fr"?"Lettre de motivation":lang==="it"?"Lettera di motivazione":"Cover Letter"}
+                    </div>
+                    <div style={{width:10,height:10,borderRadius:3,background:"rgba(16,185,129,.4)"}}/>
+                  </div>
+                  {/* ATS Score badge */}
+                  <div style={{display:"flex",alignItems:"center",gap:8,background:"rgba(16,185,129,.1)",border:"1px solid rgba(16,185,129,.2)",borderRadius:10,padding:"8px 12px",marginBottom:16}}>
+                    <div style={{fontSize:18,fontFamily:"var(--hd)",fontWeight:800,color:"var(--em)"}}>92%</div>
+                    <div>
+                      <div style={{fontSize:11,fontWeight:700,color:"var(--em)"}}>ATS-Score</div>
+                      <div style={{fontSize:10,color:"rgba(255,255,255,.3)"}}>
+                        {lang==="de"?"Sehr gut – passt zur Stelle":"Very good – matches the role"}
+                      </div>
+                    </div>
+                    <div style={{marginLeft:"auto",display:"flex",gap:2}}>
+                      {[1,1,1,1,.3].map((o,j)=><div key={j} style={{width:6,height:6,borderRadius:"50%",background:`rgba(16,185,129,${o})`}}/>)}
+                    </div>
+                  </div>
+                  {/* Preview text lines */}
+                  <div style={{fontSize:12,color:"rgba(255,255,255,.7)",lineHeight:1.85,fontFamily:"var(--bd)"}}>
+                    <div style={{fontSize:11,fontWeight:700,color:"rgba(255,255,255,.25)",letterSpacing:1,textTransform:"uppercase",marginBottom:8}}>
+                      {lang==="de"?"Motivationsschreiben":lang==="fr"?"Lettre de motivation":lang==="it"?"Lettera di motivazione":"Cover Letter"}
+                    </div>
+                    <div style={{color:"rgba(255,255,255,.55)",fontSize:12,lineHeight:1.8}}>
+                      {lang==="de"
+                        ? <>Sehr geehrte Damen und Herren,<br/><br/>mit grossem Interesse habe ich Ihre Stellenausschreibung als <span style={{color:"var(--em)",fontWeight:600}}>Senior Marketing Manager</span> gelesen. Mit meiner 5-jährigen Erfahrung im digitalen Marketing und nachgewiesenen Erfolgen bei der Lead-Generierung…</>
+                        : <>Dear Hiring Team,<br/><br/>I am excited to apply for the <span style={{color:"var(--em)",fontWeight:600}}>Senior Marketing Manager</span> position. With 5 years of digital marketing experience and proven results in lead generation…</>}
+                    </div>
+                  </div>
+                  {/* Bottom row */}
+                  <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginTop:16,paddingTop:14,borderTop:"1px solid rgba(255,255,255,.06)"}}>
+                    <div style={{display:"flex",gap:6}}>
+                      {["PDF","Word","Kopieren"].map((a,j)=>(
+                        <div key={j} style={{fontSize:10,fontWeight:700,background:"rgba(255,255,255,.07)",color:"rgba(255,255,255,.4)",padding:"3px 8px",borderRadius:6}}>{a}</div>
+                      ))}
+                    </div>
+                    <div style={{fontSize:10,color:"rgba(255,255,255,.2)"}}>
+                      ⚡ {lang==="de"?"Generiert in 8s":"Generated in 8s"}
+                    </div>
+                  </div>
                 </div>
-                <div style={{fontSize:12,color:"rgba(255,255,255,.4)",marginTop:2}}>
-                  {lang==="de"?"Bewerbung in 60 Sek. · ATS-optimiert · Schweizer Standard":lang==="fr"?"Candidature en 60s · Optimisé ATS · Standard suisse":lang==="it"?"Candidatura in 60s · ATS-ottimizzato · Standard svizzero":"Application in 60s · ATS-optimized · Swiss standard"}
+                {/* Floating badge */}
+                <div style={{position:"absolute",top:-14,right:16,background:"linear-gradient(135deg,#10b981,#059669)",color:"white",fontSize:11,fontWeight:700,padding:"5px 14px",borderRadius:99,boxShadow:"0 4px 16px rgba(16,185,129,.4)",zIndex:2,whiteSpace:"nowrap"}}>
+                  ✦ {lang==="de"?"KI-generiert in Echtzeit":lang==="fr"?"Généré par IA":"AI-generated live"}
                 </div>
               </div>
             </div>
-            <button className="btn b-em" onClick={()=>navTo("app")} style={{flexShrink:0}}>
-              {lang==="de"?"Jetzt starten →":lang==="fr"?"Commencer →":lang==="it"?"Inizia →":"Start now →"}
-            </button>
           </div>
         </div>
       </section>
