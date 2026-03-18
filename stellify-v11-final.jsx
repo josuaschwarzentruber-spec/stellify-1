@@ -16,7 +16,7 @@ const C = {
   priceY: "14.90",
   FREE_LIMIT: 1,
   PRO_LIMIT: 20, // 20 Generierungen pro Tag
-  CHAT_FREE_LIMIT: 20,
+  CHAT_FREE_LIMIT: 25,
 
   ULTIMATE_LIMIT: 9999999,  // effektiv unbegrenzt
   stripeUltimate: "https://buy.stripe.com/aFafZg9ow81jbSEgvj2B206",
@@ -2965,54 +2965,64 @@ Verhalten: Antworte konkret und umsetzbar (max. 3-4 Sätze im Widget). Schreib B
     </div>}
 
     {/* Chat Window */}
-    {open&&<div style={{position:"fixed",bottom:92,right:24,width:360,maxWidth:"calc(100vw - 32px)",background:"rgba(15,15,26,.92)",backdropFilter:"blur(32px)",WebkitBackdropFilter:"blur(32px)",border:"1px solid rgba(255,255,255,.12)",borderRadius:20,boxShadow:"0 24px 64px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.05) inset",zIndex:1000,display:"flex",flexDirection:"column",overflow:"hidden"}}>
+    {open&&<div style={{position:"fixed",bottom:92,right:24,width:380,maxWidth:"calc(100vw - 32px)",background:"#0d0d1a",border:"1px solid rgba(255,255,255,.1)",borderRadius:24,boxShadow:"0 32px 80px rgba(0,0,0,.7),0 0 0 1px rgba(16,185,129,.08) inset",zIndex:1000,display:"flex",flexDirection:"column",overflow:"hidden",animation:"fadeSlideUp .25s ease"}}>
 
       {/* Header */}
-      <div style={{background:"linear-gradient(135deg,rgba(16,185,129,.2),rgba(16,185,129,.08))",borderBottom:"1px solid rgba(255,255,255,.07)",padding:"12px 14px",display:"flex",alignItems:"center",gap:10}}>
-        <div style={{width:34,height:34,background:"var(--em)",borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,flexShrink:0}}>🤖</div>
+      <div style={{background:"linear-gradient(180deg,rgba(16,185,129,.12) 0%,rgba(16,185,129,.04) 100%)",borderBottom:"1px solid rgba(255,255,255,.06)",padding:"14px 16px",display:"flex",alignItems:"center",gap:12}}>
+        {/* Avatar with online ring */}
+        <div style={{position:"relative",flexShrink:0}}>
+          <div style={{width:38,height:38,background:"linear-gradient(135deg,#10b981,#059669)",borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:17,boxShadow:"0 0 0 2px rgba(16,185,129,.25),0 4px 12px rgba(16,185,129,.3)"}}>✦</div>
+          <div style={{position:"absolute",bottom:1,right:1,width:9,height:9,borderRadius:"50%",background:"#22c55e",border:"2px solid #0d0d1a",boxShadow:"0 0 6px #22c55e"}}/>
+        </div>
         <div style={{flex:1,minWidth:0}}>
-          <div style={{fontFamily:"var(--hd)",fontSize:13,fontWeight:800,color:"white"}}>Stella – Stellify</div>
-          <div style={{fontSize:10,color:"rgba(255,255,255,.4)"}}>
-            {pro ? L("Pro · Unbegrenzt","Pro · Unlimited","Pro · Illimité","Pro · Illimitato")
-                 : `${remaining}/${C.CHAT_FREE_LIMIT} ${L("Nachrichten","messages","messages","messaggi")}`}
+          <div style={{fontFamily:"var(--hd)",fontSize:14,fontWeight:800,color:"white",letterSpacing:"-.3px"}}>Stella</div>
+          <div style={{fontSize:11,color:"rgba(255,255,255,.35)",marginTop:1}}>
+            {L("KI-Karriere-Assistentin · Stellify","AI Career Assistant · Stellify","Assistante carrière IA · Stellify","Assistente carriera IA · Stellify")}
           </div>
         </div>
         {/* Verlauf Button */}
         <button onClick={()=>setShowHistory(h=>!h)} title={L("Verlauf","History","Historique","Cronologia")}
-          style={{background:showHistory?"rgba(16,185,129,.25)":"rgba(255,255,255,.08)",border:"1px solid rgba(255,255,255,.1)",borderRadius:8,width:30,height:30,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",fontSize:14,color:showHistory?"var(--em)":"rgba(255,255,255,.6)",flexShrink:0,transition:"all .2s"}}>
-          🕐
+          style={{background:showHistory?"rgba(16,185,129,.2)":"rgba(255,255,255,.06)",border:`1px solid ${showHistory?"rgba(16,185,129,.4)":"rgba(255,255,255,.08)"}`,borderRadius:10,width:32,height:32,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",fontSize:13,color:showHistory?"var(--em)":"rgba(255,255,255,.45)",flexShrink:0,transition:"all .2s"}}
+          onMouseEnter={e=>e.currentTarget.style.background=showHistory?"rgba(16,185,129,.3)":"rgba(255,255,255,.1)"}
+          onMouseLeave={e=>e.currentTarget.style.background=showHistory?"rgba(16,185,129,.2)":"rgba(255,255,255,.06)"}>
+          ⏱
         </button>
         {/* Neuer Chat */}
         <button onClick={newChat} title={L("Neuer Chat","New chat","Nouveau chat","Nuova chat")}
-          style={{background:"rgba(255,255,255,.08)",border:"1px solid rgba(255,255,255,.1)",borderRadius:8,width:30,height:30,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",fontSize:14,color:"rgba(255,255,255,.6)",flexShrink:0,transition:"all .2s"}}
-          onMouseEnter={e=>e.currentTarget.style.background="rgba(255,255,255,.15)"}
-          onMouseLeave={e=>e.currentTarget.style.background="rgba(255,255,255,.08)"}>
-          ✏️
+          style={{background:"rgba(255,255,255,.06)",border:"1px solid rgba(255,255,255,.08)",borderRadius:10,width:32,height:32,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",fontSize:13,color:"rgba(255,255,255,.45)",flexShrink:0,transition:"all .2s"}}
+          onMouseEnter={e=>e.currentTarget.style.background="rgba(255,255,255,.12)"}
+          onMouseLeave={e=>e.currentTarget.style.background="rgba(255,255,255,.06)"}>
+          ✎
         </button>
-        <div style={{width:8,height:8,borderRadius:"50%",background:"#22c55e",boxShadow:"0 0 6px #22c55e",flexShrink:0}}/>
+        <button onClick={()=>setOpen(false)}
+          style={{background:"rgba(255,255,255,.06)",border:"1px solid rgba(255,255,255,.08)",borderRadius:10,width:32,height:32,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",fontSize:14,color:"rgba(255,255,255,.4)",flexShrink:0,transition:"all .2s"}}
+          onMouseEnter={e=>e.currentTarget.style.background="rgba(255,255,255,.12)"}
+          onMouseLeave={e=>e.currentTarget.style.background="rgba(255,255,255,.06)"}>
+          ✕
+        </button>
       </div>
 
       {/* Chat-Verlauf Panel */}
       {showHistory && (
-        <div style={{background:"rgba(7,7,14,.98)",borderBottom:"1px solid rgba(255,255,255,.07)",maxHeight:260,overflowY:"auto"}}>
-          <div style={{padding:"10px 14px 6px",fontSize:10,fontWeight:700,letterSpacing:"1.5px",textTransform:"uppercase",color:"rgba(255,255,255,.25)"}}>{L("Verlauf","History","Historique","Cronologia")}</div>
+        <div style={{background:"rgba(5,5,12,1)",borderBottom:"1px solid rgba(255,255,255,.06)",maxHeight:260,overflowY:"auto"}}>
+          <div style={{padding:"12px 16px 6px",fontSize:10,fontWeight:700,letterSpacing:"1.5px",textTransform:"uppercase",color:"rgba(255,255,255,.2)"}}>{L("Verlauf","History","Historique","Cronologia")}</div>
           {chats.length === 0 && (
-            <div style={{padding:"14px",fontSize:12,color:"rgba(255,255,255,.3)",textAlign:"center"}}>{L("Noch keine Chats","No chats yet","Pas encore de chats","Nessuna chat")}</div>
+            <div style={{padding:"20px 16px",fontSize:12,color:"rgba(255,255,255,.25)",textAlign:"center"}}>{L("Noch keine Chats","No chats yet","Pas encore de chats","Nessuna chat")}</div>
           )}
           {chats.map(chat => (
             <div key={chat.id} onClick={()=>switchChat(chat.id)}
-              style={{display:"flex",alignItems:"center",gap:10,padding:"9px 14px",cursor:"pointer",background:chat.id===activeChatId?"rgba(16,185,129,.1)":"transparent",borderLeft:`2px solid ${chat.id===activeChatId?"var(--em)":"transparent"}`,transition:"all .15s"}}
-              onMouseEnter={e=>{if(chat.id!==activeChatId)e.currentTarget.style.background="rgba(255,255,255,.04)";}}
+              style={{display:"flex",alignItems:"center",gap:10,padding:"10px 16px",cursor:"pointer",background:chat.id===activeChatId?"rgba(16,185,129,.08)":"transparent",borderLeft:`2px solid ${chat.id===activeChatId?"var(--em)":"transparent"}`,transition:"all .15s"}}
+              onMouseEnter={e=>{if(chat.id!==activeChatId)e.currentTarget.style.background="rgba(255,255,255,.03)";}}
               onMouseLeave={e=>{if(chat.id!==activeChatId)e.currentTarget.style.background="transparent";}}>
-              <div style={{fontSize:14,flexShrink:0}}>💬</div>
+              <div style={{width:6,height:6,borderRadius:"50%",background:chat.id===activeChatId?"var(--em)":"rgba(255,255,255,.2)",flexShrink:0}}/>
               <div style={{flex:1,minWidth:0}}>
-                <div style={{fontSize:12,fontWeight:600,color:chat.id===activeChatId?"var(--em)":"rgba(255,255,255,.75)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{chat.title||"Chat"}</div>
-                <div style={{fontSize:10,color:"rgba(255,255,255,.25)",marginTop:1}}>{fmtDate(chat.ts)} · {chat.msgs.length} {L("Nachrichten","messages","messages","messaggi")}</div>
+                <div style={{fontSize:12,fontWeight:600,color:chat.id===activeChatId?"rgba(255,255,255,.9)":"rgba(255,255,255,.55)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{chat.title||"Chat"}</div>
+                <div style={{fontSize:10,color:"rgba(255,255,255,.2)",marginTop:2}}>{fmtDate(chat.ts)}</div>
               </div>
               <button onClick={e=>deleteChat(chat.id,e)}
-                style={{background:"none",border:"none",color:"rgba(255,255,255,.2)",cursor:"pointer",fontSize:12,padding:"2px 4px",borderRadius:4,flexShrink:0,transition:"color .15s"}}
+                style={{background:"none",border:"none",color:"rgba(255,255,255,.15)",cursor:"pointer",fontSize:11,padding:"3px 5px",borderRadius:4,flexShrink:0,transition:"color .15s"}}
                 onMouseEnter={e=>e.currentTarget.style.color="#ef4444"}
-                onMouseLeave={e=>e.currentTarget.style.color="rgba(255,255,255,.2)"}>✕</button>
+                onMouseLeave={e=>e.currentTarget.style.color="rgba(255,255,255,.15)"}>✕</button>
             </div>
           ))}
         </div>
@@ -3020,18 +3030,20 @@ Verhalten: Antworte konkret und umsetzbar (max. 3-4 Sätze im Widget). Schreib B
 
       {/* Login Gate */}
       {!showHistory && needsLogin && (
-        <div style={{padding:"28px 20px",textAlign:"center",display:"flex",flexDirection:"column",alignItems:"center",gap:14}}>
-          <div style={{fontSize:36}}>🔐</div>
-          <div style={{fontFamily:"var(--hd)",fontSize:15,fontWeight:800,color:"white"}}>
-            {lang==="de"?"Einloggen zum Chatten":lang==="fr"?"Connexion pour chatter":"Sign in to chat"}
+        <div style={{padding:"32px 24px",textAlign:"center",display:"flex",flexDirection:"column",alignItems:"center",gap:16}}>
+          <div style={{width:56,height:56,background:"linear-gradient(135deg,#10b981,#059669)",borderRadius:16,display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,boxShadow:"0 8px 24px rgba(16,185,129,.3)"}}>✦</div>
+          <div>
+            <div style={{fontFamily:"var(--hd)",fontSize:16,fontWeight:800,color:"white",marginBottom:6}}>
+              {lang==="de"?"Mit Stella chatten":lang==="fr"?"Chatter avec Stella":"Chat with Stella"}
+            </div>
+            <div style={{fontSize:12,color:"rgba(255,255,255,.35)",lineHeight:1.7}}>
+              {lang==="de"?"Registriere dich gratis für persönliche Karriereberatung.":lang==="fr"?"Inscrivez-vous gratuitement pour des conseils personnalisés.":"Sign up for free for personalised career coaching."}
+            </div>
           </div>
-          <div style={{fontSize:12,color:"rgba(255,255,255,.4)",lineHeight:1.6}}>
-            {lang==="de"?"20 kostenlose Fragen an Stella – registriere dich gratis.":lang==="fr"?"20 questions gratuites – inscrivez-vous.":"20 free questions for Stella – register free."}
-          </div>
-          <button onClick={()=>onAuthOpen&&onAuthOpen()} className="btn b-em b-w" style={{fontSize:13}}>
-            {lang==="de"?"Einloggen / Registrieren →":lang==="fr"?"Connexion / Inscription →":"Sign in / Register →"}
+          <button onClick={()=>onAuthOpen&&onAuthOpen()} style={{background:"linear-gradient(135deg,#10b981,#059669)",color:"white",border:"none",borderRadius:12,padding:"11px 28px",fontSize:13,fontWeight:700,cursor:"pointer",boxShadow:"0 4px 16px rgba(16,185,129,.35)",width:"100%"}}>
+            {lang==="de"?"Gratis registrieren →":lang==="fr"?"S'inscrire gratuitement →":"Sign up for free →"}
           </button>
-          <div style={{fontSize:11,color:"rgba(255,255,255,.2)"}}>
+          <div style={{fontSize:11,color:"rgba(255,255,255,.18)"}}>
             {lang==="de"?"Kein Abo nötig · Sofort starten":"No subscription needed · Start instantly"}
           </div>
         </div>
@@ -3039,51 +3051,55 @@ Verhalten: Antworte konkret und umsetzbar (max. 3-4 Sätze im Widget). Schreib B
 
       {/* Messages */}
       {!showHistory && !needsLogin && <>
-        <div style={{flex:1,overflowY:"auto",padding:14,display:"flex",flexDirection:"column",gap:10,maxHeight:320,minHeight:200}}>
+        <div style={{flex:1,overflowY:"auto",padding:"16px 14px",display:"flex",flexDirection:"column",gap:12,maxHeight:340,minHeight:220,scrollbarWidth:"thin",scrollbarColor:"rgba(255,255,255,.08) transparent"}}>
           {msgs.map((m,i)=>(
-            <div key={i} style={{display:"flex",gap:8,flexDirection:m.r==="u"?"row-reverse":"row",alignItems:"flex-start"}}>
-              <div style={{width:28,height:28,borderRadius:"50%",background:m.r==="u"?"rgba(16,185,129,.2)":"rgba(255,255,255,.08)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,flexShrink:0}}>{m.r==="u"?"👤":"🤖"}</div>
-              <div style={{maxWidth:"78%",background:m.r==="u"?"rgba(16,185,129,.15)":"rgba(255,255,255,.05)",border:`1px solid ${m.r==="u"?"rgba(16,185,129,.25)":"rgba(255,255,255,.07)"}`,borderRadius:m.r==="u"?"14px 14px 4px 14px":"14px 14px 14px 4px",padding:"9px 12px",fontSize:13,color:"rgba(255,255,255,.85)",lineHeight:1.6}}>
+            <div key={i} style={{display:"flex",gap:10,flexDirection:m.r==="u"?"row-reverse":"row",alignItems:"flex-end"}}>
+              {m.r==="ai"&&<div style={{width:26,height:26,background:"linear-gradient(135deg,#10b981,#059669)",borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,flexShrink:0,boxShadow:"0 2px 8px rgba(16,185,129,.3)"}}>✦</div>}
+              <div style={{maxWidth:"80%",background:m.r==="u"?"linear-gradient(135deg,rgba(16,185,129,.18),rgba(16,185,129,.1))":"rgba(255,255,255,.04)",border:`1px solid ${m.r==="u"?"rgba(16,185,129,.2)":"rgba(255,255,255,.06)"}`,borderRadius:m.r==="u"?"18px 18px 4px 18px":"18px 18px 18px 4px",padding:"10px 14px",fontSize:13,color:m.r==="u"?"rgba(255,255,255,.92)":"rgba(255,255,255,.78)",lineHeight:1.65,letterSpacing:"-.1px"}}>
                 {m.r==="ai"?renderMsg(m.t):m.t}
               </div>
             </div>
           ))}
-          {loading&&<div style={{display:"flex",gap:8,alignItems:"flex-start"}}>
-            <div style={{width:28,height:28,borderRadius:"50%",background:"rgba(255,255,255,.08)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13}}>🤖</div>
-            <div style={{background:"rgba(255,255,255,.05)",border:"1px solid rgba(255,255,255,.07)",borderRadius:"14px 14px 14px 4px",padding:"9px 12px"}}>
-              <div style={{display:"flex",gap:4}}>{[0,1,2].map(j=><div key={j} style={{width:6,height:6,borderRadius:"50%",background:"var(--em)",opacity:.7,animation:`pulse 1.2s ease-in-out ${j*0.2}s infinite`}}/>)}</div>
+          {loading&&<div style={{display:"flex",gap:10,alignItems:"flex-end"}}>
+            <div style={{width:26,height:26,background:"linear-gradient(135deg,#10b981,#059669)",borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,flexShrink:0}}>✦</div>
+            <div style={{background:"rgba(255,255,255,.04)",border:"1px solid rgba(255,255,255,.06)",borderRadius:"18px 18px 18px 4px",padding:"12px 16px",display:"flex",gap:5,alignItems:"center"}}>
+              {[0,1,2].map(j=><div key={j} style={{width:5,height:5,borderRadius:"50%",background:"var(--em)",animation:`pulse 1.2s ease-in-out ${j*0.2}s infinite`}}/>)}
             </div>
           </div>}
           <div ref={bottomRef}/>
         </div>
 
-        {needsUpgrade&&<div style={{padding:"10px 14px",background:"rgba(245,158,11,.08)",borderTop:"1px solid rgba(245,158,11,.15)",display:"flex",alignItems:"center",justifyContent:"space-between",gap:10}}>
-          <div>
-            <div style={{fontSize:12,color:"rgba(245,158,11,.9)",fontWeight:700}}>{L("Tageslimit (20) erreicht","Daily limit (20) reached","Limite quotidien atteint","Limite giornaliero raggiunto")}</div>
-            <div style={{fontSize:11,color:"rgba(255,255,255,.3)",marginTop:2}}>{L("Ultimate: unbegrenzt, kein Reset","Ultimate: unlimited, no reset","Ultimate: illimité","Ultimate: illimitato")}</div>
+        {needsUpgrade&&<div style={{padding:"12px 16px",background:"rgba(245,158,11,.06)",borderTop:"1px solid rgba(245,158,11,.1)",display:"flex",alignItems:"center",justifyContent:"space-between",gap:10}}>
+          <div style={{fontSize:12,color:"rgba(245,158,11,.8)",lineHeight:1.5}}>
+            {L("Fachliche Fragen erfordern Pro","Expert questions require Pro","Questions expertes nécessitent Pro","Domande esperte richiedono Pro")}
           </div>
-          <button onClick={()=>setPw(true)} style={{background:"linear-gradient(135deg,#f59e0b,#d97706)",color:"white",border:"none",borderRadius:8,padding:"6px 14px",fontSize:11,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap",boxShadow:"0 2px 8px rgba(245,158,11,.3)"}}>
-            {L("Upgrade →","Upgrade →","Upgrade →","Upgrade →")}
+          <button onClick={()=>setPw(true)} style={{background:"linear-gradient(135deg,#f59e0b,#d97706)",color:"white",border:"none",borderRadius:10,padding:"7px 14px",fontSize:12,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap",boxShadow:"0 2px 10px rgba(245,158,11,.3)",flexShrink:0}}>
+            Pro →
           </button>
         </div>}
-        {!isLoggedIn&&<div style={{padding:"8px 14px",background:"rgba(16,185,129,.06)",borderTop:"1px solid rgba(16,185,129,.12)",display:"flex",alignItems:"center",justifyContent:"space-between",gap:10}}>
-          <div style={{fontSize:11,color:"rgba(255,255,255,.35)"}}>{L("Jetzt registrieren für vollständige Karriere-Beratung","Register now for full career coaching","Inscrivez-vous pour un coaching complet","Registrati per il coaching completo")}</div>
-          <button onClick={()=>onAuthOpen&&onAuthOpen()} style={{background:"var(--em)",color:"white",border:"none",borderRadius:8,padding:"5px 12px",fontSize:11,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap"}}>
+        {!isLoggedIn&&<div style={{padding:"10px 16px",background:"rgba(16,185,129,.04)",borderTop:"1px solid rgba(16,185,129,.08)",display:"flex",alignItems:"center",justifyContent:"space-between",gap:10}}>
+          <div style={{fontSize:11,color:"rgba(255,255,255,.3)",lineHeight:1.5}}>{L("Für persönliche Beratung registrieren","Sign up for personal coaching","S'inscrire pour un coaching","Registrati per il coaching")}</div>
+          <button onClick={()=>onAuthOpen&&onAuthOpen()} style={{background:"var(--em)",color:"white",border:"none",borderRadius:8,padding:"6px 12px",fontSize:11,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0}}>
             {L("Gratis →","Free →","Gratuit →","Gratis →")}
           </button>
         </div>}
 
-        <div style={{borderTop:"1px solid rgba(255,255,255,.07)",padding:"10px 12px",display:"flex",gap:8,alignItems:"flex-end"}}>
-          <textarea value={input} onChange={e=>setInput(e.target.value)}
-            onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey&&!loading&&canChat){e.preventDefault();send();}}}
-            placeholder={needsUpgrade ? L("Tageslimit erreicht – Upgrade für mehr","Daily limit reached – upgrade for more","Limite atteint – mettez à niveau","Limite raggiunto – aggiorna") : L("Frag mich etwas…","Ask me anything…","Posez-moi une question…","Chiedimi qualcosa…")}
-            disabled={needsUpgrade||loading}
-            style={{flex:1,background:"rgba(255,255,255,.06)",border:"1px solid rgba(255,255,255,.1)",borderRadius:10,padding:"8px 11px",fontSize:13,color:"white",resize:"none",minHeight:36,maxHeight:90,outline:"none",lineHeight:1.5}}
-            rows={1}/>
-          <button onClick={send} disabled={!input.trim()||loading||needsUpgrade}
-            style={{width:36,height:36,borderRadius:10,background:input.trim()&&!needsUpgrade?"var(--em)":"rgba(255,255,255,.08)",border:"none",cursor:input.trim()&&!needsUpgrade?"pointer":"default",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,flexShrink:0,transition:"background .2s"}}>
-            {loading?"⏳":"➤"}
-          </button>
+        <div style={{borderTop:"1px solid rgba(255,255,255,.05)",padding:"12px 14px",background:"rgba(5,5,12,.6)"}}>
+          <div style={{display:"flex",gap:10,alignItems:"flex-end",background:"rgba(255,255,255,.05)",border:"1px solid rgba(255,255,255,.08)",borderRadius:16,padding:"8px 8px 8px 14px"}}>
+            <textarea value={input} onChange={e=>setInput(e.target.value)}
+              onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey&&!loading&&canChat){e.preventDefault();send();}}}
+              placeholder={needsUpgrade ? L("Pro freischalten für Karriere-Beratung","Unlock Pro for career coaching","Activer Pro pour le coaching","Sblocca Pro per il coaching") : L("Nachricht eingeben…","Type a message…","Écrire un message…","Scrivi un messaggio…")}
+              disabled={needsUpgrade||loading}
+              style={{flex:1,background:"none",border:"none",color:"rgba(255,255,255,.85)",fontSize:13,resize:"none",minHeight:20,maxHeight:80,outline:"none",lineHeight:1.6,padding:0}}
+              rows={1}/>
+            <button onClick={send} disabled={!input.trim()||loading||needsUpgrade}
+              style={{width:34,height:34,borderRadius:10,background:input.trim()&&!needsUpgrade?"linear-gradient(135deg,#10b981,#059669)":"rgba(255,255,255,.06)",border:"none",cursor:input.trim()&&!needsUpgrade?"pointer":"default",display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,flexShrink:0,transition:"all .2s",boxShadow:input.trim()&&!needsUpgrade?"0 2px 8px rgba(16,185,129,.4)":"none"}}>
+              {loading?"⏳":"➤"}
+            </button>
+          </div>
+          <div style={{textAlign:"center",fontSize:10,color:"rgba(255,255,255,.12)",marginTop:8}}>
+            {L("Stella kann Fehler machen – wichtige Entscheidungen selbst prüfen","Stella can make mistakes – verify important decisions","Stella peut faire des erreurs – vérifiez vos décisions","Stella può sbagliare – verifica le decisioni importanti")}
+          </div>
         </div>
       </>}
     </div>}
@@ -5789,9 +5805,15 @@ RISPOSTA: "Sarebbe possibile un bonus di CHF 15k se il budget è limitato?"`)
             <div className="seye">{t.price.label}</div>
             <h2 className="st">{t.price.title}</h2>
             <p className="ss">{t.price.sub}</p>
-            {/* Jahres-Hinweis prominent */}
-            <div style={{display:"inline-flex",alignItems:"center",gap:10,background:"rgba(245,158,11,.12)",border:"1px solid rgba(245,158,11,.3)",borderRadius:99,padding:"8px 20px",marginTop:18,fontSize:13,fontWeight:700,color:"#f59e0b"}}>
-              🎁 {lang==="de"?"Jährlich zahlen – 2 Monate geschenkt":lang==="en"?"Pay annually – 2 months free":lang==="fr"?"Paiement annuel – 2 mois offerts":"Pagamento annuale – 2 mesi gratis"}
+            {/* Billing Toggle */}
+            <div style={{display:"inline-flex",alignItems:"center",background:"rgba(255,255,255,.06)",border:"1px solid rgba(255,255,255,.1)",borderRadius:99,padding:4,marginTop:20,gap:4}}>
+              <button onClick={()=>setYearly(false)} style={{padding:"7px 20px",borderRadius:99,border:"none",background:!yearly?"white":"transparent",color:!yearly?"var(--ink)":"rgba(255,255,255,.5)",fontSize:13,fontWeight:700,cursor:"pointer",transition:"all .2s",whiteSpace:"nowrap"}}>
+                {lang==="de"?"Monatlich":lang==="en"?"Monthly":lang==="fr"?"Mensuel":"Mensile"}
+              </button>
+              <button onClick={()=>setYearly(true)} style={{padding:"7px 20px",borderRadius:99,border:"none",background:yearly?"linear-gradient(135deg,#10b981,#059669)":"transparent",color:yearly?"white":"rgba(255,255,255,.5)",fontSize:13,fontWeight:700,cursor:"pointer",transition:"all .2s",display:"flex",alignItems:"center",gap:6,whiteSpace:"nowrap"}}>
+                {lang==="de"?"Jährlich":lang==="en"?"Yearly":lang==="fr"?"Annuel":"Annuale"}
+                {yearly&&<span style={{background:"rgba(255,255,255,.25)",borderRadius:99,padding:"1px 7px",fontSize:10}}>–{lang==="de"?"2 Monate gratis":lang==="en"?"2 months free":lang==="fr"?"2 mois offerts":"2 mesi gratis"}</span>}
+              </button>
             </div>
           </div>
 
@@ -5829,17 +5851,17 @@ RISPOSTA: "Sarebbe possibile un bonus di CHF 15k se il budget è limitato?"`)
                   </>}
                   {tier.priceY&&<>
                     <div style={{fontFamily:"var(--hd)",fontSize:42,fontWeight:800,color:"white",lineHeight:1,letterSpacing:"-2px"}}>
-                      CHF {Number(tier.priceY).toFixed(2)}<span style={{fontSize:16,fontWeight:400,color:"rgba(255,255,255,.3)",fontFamily:"var(--bd)",letterSpacing:0}}>/Mo.</span>
+                      CHF {yearly ? Number(tier.priceY).toFixed(2) : Number(tier.priceM).toFixed(2)}<span style={{fontSize:16,fontWeight:400,color:"rgba(255,255,255,.3)",fontFamily:"var(--bd)",letterSpacing:0}}>/Mo.</span>
                     </div>
-                    <div style={{fontSize:13,color:"rgba(255,255,255,.3)",margin:"6px 0 4px"}}>
-                      CHF {annualTotal}{lang==="de"?" /Jahr":" /year"} · <span style={{color:isPro?"var(--em)":"#f59e0b",fontWeight:700}}>–{savePct}%</span> {lang==="de"?"vs. monatlich":lang==="en"?"vs. monthly":lang==="fr"?"vs. mensuel":"vs. mensile"}
-                    </div>
-                    {savedTotal&&<div style={{fontSize:11,color:"rgba(255,255,255,.2)",marginBottom:18}}>
-                      {lang==="de"?`statt CHF ${(tier.priceM*12).toFixed(0)}/Jahr – du sparst CHF ${savedTotal}`:
-                       lang==="en"?`instead of CHF ${(tier.priceM*12).toFixed(0)}/year – you save CHF ${savedTotal}`:
-                       lang==="fr"?`au lieu de CHF ${(tier.priceM*12).toFixed(0)}/an – économie CHF ${savedTotal}`:
-                       `invece di CHF ${(tier.priceM*12).toFixed(0)}/anno – risparmio CHF ${savedTotal}`}
-                    </div>}
+                    {yearly ? (
+                      <div style={{fontSize:13,color:"rgba(255,255,255,.3)",margin:"6px 0 18px"}}>
+                        CHF {annualTotal}{lang==="de"?" /Jahr":" /year"} · <span style={{color:isPro?"var(--em)":"#f59e0b",fontWeight:700}}>–{savePct}%</span> {lang==="de"?"ggü. monatlich":lang==="en"?"vs. monthly":lang==="fr"?"vs. mensuel":"vs. mensile"}
+                      </div>
+                    ) : (
+                      <div style={{fontSize:13,color:"rgba(255,255,255,.3)",margin:"6px 0 18px"}}>
+                        {lang==="de"?"Monatlich kündbar":lang==="en"?"Cancel anytime":lang==="fr"?"Résiliable à tout moment":"Cancellabile in qualsiasi momento"}
+                      </div>
+                    )}
                   </>}
 
                   {/* Description */}
@@ -5863,20 +5885,6 @@ RISPOSTA: "Sarebbe possibile un bonus di CHF 15k se il budget è limitato?"`)
                     </div>
                   </div>}
 
-                  {/* Feature list – flowing, no bullets */}
-                  <div style={{marginBottom:22}}>
-                    {(tier.list||[]).slice(0,6).map((f,i)=>(
-                      <div key={i} style={{display:"flex",alignItems:"flex-start",gap:8,padding:"7px 0",borderBottom:i<5?"1px solid rgba(255,255,255,.05)":"none"}}>
-                        <span style={{color:isPro?"var(--em)":isUlt?"#f59e0b":"rgba(255,255,255,.3)",flexShrink:0,fontSize:12,marginTop:2}}>✓</span>
-                        <span style={{fontSize:13,color:"rgba(255,255,255,.65)",lineHeight:1.5}}>{f}</span>
-                      </div>
-                    ))}
-                    {isFree&&(tier.no||[]).length>0&&<div style={{marginTop:10,padding:"8px 10px",background:"rgba(255,255,255,.03)",borderRadius:8}}>
-                      <div style={{fontSize:11,color:"rgba(255,255,255,.2)",lineHeight:1.6}}>
-                        ✗ {(tier.no||[]).slice(0,4).join(" · ")}
-                      </div>
-                    </div>}
-                  </div>
 
                   {/* CTA Button */}
                   {isFree&&<button onClick={()=>navTo("app")} style={{width:"100%",padding:"13px",borderRadius:12,border:"1.5px solid rgba(255,255,255,.18)",background:"transparent",color:"white",fontFamily:"var(--bd)",fontSize:14,fontWeight:700,cursor:"pointer",transition:"all .2s"}}
@@ -5884,15 +5892,19 @@ RISPOSTA: "Sarebbe possibile un bonus di CHF 15k se il budget è limitato?"`)
                     onMouseLeave={e=>{e.currentTarget.style.borderColor="rgba(255,255,255,.18)";e.currentTarget.style.background="transparent";}}>
                     {tier.btn}
                   </button>}
-                  {isPro&&<button onClick={()=>window.open(C.stripeYearly,"_blank")} style={{width:"100%",padding:"13px",borderRadius:12,border:"none",background:"linear-gradient(135deg,#10b981,#059669)",color:"white",fontFamily:"var(--bd)",fontSize:14,fontWeight:700,cursor:"pointer",boxShadow:"0 4px 20px rgba(16,185,129,.35)",transition:"all .2s"}}
+                  {isPro&&<button onClick={()=>window.open(yearly?C.stripeYearly:C.stripeMonthly,"_blank")} style={{width:"100%",padding:"13px",borderRadius:12,border:"none",background:"linear-gradient(135deg,#10b981,#059669)",color:"white",fontFamily:"var(--bd)",fontSize:14,fontWeight:700,cursor:"pointer",boxShadow:"0 4px 20px rgba(16,185,129,.35)",transition:"all .2s"}}
                     onMouseEnter={e=>{e.currentTarget.style.boxShadow="0 8px 32px rgba(16,185,129,.5)";e.currentTarget.style.transform="translateY(-1px)";}}
                     onMouseLeave={e=>{e.currentTarget.style.boxShadow="0 4px 20px rgba(16,185,129,.35)";e.currentTarget.style.transform="none";}}>
-                    {lang==="de"?`Pro starten → CHF ${C.priceY}/Mo.`:lang==="en"?`Start Pro → CHF ${C.priceY}/mo`:lang==="fr"?`Démarrer Pro → CHF ${C.priceY}/mois`:`Avvia Pro → CHF ${C.priceY}/mese`}
+                    {yearly
+                      ? (lang==="de"?`Pro starten → CHF ${C.priceY}/Mo. jährlich`:lang==="en"?`Start Pro → CHF ${C.priceY}/mo yearly`:lang==="fr"?`Démarrer Pro → CHF ${C.priceY}/mois annuel`:`Avvia Pro → CHF ${C.priceY}/mese annuale`)
+                      : (lang==="de"?`Pro starten → CHF ${C.priceM}/Mo.`:lang==="en"?`Start Pro → CHF ${C.priceM}/mo`:lang==="fr"?`Démarrer Pro → CHF ${C.priceM}/mois`:`Avvia Pro → CHF ${C.priceM}/mese`)}
                   </button>}
-                  {isUlt&&<button onClick={()=>window.open(C.stripeUltimateYearly,"_blank")} style={{width:"100%",padding:"13px",borderRadius:12,border:"1.5px solid rgba(245,158,11,.4)",background:"transparent",color:"#f59e0b",fontFamily:"var(--bd)",fontSize:14,fontWeight:700,cursor:"pointer",transition:"all .2s"}}
+                  {isUlt&&<button onClick={()=>window.open(yearly?C.stripeUltimateYearly:C.stripeUltimate,"_blank")} style={{width:"100%",padding:"13px",borderRadius:12,border:"1.5px solid rgba(245,158,11,.4)",background:"transparent",color:"#f59e0b",fontFamily:"var(--bd)",fontSize:14,fontWeight:700,cursor:"pointer",transition:"all .2s"}}
                     onMouseEnter={e=>{e.currentTarget.style.background="rgba(245,158,11,.08)";}}
                     onMouseLeave={e=>{e.currentTarget.style.background="transparent";}}>
-                    {lang==="de"?`Ultimate → CHF ${C.priceUltimate}/Mo.`:lang==="en"?`Ultimate → CHF ${C.priceUltimate}/mo`:lang==="fr"?`Ultimate → CHF ${C.priceUltimate}/mois`:`Ultimate → CHF ${C.priceUltimate}/mese`}
+                    {yearly
+                      ? (lang==="de"?`Ultimate → CHF 39.90/Mo. jährlich`:lang==="en"?`Ultimate → CHF 39.90/mo yearly`:lang==="fr"?`Ultimate → CHF 39.90/mois annuel`:`Ultimate → CHF 39.90/mese annuale`)
+                      : (lang==="de"?`Ultimate → CHF ${C.priceUltimate}/Mo.`:lang==="en"?`Ultimate → CHF ${C.priceUltimate}/mo`:lang==="fr"?`Ultimate → CHF ${C.priceUltimate}/mois`:`Ultimate → CHF ${C.priceUltimate}/mese`)}
                   </button>}
                   <div style={{textAlign:"center",fontSize:11,color:"rgba(255,255,255,.18)",marginTop:10}}>{lang==="de"?"Stripe · Twint · Jederzeit kündbar":lang==="en"?"Stripe · Twint · Cancel anytime":lang==="fr"?"Stripe · Twint · Résiliable":"Stripe · Twint · Cancellabile"}</div>
                 </div>
@@ -6768,9 +6780,7 @@ VERHALTEN:
                 <div style={{fontSize:11,color:"rgba(255,255,255,.35)"}}>{L2("KI-Karriere-Assistentin","AI Career Assistant","Assistante carrière IA","Assistente carriera IA")} · <span style={{color:"#22c55e"}}>●</span> Online</div>
               </div>
             </div>
-            <div style={{fontSize:12,color:pro?"var(--em)":"rgba(255,255,255,.35)",fontWeight:600,minWidth:60,textAlign:"right"}}>
-              {pro ? "Pro ∞" : `${Math.max(0,C.CHAT_FREE_LIMIT-localUsage)}/${C.CHAT_FREE_LIMIT}`}
-            </div>
+            {pro&&<div style={{fontSize:11,color:"var(--em)",fontWeight:700,background:"rgba(16,185,129,.12)",border:"1px solid rgba(16,185,129,.2)",borderRadius:99,padding:"3px 10px"}}>Pro</div>}
           </div>
 
           {/* Messages Area */}
@@ -6796,7 +6806,7 @@ VERHALTEN:
 
           {/* Limit Banner */}
           {!localCanChat&&<div style={{background:"rgba(245,158,11,.1)",borderTop:"1px solid rgba(245,158,11,.2)",padding:"10px 20px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,flexShrink:0}}>
-            <div style={{fontSize:13,color:"rgba(245,158,11,.8)"}}>{L2("10 Gratis-Nachrichten aufgebraucht","10 free messages used","10 messages gratuits utilisés","10 messaggi gratuiti esauriti")}</div>
+            <div style={{fontSize:13,color:"rgba(245,158,11,.8)"}}>{L2("Für fachliche Fragen Pro freischalten","Unlock Pro for expert questions","Activer Pro pour des questions expertes","Sblocca Pro per domande specialistiche")}</div>
             <button onClick={()=>setPw(true)} style={{background:"var(--am)",color:"white",border:"none",borderRadius:10,padding:"8px 18px",fontSize:13,fontWeight:700,cursor:"pointer"}}>
               {L2("Pro freischalten →","Unlock Pro →","Activer Pro →","Sblocca Pro →")}
             </button>
