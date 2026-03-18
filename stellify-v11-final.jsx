@@ -5,7 +5,7 @@ import React, { useState, useEffect, useRef } from "react";
 // ═══════════════════════════════════════════
 const C = {
   name: "Stellify",
-  tagline: "AI Career Copilot Schweiz",
+  tagline: "Dein nächster Job. KI-schnell.",
   domain: "stellify.ch",
   email: "support@stellify.ch",
   address: "6300 Zug, Schweiz",
@@ -15,7 +15,7 @@ const C = {
   priceM: "19.90",
   priceY: "14.90",
   FREE_LIMIT: 1,
-  PRO_LIMIT: 60,
+  PRO_LIMIT: 20, // 20 Generierungen pro Tag
   CHAT_FREE_LIMIT: 20,
 
   ULTIMATE_LIMIT: 9999999,  // effektiv unbegrenzt
@@ -53,9 +53,9 @@ const getU = () => {
     const m = new Date().toISOString().slice(0,7);   // monatlicher Reset für Free
     const w = getWeekKey();                           // wöchentlicher Reset für Pro
     const resetMonth = d.month !== m;
-    const resetWeek  = d.week  !== w;
+    const resetDay   = d.day   !== new Date().toISOString().slice(0,10);
     if(resetMonth) return {month:m, week:w, count:0, proCount:0, chatCount:0};
-    if(resetWeek)  return {...d, week:w, proCount:0}; // Pro-Limit weekly reset
+    if(resetDay)   return {...d, day:new Date().toISOString().slice(0,10), proCount:0}; // Pro-Limit daily reset
     return d;
   } catch { return {month:"", week:"", count:0, proCount:0, chatCount:0}; }
 };
@@ -149,6 +149,32 @@ function authAddMember(ownerEmail, memberEmail) {
 }
 function authIsAdmin(email,pw) {
   return email.toLowerCase()===C.ADMIN_EMAIL.toLowerCase() && pw===C.ADMIN_PW;
+}
+function authRequestReset(email) {
+  const users = authGetUsers();
+  const user = users.find(u=>u.email.toLowerCase()===email.toLowerCase());
+  if(!user) return {ok:false, err:"E-Mail nicht gefunden."};
+  // Reset-Token generieren (vereinfacht – in Produktion via echter E-Mail)
+  const token = Math.random().toString(36).slice(2,10).toUpperCase();
+  const resets = JSON.parse(localStorage.getItem("stf_resets")||"{}");
+  resets[token] = {email:user.email, expires:Date.now()+3600000};
+  localStorage.setItem("stf_resets", JSON.stringify(resets));
+  // In Produktion: E-Mail senden. Hier: Token im Alert anzeigen
+  return {ok:true, token, msg:`Dein Reset-Code: ${token} (gültig 1 Stunde)`};
+}
+function authResetPassword(token, newPw) {
+  const resets = JSON.parse(localStorage.getItem("stf_resets")||"{}");
+  const reset = resets[token];
+  if(!reset) return {ok:false, err:"Ungültiger oder abgelaufener Code."};
+  if(Date.now() > reset.expires) return {ok:false, err:"Code abgelaufen. Bitte neu anfordern."};
+  const users = authGetUsers();
+  const idx = users.findIndex(u=>u.email===reset.email);
+  if(idx<0) return {ok:false, err:"Nutzer nicht gefunden."};
+  users[idx].pw = newPw;
+  authSaveUsers(users);
+  delete resets[token];
+  localStorage.setItem("stf_resets", JSON.stringify(resets));
+  return {ok:true};
 }
 
 // 🧠 MODEL ROUTING
@@ -725,7 +751,7 @@ const mkT = (lang) => {
          note:L("Monatlich kündbar · Erneuerung jeden Montag 07:00","Monthly · Erneuerung every Monday 07:00","Mensuel · Rechargement lundi 07:00","Mensile · Ricarica lunedì 07:00"),
          yearNote:L("🎁 Jahresabo – 2 Monate gratis · CHF 14.90/Mo.","🎁 Annual plan – 2 months free · CHF 14.90/mo","🔥 CHF 14.90/mois avec abonnement annuel","🔥 CHF 14.90/mese con abbonamento annuale"),
          desc:L(
-           "Pro ist limitiert – du hast ein wöchentliches Nutzungsvolumen, das jeden Montag automatisch aufgefüllt wird.",
+           "Pro gibt dir vollen Zugriff auf alle 20+ Tools. Du erhältst täglich ein festes Nutzungsvolumen – perfekt für regelmässige Bewerbungen und Karriere-Optimierungen.",
            "Pro is limited – you have a weekly volume that erneuerungs automatically every Monday.",
            "Pro est limité – vous avez un volume hebdomadaire rechargé automatiquement chaque lundi.",
            "Pro è limitato – hai una volume settimanale che si ricarica automaticamente ogni lunedì."
@@ -742,7 +768,7 @@ const mkT = (lang) => {
          yearNote:L("🎁 Jahresabo – 2 Monate gratis · CHF 39.90/Mo.","🎁 Annual plan – 2 months free · CHF 39.90/mo","🔥 CHF 39.90/mois avec abonnement annuel","🔥 CHF 39.90/mese con abbonamento annuale"),
          desc:L(
            "Ultimate ist unlimitiert – keine Limits, kein Nutzungsvolumen, kein Warten.",
-           "Ultimate is unlimited – no limits, no volume, no waiting.",
+           "Ultimate is your personal career copilot without any restrictions. Unlimited use of all tools, 24/7, for maximum career success.",
            "Ultimate est illimité – aucune limite, aucun volume, aucune attente.",
            "Ultimate è illimitato – nessun limite, nessuna volume, nessuna attesa."
          ),
@@ -1543,7 +1569,14 @@ function GenericToolPage({ tool, lang, pro, setPw, setPage, yearly, C, proUsage,
   const [docText, setDocText] = useState("");
   const [docLoading, setDocLoading] = useState(false);
   const stripeLink = () => yearly ? C.stripeYearly : C.stripeMonthly;
-  const nextReset=()=>{const d=new Date();d.setMonth(d.getMonth()+1);d.setDate(1);return d.toLocaleDateString(lang==="de"?"de-CH":lang==="fr"?"fr-CH":lang==="it"?"it-CH":"en-CH",{day:"numeric",month:"long",year:"numeric"});};
+  const nextReset=()=>{
+    const d=new Date();
+    d.setDate(d.getDate()+1);d.setHours(0,0,0,0);
+    const diff=d-new Date();
+    const h=Math.floor(diff/3600000);
+    const min=Math.floor((diff%3600000)/60000);
+    return lang==="de"?`in ${h}h ${min}min (Mitternacht)`:lang==="fr"?`dans ${h}h ${min}min (minuit)`:lang==="it"?`tra ${h}h ${min}min (mezzanotte)`:`in ${h}h ${min}min (midnight)`;
+  };
   const limitHit = pro && authSession?.plan!=="ultimate" && proUsage >= C.PRO_LIMIT;
 
   const setV = (k,v) => setVals(p=>({...p,[k]:v}));
@@ -3193,14 +3226,24 @@ function BewerbungsTracker({lang, pro, setPw, navTo}) {
 // 🔐 AUTH MODAL (Login / Registrierung / Admin)
 function AuthModal({ lang, onClose, onSuccess, defaultMode="login" }) {
   const L=(d,e,f,i)=>({de:d,en:e,fr:f,it:i}[lang]||d);
-  const [mode, setMode] = useState(defaultMode); // "login" | "register" | "admin"
+  const [mode, setMode] = useState(defaultMode); // "login"|"register"|"forgot"|"reset"
   const [email, setEmail] = useState("");
   const [pw, setPw] = useState("");
   const [pw2, setPw2] = useState("");
-  const [plan, setPlan] = useState("pro");
+  const [resetToken, setResetToken] = useState("");
+  const [newPw, setNewPw] = useState("");
   const [err, setErr] = useState("");
+  const [info, setInfo] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPw, setShowPw] = useState(false);
+
+  const inp = {background:"rgba(255,255,255,.07)",border:"1.5px solid rgba(255,255,255,.12)",borderRadius:12,padding:"12px 14px",width:"100%",color:"white",fontFamily:"inherit",fontSize:14,outline:"none",boxSizing:"border-box",transition:"border-color .2s"};
+
+  const GOOGLE_CLIENT_ID = "370460173343-bnc71e8tib764unofcd6sqf7slesehih.apps.googleusercontent.com";
+  const handleGoogleLogin = () => {
+    const redirect = encodeURIComponent(window.location.origin + "/api/auth/google");
+    window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${redirect}&response_type=code&scope=email%20profile&prompt=select_account`;
+  };
 
   function handleLogin(e) {
     e.preventDefault(); setErr(""); setLoading(true);
@@ -3216,8 +3259,8 @@ function AuthModal({ lang, onClose, onSuccess, defaultMode="login" }) {
   function handleRegister(e) {
     e.preventDefault(); setErr("");
     if(!email.includes("@")) return setErr(L("Ungültige E-Mail.","Invalid email.","E-mail invalide.","E-mail non valida."));
-    if(pw.length<6) return setErr(L("Passwort mind. 6 Zeichen.","Password min. 6 chars.","Mot de passe min. 6 caractères.","Password min. 6 caratteri."));
-    if(pw!==pw2) return setErr(L("Passwörter stimmen nicht überein.","Passwords don't match.","Mots de passe différents.","Password non corrispondono."));
+    if(pw.length<6) return setErr(L("Passwort mind. 6 Zeichen.","Password min. 6 chars.","Min. 6 caractères.","Min. 6 caratteri."));
+    if(pw!==pw2) return setErr(L("Passwörter stimmen nicht überein.","Passwords don't match.","Mots de passe différents.","Password diverse."));
     setLoading(true);
     setTimeout(()=>{
       const r = authRegister(email, pw, "free");
@@ -3227,67 +3270,152 @@ function AuthModal({ lang, onClose, onSuccess, defaultMode="login" }) {
     },400);
   }
 
-  const inp = {background:"rgba(255,255,255,.07)",border:"1.5px solid rgba(255,255,255,.12)",borderRadius:10,padding:"10px 13px",width:"100%",color:"white",fontFamily:"inherit",fontSize:14,outline:"none",boxSizing:"border-box"};
+  function handleForgot(e) {
+    e.preventDefault(); setErr(""); setLoading(true);
+    setTimeout(()=>{
+      const r = authRequestReset(email);
+      if(r.ok) {
+        setInfo(r.msg);
+        setMode("reset");
+      } else setErr(r.err);
+      setLoading(false);
+    },400);
+  }
+
+  function handleReset(e) {
+    e.preventDefault(); setErr("");
+    if(newPw.length<6) return setErr(L("Passwort mind. 6 Zeichen.","Min. 6 chars.","Min. 6 car.","Min. 6 car."));
+    const r = authResetPassword(resetToken.toUpperCase(), newPw);
+    if(r.ok) { setInfo(L("Passwort geändert! Bitte einloggen.","Password changed! Please sign in.","Mot de passe changé!","Password cambiata!")); setMode("login"); }
+    else setErr(r.err);
+  }
 
   return (
     <div className="mbg" onClick={e=>{if(e.target===e.currentTarget)onClose()}}>
-      <div className="mod" style={{maxWidth:420,textAlign:"left"}}>
-        {/* Mode Tabs */}
-        <div style={{display:"flex",gap:4,background:"rgba(255,255,255,.06)",borderRadius:12,padding:4,marginBottom:22}}>
-          {[["login",L("Einloggen","Sign in","Connexion","Accedi")],["register",L("Registrieren","Register","S'inscrire","Registrati")]].map(([m,lbl])=>(
-            <button key={m} onClick={()=>{setMode(m);setErr("");}}
-              style={{flex:1,padding:"8px 0",borderRadius:9,border:"none",cursor:"pointer",fontFamily:"inherit",fontSize:13,fontWeight:700,transition:"all .2s",
-                background:mode===m?"var(--em)":"transparent",color:mode===m?"white":"rgba(255,255,255,.4)"}}>
-              {lbl}
-            </button>
-          ))}
+      <div className="mod" style={{maxWidth:420,textAlign:"left",padding:"32px"}}>
+
+        {/* Logo */}
+        <div style={{textAlign:"center",marginBottom:24}}>
+          <div style={{fontSize:28,fontFamily:"var(--hd)",fontWeight:800,color:"white",letterSpacing:"-1px"}}>
+            Stellify<span style={{color:"var(--em)"}}>.</span>
+          </div>
+          <div style={{fontSize:12,color:"rgba(255,255,255,.3)",marginTop:2}}>AI Career Copilot Schweiz</div>
         </div>
 
-        {mode==="login" && <>
-          <h2 style={{fontSize:22,marginBottom:4}}>{L("Willkommen zurück 👋","Welcome back 👋","Bon retour 👋","Bentornato 👋")}</h2>
-          <p style={{marginBottom:20,color:"rgba(255,255,255,.4)",fontSize:13}}>{L("Logge dich ein und nutze alle deine Tools.","Sign in and use all your tools.","Connectez-vous et utilisez vos outils.","Accedi e usa tutti i tuoi strumenti.")}</p>
-          <form onSubmit={handleLogin} style={{display:"flex",flexDirection:"column",gap:12}}>
-            <input type="email" placeholder="E-Mail" value={email} onChange={e=>setEmail(e.target.value)} required style={inp}/>
-            <div style={{position:"relative"}}>
-              <input type={showPw?"text":"password"} placeholder={L("Passwort","Password","Mot de passe","Password")} value={pw} onChange={e=>setPw(e.target.value)} required style={{...inp,paddingRight:40}}/>
-              <button type="button" onClick={()=>setShowPw(v=>!v)} style={{position:"absolute",right:10,top:"50%",transform:"translateY(-50%)",background:"none",border:"none",cursor:"pointer",color:"rgba(255,255,255,.3)",fontSize:14}}>{showPw?"🙈":"👁"}</button>
+        {/* Tabs */}
+        {(mode==="login"||mode==="register") && (
+          <div style={{display:"flex",gap:4,background:"rgba(255,255,255,.06)",borderRadius:12,padding:4,marginBottom:24}}>
+            {[["login",L("Einloggen","Sign in","Connexion","Accedi")],["register",L("Registrieren","Register","S'inscrire","Registrati")]].map(([m,lbl])=>(
+              <button key={m} onClick={()=>{setMode(m);setErr("");setInfo("");}}
+                style={{flex:1,padding:"9px 0",borderRadius:9,border:"none",cursor:"pointer",fontFamily:"inherit",fontSize:13,fontWeight:700,transition:"all .2s",
+                  background:mode===m?"var(--em)":"transparent",color:mode===m?"white":"rgba(255,255,255,.4)"}}>
+                {lbl}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Google Button */}
+        {(mode==="login"||mode==="register") && (
+          <>
+            <button onClick={handleGoogleLogin}
+              style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"center",gap:10,background:"white",border:"none",borderRadius:12,padding:"12px",cursor:"pointer",fontFamily:"inherit",fontSize:14,fontWeight:600,color:"#1a1a2e",boxShadow:"0 2px 8px rgba(0,0,0,.15)",transition:"all .2s",marginBottom:16}}
+              onMouseEnter={e=>e.currentTarget.style.boxShadow="0 4px 16px rgba(0,0,0,.25)"}
+              onMouseLeave={e=>e.currentTarget.style.boxShadow="0 2px 8px rgba(0,0,0,.15)"}>
+              <svg width="18" height="18" viewBox="0 0 24 24">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+              </svg>
+              {L("Mit Google fortfahren","Continue with Google","Continuer avec Google","Continua con Google")}
+            </button>
+            <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:16}}>
+              <div style={{flex:1,height:1,background:"rgba(255,255,255,.1)"}}/>
+              <span style={{fontSize:11,color:"rgba(255,255,255,.3)",fontWeight:500}}>{L("oder mit E-Mail","or with email","ou avec e-mail","o con e-mail")}</span>
+              <div style={{flex:1,height:1,background:"rgba(255,255,255,.1)"}}/>
             </div>
-            {err&&<div style={{color:"#ef4444",fontSize:12,padding:"6px 10px",background:"rgba(239,68,68,.08)",borderRadius:8}}>{err}</div>}
-            <button type="submit" className="btn b-em b-w" disabled={loading} style={{marginTop:4}}>
+          </>
+        )}
+
+        {/* Login Form */}
+        {mode==="login" && <>
+          <form onSubmit={handleLogin} style={{display:"flex",flexDirection:"column",gap:10}}>
+            <input type="email" placeholder="E-Mail" value={email} onChange={e=>setEmail(e.target.value)} required style={inp} onFocus={e=>e.target.style.borderColor="var(--em)"} onBlur={e=>e.target.style.borderColor="rgba(255,255,255,.12)"}/>
+            <div style={{position:"relative"}}>
+              <input type={showPw?"text":"password"} placeholder={L("Passwort","Password","Mot de passe","Password")} value={pw} onChange={e=>setPw(e.target.value)} required style={{...inp,paddingRight:44}} onFocus={e=>e.target.style.borderColor="var(--em)"} onBlur={e=>e.target.style.borderColor="rgba(255,255,255,.12)"}/>
+              <button type="button" onClick={()=>setShowPw(v=>!v)} style={{position:"absolute",right:12,top:"50%",transform:"translateY(-50%)",background:"none",border:"none",cursor:"pointer",color:"rgba(255,255,255,.3)",fontSize:16}}>{showPw?"🙈":"👁"}</button>
+            </div>
+            <div style={{textAlign:"right"}}>
+              <button type="button" onClick={()=>{setMode("forgot");setErr("");setInfo("");}} style={{background:"none",border:"none",color:"rgba(255,255,255,.35)",cursor:"pointer",fontSize:12,fontFamily:"inherit"}}>
+                {L("Passwort vergessen?","Forgot password?","Mot de passe oublié?","Password dimenticata?")}
+              </button>
+            </div>
+            {err&&<div style={{color:"#ef4444",fontSize:12,padding:"8px 12px",background:"rgba(239,68,68,.08)",borderRadius:8,border:"1px solid rgba(239,68,68,.2)"}}>{err}</div>}
+            {info&&<div style={{color:"#10b981",fontSize:12,padding:"8px 12px",background:"rgba(16,185,129,.08)",borderRadius:8}}>{info}</div>}
+            <button type="submit" className="btn b-em b-w" disabled={loading} style={{marginTop:4,padding:"13px"}}>
               {loading?"⏳ …":L("Einloggen →","Sign in →","Connexion →","Accedi →")}
             </button>
           </form>
-          <div style={{textAlign:"center",marginTop:16,fontSize:12,color:"rgba(255,255,255,.25)"}}>
-            {L("Noch kein Account?","No account yet?","Pas encore de compte?","Nessun account?")} <button onClick={()=>setMode("register")} style={{background:"none",border:"none",color:"var(--em)",cursor:"pointer",fontWeight:600,fontSize:12}}>
-              {L("Jetzt registrieren","Register now","S'inscrire","Registrati")}
-            </button>
+          <div style={{textAlign:"center",marginTop:14,fontSize:12,color:"rgba(255,255,255,.25)"}}>
+            {L("Noch kein Konto?","No account yet?","Pas encore de compte?","Nessun account?")} <button onClick={()=>{setMode("register");setErr("");}} style={{background:"none",border:"none",color:"var(--em)",cursor:"pointer",fontWeight:700,fontSize:12}}>{L("Gratis registrieren","Register free","S'inscrire","Registrati")}</button>
           </div>
         </>}
 
+        {/* Register Form */}
         {mode==="register" && <>
-          <h2 style={{fontSize:24,fontFamily:"var(--hd)",fontWeight:800,letterSpacing:"-0.5px",marginBottom:4}}>{L("Konto erstellen ✦","Create account ✦","Créer un compte ✦","Crea account ✦")}</h2>
-          <p style={{marginBottom:20,color:"rgba(255,255,255,.4)",fontSize:13}}>{L("Gratis registrieren – 20 Chat-Fragen inklusive.","Register free – 20 chat questions included.","Inscription gratuite – 20 questions incluses.","Registrazione gratuita – 20 domande incluse.")}</p>
-          <form onSubmit={handleRegister} style={{display:"flex",flexDirection:"column",gap:12}}>
-            <input type="email" placeholder="E-Mail" value={email} onChange={e=>setEmail(e.target.value)} required style={inp}/>
+          <form onSubmit={handleRegister} style={{display:"flex",flexDirection:"column",gap:10}}>
+            <input type="email" placeholder="E-Mail" value={email} onChange={e=>setEmail(e.target.value)} required style={inp} onFocus={e=>e.target.style.borderColor="var(--em)"} onBlur={e=>e.target.style.borderColor="rgba(255,255,255,.12)"}/>
             <div style={{position:"relative"}}>
-              <input type={showPw?"text":"password"} placeholder={L("Passwort (mind. 6 Zeichen)","Password (min. 6 chars)","Mot de passe (min. 6 car.)","Password (min. 6 car.)")} value={pw} onChange={e=>setPw(e.target.value)} required style={{...inp,paddingRight:40}}/>
-              <button type="button" onClick={()=>setShowPw(v=>!v)} style={{position:"absolute",right:10,top:"50%",transform:"translateY(-50%)",background:"none",border:"none",cursor:"pointer",color:"rgba(255,255,255,.3)",fontSize:14}}>{showPw?"🙈":"👁"}</button>
+              <input type={showPw?"text":"password"} placeholder={L("Passwort (mind. 6 Zeichen)","Password (min. 6 chars)","Mot de passe (min. 6 car.)","Password (min. 6 car.)")} value={pw} onChange={e=>setPw(e.target.value)} required style={{...inp,paddingRight:44}} onFocus={e=>e.target.style.borderColor="var(--em)"} onBlur={e=>e.target.style.borderColor="rgba(255,255,255,.12)"}/>
+              <button type="button" onClick={()=>setShowPw(v=>!v)} style={{position:"absolute",right:12,top:"50%",transform:"translateY(-50%)",background:"none",border:"none",cursor:"pointer",color:"rgba(255,255,255,.3)",fontSize:16}}>{showPw?"🙈":"👁"}</button>
             </div>
-            <input type="password" placeholder={L("Passwort wiederholen","Repeat password","Répétez le mot de passe","Ripeti password")} value={pw2} onChange={e=>setPw2(e.target.value)} required style={inp}/>
-            {err&&<div style={{color:"#ef4444",fontSize:12,padding:"6px 10px",background:"rgba(239,68,68,.08)",borderRadius:8}}>{err}</div>}
-            <button type="submit" className="btn b-em b-w" disabled={loading} style={{marginTop:4}}>
-              {loading?"⏳ …":L("Konto erstellen →","Create account →","Créer un compte →","Crea account →")}
+            <input type="password" placeholder={L("Passwort wiederholen","Repeat password","Répétez le mot de passe","Ripeti password")} value={pw2} onChange={e=>setPw2(e.target.value)} required style={inp} onFocus={e=>e.target.style.borderColor="var(--em)"} onBlur={e=>e.target.style.borderColor="rgba(255,255,255,.12)"}/>
+            {err&&<div style={{color:"#ef4444",fontSize:12,padding:"8px 12px",background:"rgba(239,68,68,.08)",borderRadius:8,border:"1px solid rgba(239,68,68,.2)"}}>{err}</div>}
+            <button type="submit" className="btn b-em b-w" disabled={loading} style={{marginTop:4,padding:"13px"}}>
+              {loading?"⏳ …":L("Konto erstellen →","Create account →","Créer →","Crea →")}
             </button>
           </form>
-          <div style={{textAlign:"center",marginTop:16,fontSize:12,color:"rgba(255,255,255,.25)"}}>
-            {L("Bereits ein Konto?","Already have an account?","Déjà un compte?","Hai già un account?")} <button onClick={()=>setMode("login")} style={{background:"none",border:"none",color:"var(--em)",cursor:"pointer",fontWeight:600,fontSize:12}}>
-              {L("Einloggen","Sign in","Connexion","Accedi")}
-            </button>
+          <div style={{textAlign:"center",marginTop:14,fontSize:11,color:"rgba(255,255,255,.2)",lineHeight:1.6}}>
+            {L("Mit der Registrierung stimmst du den AGB und der Datenschutzerklärung zu.","By registering you agree to our Terms and Privacy Policy.","En vous inscrivant vous acceptez les CGU.","Registrandoti accetti i T&C.")}
+          </div>
+          <div style={{textAlign:"center",marginTop:10,fontSize:12,color:"rgba(255,255,255,.25)"}}>
+            {L("Bereits ein Konto?","Already have an account?","Déjà un compte?","Hai già un account?")} <button onClick={()=>{setMode("login");setErr("");}} style={{background:"none",border:"none",color:"var(--em)",cursor:"pointer",fontWeight:700,fontSize:12}}>{L("Einloggen","Sign in","Connexion","Accedi")}</button>
           </div>
         </>}
 
-        <div style={{textAlign:"center",marginTop:18}}>
-          <button onClick={onClose} style={{background:"none",border:"none",color:"rgba(255,255,255,.2)",cursor:"pointer",fontSize:12}}>
+        {/* Passwort vergessen */}
+        {mode==="forgot" && <>
+          <h2 style={{fontSize:20,marginBottom:4}}>🔑 {L("Passwort zurücksetzen","Reset password","Réinitialiser","Reimposta")}</h2>
+          <p style={{fontSize:13,color:"rgba(255,255,255,.4)",marginBottom:20}}>{L("Gib deine E-Mail ein. Du erhältst einen Reset-Code.","Enter your email. You'll receive a reset code.","Entrez votre e-mail. Vous recevrez un code.","Inserisci l'email per ricevere il codice.")}</p>
+          <form onSubmit={handleForgot} style={{display:"flex",flexDirection:"column",gap:10}}>
+            <input type="email" placeholder="E-Mail" value={email} onChange={e=>setEmail(e.target.value)} required style={inp} onFocus={e=>e.target.style.borderColor="var(--em)"} onBlur={e=>e.target.style.borderColor="rgba(255,255,255,.12)"}/>
+            {err&&<div style={{color:"#ef4444",fontSize:12,padding:"8px 12px",background:"rgba(239,68,68,.08)",borderRadius:8}}>{err}</div>}
+            <button type="submit" className="btn b-em b-w" disabled={loading} style={{padding:"13px"}}>
+              {loading?"⏳ …":L("Code senden →","Send code →","Envoyer →","Invia →")}
+            </button>
+          </form>
+          <div style={{textAlign:"center",marginTop:14}}>
+            <button onClick={()=>{setMode("login");setErr("");}} style={{background:"none",border:"none",color:"rgba(255,255,255,.3)",cursor:"pointer",fontSize:12}}>← {L("Zurück","Back","Retour","Indietro")}</button>
+          </div>
+        </>}
+
+        {/* Reset Code eingeben */}
+        {mode==="reset" && <>
+          <h2 style={{fontSize:20,marginBottom:4}}>✅ {L("Neues Passwort","New password","Nouveau mot de passe","Nuova password")}</h2>
+          {info&&<div style={{color:"#10b981",fontSize:12,padding:"8px 12px",background:"rgba(16,185,129,.08)",borderRadius:8,marginBottom:14,lineHeight:1.5}}>{info}</div>}
+          <form onSubmit={handleReset} style={{display:"flex",flexDirection:"column",gap:10}}>
+            <input placeholder={L("Reset-Code eingeben","Enter reset code","Code de réinitialisation","Codice reset")} value={resetToken} onChange={e=>setResetToken(e.target.value)} required style={{...inp,fontFamily:"monospace",letterSpacing:2,textTransform:"uppercase"}}/>
+            <input type="password" placeholder={L("Neues Passwort","New password","Nouveau mot de passe","Nuova password")} value={newPw} onChange={e=>setNewPw(e.target.value)} required style={inp}/>
+            {err&&<div style={{color:"#ef4444",fontSize:12,padding:"8px 12px",background:"rgba(239,68,68,.08)",borderRadius:8}}>{err}</div>}
+            <button type="submit" className="btn b-em b-w" style={{padding:"13px"}}>
+              {L("Passwort ändern →","Change password →","Changer →","Cambia →")}
+            </button>
+          </form>
+        </>}
+
+        <div style={{textAlign:"center",marginTop:20}}>
+          <button onClick={onClose} style={{background:"none",border:"none",color:"rgba(255,255,255,.2)",cursor:"pointer",fontSize:12,fontFamily:"inherit"}}>
             {L("Schliessen","Close","Fermer","Chiudi")}
           </button>
         </div>
@@ -3614,8 +3742,12 @@ export default function App() {
   const [page,setPage]=useState("landing");
   const [pro,setPro]=useState(false); const [usage,setUsage]=useState(0); const [proUsage,setProUsage]=useState(0);
   const [splash,setSplash]=useState(()=>!sessionStorage.getItem("stf_splashed"));
+  const [showPromo,setShowPromo]=useState(()=>{
+    try { return !sessionStorage.getItem("stf_promo_shown"); } catch { return true; }
+  });
+  const closePromo=()=>{ try{sessionStorage.setItem("stf_promo_shown","1");}catch{} setShowPromo(false); };
   const [showReferral,setShowReferral]=useState(false);
-  const [pw,setPw]=useState(false); const [yearly,setYearly]=useState(false);
+  const [pw,setPw]=useState(false); const [yearly,setYearly]=useState(true); // Jährlich Standard
   // Auth
   const [authSession, setAuthSession] = useState(()=>authGetSession());
   const [showAuth, setShowAuth] = useState(false);
@@ -3665,19 +3797,39 @@ export default function App() {
   // cookie banner
   const [cookieBanner,setCookieBanner]=useState(()=>{
     try {
-      // Show if not yet accepted in this version
       const v = localStorage.getItem("stf_cookie_v2");
       return !v;
     } catch { return true; }
   });
   const acceptCookie=(all)=>{ try { localStorage.setItem("stf_cookie_v2",all?"all":"essential"); } catch{} setCookieBanner(false); };
 
+  // Promo-Modal: erscheint nach 8 Sekunden beim ersten Besuch
+  useEffect(()=>{
+    const seen = sessionStorage.getItem("stf_promo_seen");
+    if(!seen) {
+      const timer = setTimeout(()=>{
+        setShowPromo(true);
+        sessionStorage.setItem("stf_promo_seen","1");
+      }, 8000);
+      return ()=>clearTimeout(timer);
+    }
+  },[]);
+
+  // PromoModal Komponente
+
   const uj=(k,v)=>setJob(p=>({...p,[k]:v})); const up=(k,v)=>setProf(p=>({...p,[k]:v}));
   const L=(d,e,f,i)=>({de:d,en:e,fr:f,it:i}[lang]);
   const stripeLink=()=>yearly?C.stripeYearly:C.stripeMonthly;
   const canGen=()=>pro?(proUsage<C.PRO_LIMIT):(usage<C.FREE_LIMIT);
   const canGenPro=()=>authSession?.plan==="ultimate"||proUsage<C.PRO_LIMIT;
-  const nextReset=()=>{const d=new Date();d.setMonth(d.getMonth()+1);d.setDate(1);return d.toLocaleDateString(lang==="de"?"de-CH":lang==="fr"?"fr-CH":lang==="it"?"it-CH":"en-CH",{day:"numeric",month:"long",year:"numeric"});};
+  const nextReset=()=>{
+    const d=new Date();
+    d.setDate(d.getDate()+1);d.setHours(0,0,0,0);
+    const diff=d-new Date();
+    const h=Math.floor(diff/3600000);
+    const min=Math.floor((diff%3600000)/60000);
+    return lang==="de"?`in ${h}h ${min}min (Mitternacht)`:lang==="fr"?`dans ${h}h ${min}min (minuit)`:lang==="it"?`tra ${h}h ${min}min (mezzanotte)`:`in ${h}h ${min}min (midnight)`;
+  };
 
   const curDoc=()=>docType==="beide"?(tab===0?results.motivation:results.lebenslauf):results[docType];
   const setCurDoc=v=>{ if(docType==="beide") setResults(r=>tab===0?{...r,motivation:v}:{...r,lebenslauf:v}); else setResults(r=>({...r,[docType]:v})); };
@@ -3956,15 +4108,37 @@ Antworte NUR mit JSON:
       </div>
     </div>
   ):proUsage>=C.PRO_LIMIT?(
-    <div style={{background:"rgba(245,158,11,.1)",border:"1px solid rgba(245,158,11,.25)",borderRadius:10,padding:"10px 16px",fontSize:13,display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,flexWrap:"wrap"}}>
-      <span>⏳ {L("Monatliches Nutzungsvolumen aufgebraucht","Monthly volume used up","Volume mensuel épuisé","Monthly volume used up")} · {L("Reset am","Reset on","Réinitialisation le","Reset on")} <strong>{nextReset()}</strong></span>
+    <div style={{background:"linear-gradient(135deg,rgba(245,158,11,.12),rgba(245,158,11,.06))",border:"1.5px solid rgba(245,158,11,.3)",borderRadius:14,padding:"16px 20px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,flexWrap:"wrap"}}>
+      <div>
+        <div style={{fontFamily:"var(--hd)",fontSize:14,fontWeight:800,color:"#f59e0b",marginBottom:3}}>
+          ⚡ {L("Tageslimit erreicht – bereit für mehr?","Daily limit reached – ready for more?","Limite quotidien atteint – prêt pour plus?","Limite giornaliero raggiunto?")}
+        </div>
+        <div style={{fontSize:12,color:"rgba(255,255,255,.5)",lineHeight:1.5}}>
+          {L("Du hast heute alle 20 Generierungen genutzt. Ultimate gibt dir unbegrenzte Nutzung – ohne Reset, ohne Warten.",
+             "You've used all 20 generations today. Ultimate gives you unlimited use – no reset, no waiting.",
+             "Vous avez utilisé les 20 générations aujourd'hui. Ultimate offre une utilisation illimitée.",
+             "Hai usato tutte le 20 generazioni oggi. Ultimate offre utilizzo illimitato.")}
+        </div>
+        <div style={{fontSize:11,color:"rgba(245,158,11,.6)",marginTop:4}}>
+          🔄 {L("Pro-Limit erneuert sich morgen früh um 00:00 Uhr","Pro limit resets tomorrow at midnight","Le quota Pro se renouvelle demain à minuit","Il limite Pro si rinnova domani a mezzanotte")}
+        </div>
+      </div>
+      <div style={{display:"flex",flexDirection:"column",gap:8,flexShrink:0}}>
+        <button onClick={()=>window.open(C.stripeUltimate,"_blank")} className="btn" style={{background:"linear-gradient(135deg,#f59e0b,#d97706)",color:"white",border:"none",padding:"10px 20px",fontSize:13,fontWeight:700,borderRadius:10,cursor:"pointer",boxShadow:"0 4px 14px rgba(245,158,11,.4)"}}>
+          ♾️ {L("Ultimate holen →","Get Ultimate →","Obtenir Ultimate →","Ottieni Ultimate →")}
+        </button>
+        <div style={{fontSize:10,color:"rgba(255,255,255,.25)",textAlign:"center"}}>CHF 39.90/Mo. · {L("2 Monate gratis","2 months free","2 mois offerts","2 mesi gratis")}</div>
+      </div>
     </div>
   ):(
     <div className="ubar">
-      <span style={{color:"var(--em)",fontWeight:600}}>✦ Pro · <strong>{C.PRO_LIMIT-proUsage}</strong> {L("von","of","de","of")} {C.PRO_LIMIT} {L("Generierungen übrig","generations left","générations restantes","generations left")}</span>
+      <div style={{display:"flex",flexDirection:"column",gap:2}}>
+        <span style={{color:"var(--em)",fontWeight:700,fontSize:13}}>✦ Pro · <strong>{C.PRO_LIMIT-proUsage}</strong>/{C.PRO_LIMIT} {L("heute noch verfügbar","remaining today","restants aujourd'hui","rimasti oggi")}</span>
+        <span style={{fontSize:11,color:"rgba(255,255,255,.3)"}}>🔄 {L("Reset täglich um 00:00","Resets daily at midnight","Renouvellement quotidien à minuit","Rinnovo quotidiano a mezzanotte")}</span>
+      </div>
       <div style={{display:"flex",alignItems:"center",gap:9}}>
-        <div className="u-tr"><div className="u-fi" style={{width:`${(proUsage/C.PRO_LIMIT)*100}%`,background:"var(--em)"}}/></div>
-        <span style={{fontSize:11,color:"var(--mu)",whiteSpace:"nowrap"}}>↻ {nextReset()}</span>
+        <div className="u-tr"><div className="u-fi" style={{width:`${(proUsage/C.PRO_LIMIT)*100}%`,background:proUsage/C.PRO_LIMIT>0.8?"#f59e0b":"var(--em)"}}/></div>
+        {proUsage/C.PRO_LIMIT>0.6&&<button onClick={()=>window.open(C.stripeUltimate,"_blank")} style={{background:"rgba(245,158,11,.15)",border:"1px solid rgba(245,158,11,.3)",borderRadius:8,padding:"4px 10px",fontSize:11,fontWeight:700,color:"#f59e0b",cursor:"pointer",whiteSpace:"nowrap"}}>♾️ Ultimate</button>}
       </div>
     </div>
   );
@@ -4394,6 +4568,320 @@ DIAPOSITIVA 2 – Punti salienti:
   • Nuovi clienti: 127 (+34%) ✅
 
 NOTE: Incluse in tutte le diapositive`),
+
+    plan306090: `🗓️ 30-60-90-TAGE-PLAN
+
+Stelle: Senior Marketing Manager · Swisscom Bern | Start: 1. April 2026
+
+📅 ERSTE 30 TAGE – «Verstehen»
+Woche 1-2: Onboarding, alle Stakeholder kennenlernen, Prozesse verstehen
+Woche 3-4: KPIs analysieren, bestehende Kampagnen bewerten
+→ Ziel: 20 Key-Personen kennen, vollständiges KPI-Briefing
+
+📅 TAGE 31-60 – «Beitragen»
+Social-Media-Audit durchführen und präsentieren
+Ersten Quick Win liefern: +10% Engagement
+→ Ziel: Als Experte sichtbar werden
+
+📅 TAGE 61-90 – «Führen»
+Q3-Marketingstrategie präsentieren und Budget-Proposal einreichen
+→ Ziel: Strategieplan genehmigt, als «Go-To-Person» positioniert
+
+🎯 KPIs: Tag 30: Feedback positiv | Tag 60: Projekt live | Tag 90: Strategie approved`,
+
+    referenz: `🏆 REFERENZSCHREIBEN
+
+Für: Thomas Keller, Senior Developer
+Von: Dr. Maria Suter, CTO · ABC Tech AG Zürich
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Sehr geehrte Damen und Herren,
+
+ich empfehle Herrn Thomas Keller ohne Einschränkung für eine Führungsposition.
+
+In 3 Jahren bei ABC Tech AG hat Herr Keller die Migration unserer Plattform auf Microservices geleitet – CHF 2.5M Projekt, 3 Wochen vor Plan abgeschlossen. Er führte ein 5-köpfiges Team mit hoher Eigenverantwortung.
+
+Besonders beeindruckend: Seine Fähigkeit, komplexe Technik verständlich zu kommunizieren.
+
+Dr. Maria Suter, CTO | abc-tech.ch | +41 44 123 45 67
+
+✅ Professioneller Ton · Konkrete Zahlen · Persönlicher Kontakt`,
+
+
+    networking: L(
+`🤝 NETWORKING-NACHRICHT – LinkedIn
+
+An: Sarah Müller, HR-Leiterin, Google Zürich
+Von: Marco Berger, Senior Developer, 6 Jahre Erfahrung
+
+──────────────────────────────────────
+KONTAKTANFRAGE (LinkedIn):
+"Guten Tag Frau Müller,
+
+Ihr Beitrag über Engineering-Kultur bei Google hat mich sehr angesprochen – besonders Ihr Punkt über psychologische Sicherheit im Team.
+
+Als Senior Developer mit 6 Jahren Erfahrung in Python und Cloud-Architekturen interessiere ich mich für die Möglichkeiten bei Google Zürich. Ich würde mich freuen, Sie in meinem Netzwerk zu haben.
+
+Mit freundlichen Grüssen
+Marco Berger"
+
+WARUM ES FUNKTIONIERT:
+✓ Konkreter Anlass (ihr Beitrag)
+✓ Kurz und respektvoll
+✓ Keine direkte Bitte um Job
+✓ Mehrwert für sie erkennbar`,
+`🤝 NETWORKING MESSAGE
+
+To: Sarah Miller, HR Lead, Google Zurich
+From: Marco Berger, Senior Developer, 6 years experience
+
+CONNECTION REQUEST:
+"Hello Sarah,
+
+Your post about engineering culture at Google really resonated with me – especially your point about psychological safety in teams.
+
+As a Senior Developer with 6 years of experience in Python and Cloud architecture, I'm very interested in opportunities at Google Zurich. I'd be happy to connect.
+
+Best regards, Marco Berger"
+
+WHY IT WORKS: ✓ Specific hook ✓ Brief & respectful ✓ No direct ask ✓ Value clear`,
+`🤝 MESSAGE DE NETWORKING
+
+À: Sarah Müller, DRH, Google Zurich
+
+DEMANDE DE CONNEXION:
+"Bonjour Madame Müller,
+
+Votre article sur la culture d'ingénierie chez Google m'a beaucoup inspiré.
+
+En tant que développeur senior avec 6 ans d'expérience, je suis intéressé par les opportunités chez Google Zurich. Ce serait un plaisir de vous avoir dans mon réseau.
+
+Cordialement, Marco Berger"`,
+`🤝 MESSAGGIO DI NETWORKING
+
+A: Sarah Müller, HR Lead, Google Zurigo
+
+RICHIESTA CONNESSIONE:
+"Buongiorno Sig.ra Müller,
+
+Il suo articolo sulla cultura ingegneristica di Google mi ha ispirato molto.
+
+Come sviluppatore senior con 6 anni di esperienza, sono interessato alle opportunità presso Google Zurigo.
+
+Cordiali saluti, Marco Berger"`),
+
+    lehrstelle: L(
+`🎓 LEHRSTELLEN-BEWERBUNG
+
+Lehrberuf: Kaufmann/-frau EFZ | Firma: UBS AG, Zürich | Name: Lena Müller, 15 J.
+
+──────────────────────────────────────
+Lena Müller
+Musterstrasse 12, 8001 Zürich
+lena.mueller@gmail.com | 079 123 45 67
+
+UBS AG
+Human Resources
+Bahnhofstrasse 45
+8001 Zürich
+
+Zürich, März 2026
+
+Bewerbung als Kauffrau EFZ – Lehrstelle 2026
+
+Sehr geehrte Damen und Herren,
+
+seit ich in der Schule bei einem Betriebsbesuch bei der UBS die Welt der Finanzen kennenlernen durfte, weiss ich: Ich möchte Kauffrau werden – und zwar bei der UBS.
+
+Ich bin Lena, 15 Jahre alt und besuche die 3. Sekundarschule in Zürich. In Mathematik und Wirtschaft gehöre ich zu den Besten meiner Klasse. Zahlen faszinieren mich – ob beim Nachhilfe-Geben für Mitschüler oder beim Verwalten der Klassenkasse, die ich seit zwei Jahren führe.
+
+Was mich besonders an der UBS begeistert: Ihre globale Präsenz und das Engagement für Nachhaltigkeit. In meiner Berufsmaturität möchte ich diese Werte mitgestalten.
+
+Ich freue mich sehr auf ein Schnupperpraktikum und ein persönliches Gespräch.
+
+Mit freundlichen Grüssen
+Lena Müller
+
+Beilagen: Lebenslauf, letzte Schulzeugnisse, Motivationsbrief`,
+`🎓 APPRENTICESHIP APPLICATION
+
+Trade: Commercial employee EFZ | Company: UBS AG, Zurich | Name: Lena Müller, 15
+
+Lena Müller | Zurich | lena.mueller@gmail.com
+
+Dear UBS Team,
+
+Ever since I visited UBS during a school trip and discovered the world of finance, I knew: I want to become a commercial employee – at UBS.
+
+I'm Lena, 15 years old, in my final year of secondary school. In maths and economics I'm among the top students. I've been managing our class fund for two years.
+
+What excites me about UBS: your global presence and commitment to sustainability.
+
+I look forward to a trial work placement and a personal interview.
+
+Kind regards, Lena Müller`,
+`🎓 CANDIDATURE APPRENTISSAGE
+
+Métier: Employée de commerce AFC | Entreprise: UBS SA, Zurich
+
+Chère équipe UBS,
+
+Depuis ma visite scolaire chez UBS, je sais que je veux devenir employée de commerce – chez vous.
+
+Je m'appelle Lena, 15 ans, en 3e secondaire à Zurich. Je suis parmi les meilleurs élèves en mathématiques et économie. Je gère la caisse de classe depuis deux ans.
+
+Dans l'attente d'un entretien,
+Lena Müller`,
+`🎓 CANDIDATURA APPRENDISTATO
+
+Mestiere: Impiegata di commercio AFC | Azienda: UBS SA, Zurigo
+
+Gentile team UBS,
+
+Da quando ho visitato UBS durante una gita scolastica, so che voglio diventare impiegata di commercio – da voi.
+
+Mi chiamo Lena, 15 anni. In matematica ed economia sono tra i migliori della classe.
+
+Distinti saluti, Lena Müller`),
+
+    kuendigung: L(
+`📤 KÜNDIGUNG – MUSTER
+
+Name: Thomas Keller | Firma: Musterfirma AG, Zürich
+
+──────────────────────────────────────
+Thomas Keller
+Beispielstrasse 5
+8001 Zürich
+thomas.keller@email.ch
+
+Musterfirma AG
+z.H. HR-Abteilung / Frau Sabine Huber
+Industriestrasse 10
+8001 Zürich
+
+Zürich, 18. März 2026
+
+KÜNDIGUNG DES ARBEITSVERHÄLTNISSES
+
+Sehr geehrte Frau Huber,
+
+hiermit kündige ich mein Arbeitsverhältnis als Senior Accountant ordentlich und fristgerecht per 31. Mai 2026 (3 Monate Kündigungsfrist gemäss Arbeitsvertrag).
+
+Ich bedanke mich herzlich für die gute Zusammenarbeit und die wertvollen Erfahrungen der vergangenen vier Jahre. Ich werde bis zum letzten Arbeitstag meine Aufgaben gewissenhaft erfüllen und stehe für eine Übergabe vollumfänglich zur Verfügung.
+
+Ich bitte Sie, mir ein wohlwollendes Arbeitszeugnis auszustellen.
+
+Mit freundlichen Grüssen
+
+Thomas Keller
+
+──────────────────────────────────────
+✓ Schriftform eingehalten (OR Art. 335)
+✓ Kündigungsfrist korrekt (3 Monate = letzter Tag des Monats)
+✓ Kein Kündigungsgrund angegeben (nicht nötig)
+✓ Zeugnis-Bitte enthalten (wichtig für gutes Zeugnis)`,
+`📤 RESIGNATION LETTER
+
+Thomas Keller | Zurich | March 18, 2026
+
+Dear Ms Huber,
+
+I hereby resign from my position as Senior Accountant with the contractual notice period of 3 months, effective May 31, 2026.
+
+I sincerely thank you for the excellent collaboration over the past four years. I will fulfill my duties diligently until my last working day and am fully available for a handover.
+
+I kindly request a positive work reference letter.
+
+Kind regards, Thomas Keller
+
+✓ Written form observed ✓ Notice period correct ✓ No reason required ✓ Reference request included`,
+`📤 LETTRE DE DÉMISSION
+
+Thomas Keller | Zurich | 18 mars 2026
+
+Madame Huber,
+
+Je résilie mon contrat de travail en tant que Senior Accountant avec un préavis de 3 mois, au 31 mai 2026.
+
+Je vous remercie chaleureusement pour notre excellente collaboration. Je reste disponible pour une transition complète.
+
+Je vous prie de bien vouloir m'établir un certificat de travail élogieux.
+
+Cordialement, Thomas Keller`,
+`📤 LETTERA DI DIMISSIONI
+
+Thomas Keller | Zurigo | 18 marzo 2026
+
+Gentile Sig.ra Huber,
+
+Mi dimetto dal mio incarico di Senior Accountant con preavviso di 3 mesi, con effetto dal 31 maggio 2026.
+
+La ringrazio per la piacevole collaborazione. Sono disponibile per un passaggio di consegne completo.
+
+La prego di rilasciarmi un certificato di lavoro favorevole.
+
+Distinti saluti, Thomas Keller`),
+
+    gehalt: L(
+`💰 GEHALTSVERHANDLUNGS-LEITFADEN
+
+Deine Situation: Senior Developer · Aktuell CHF 105'000 · Ziel CHF 125'000
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+EINSTIEGSSATZ:
+"Ich schätze unsere Zusammenarbeit sehr und möchte offen über meine Vergütung sprechen, 
+da ich den Markt beobachte und meine Leistungen einschätzen kann."
+
+TOP 5 ARGUMENTE:
+① Marktdaten: Salarium.ch Median für Senior Developer Zürich: CHF 118'000–132'000
+② Performance: 3 Kritische Projekte pünktlich geliefert, CHF 2.4M Umsatz mitgeneriert
+③ Skills-Premium: Python + Cloud-Expertise = 22% über Marktdurchschnitt
+④ Fluktuationskosten: Neueinstieg kostet 150-200% eines Jahresgehalts
+⑤ Inflations-Ausgleich: 3 Jahre ohne Erhöhung = 9% realer Kaufkraftverlust
+
+ANTWORT AUF "Budget ist leider voll":
+"Ich verstehe das. Wäre eine Einmalprämie von CHF 15'000 oder 
+mehr Home-Office-Tage denkbar als Alternative?"
+
+ANTWORT AUF "Wir müssen das intern besprechen":
+"Das verstehe ich. Bis wann darf ich mit einer Rückmeldung rechnen? 
+Ich würde mich gerne am [Datum] nochmals melden."
+
+ABSCHLUSSSATZ: "Ich freue mich auf eine faire Lösung, die unsere 
+langfristige Zusammenarbeit stärkt."
+
+DO's ✓: Schweigen nach deiner Zahl · Erst höher ansetzen · Schriftlich festhalten
+DON'Ts ✗: Gehalt mit privatem Bedarf begründen · Erste Zahl sofort akzeptieren`,
+`💰 SALARY NEGOTIATION GUIDE
+
+Your situation: Senior Developer | Current CHF 105'000 | Target CHF 125'000
+
+OPENING: "I value our collaboration and would like to openly discuss compensation."
+
+TOP 5 ARGUMENTS:
+① Market: Salarium.ch median for Senior Developer Zurich: CHF 118k–132k
+② Performance: 3 critical projects delivered on time
+③ Skills premium: Python/Cloud = 22% above market average
+④ Retention: New hire costs 150-200% annual salary
+⑤ Inflation: 3 years = 9% real salary loss
+
+RESPONSE TO "Budget is full": "Could we discuss a CHF 15k bonus or extra home office?"
+CLOSING: "I look forward to a fair solution strengthening our long-term collaboration."`,
+`💰 NÉGOCIATION SALARIALE
+
+Situation: CHF 105'000 → CHF 125'000
+
+OUVERTURE: "Je valorise notre collaboration et souhaite discuter de ma rémunération."
+CLÉ: Salarium.ch médiane CHF 118k–132k pour Zurich
+RÉPONSE: "Une prime de CHF 15k serait-elle possible si le budget est limité?"`,
+`💰 NEGOZIAZIONE STIPENDIO
+
+Situazione: CHF 105'000 → CHF 125'000
+
+APERTURA: "Apprezzo la nostra collaborazione e vorrei discutere della retribuzione."
+ARGOMENTO: Salarium.ch mediana CHF 118k–132k per Zurigo
+RISPOSTA: "Sarebbe possibile un bonus di CHF 15k se il budget è limitato?"`)
   };
 
   const Li2jobDemo=()=>(
@@ -4759,10 +5247,14 @@ NOTE: Incluse in tutte le diapositive`),
   </>;
 
   // ── Shared overlays (appear on every page) ──────────────
+  // PromoModal ist oben definiert
+
   const sharedOverlays = <>
+      {showPromo && page==="landing" && <PromoBanner lang={lang} navTo={navTo} setPw={setPw} onClose={closePromo}/>}
     {splash&&<SplashScreen onDone={()=>{setSplash(false);try{sessionStorage.setItem("stf_splashed","1");}catch{}}}/>}
     <OfflineBanner lang={lang}/>
     {showReferral&&<ReferralPanel lang={lang} session={authSession} onClose={()=>setShowReferral(false)}/>}
+    {showPromo&&!authSession&&<PromoModal/>}
   </>;
 
   if(page==="landing") return(<>{<style>{FONTS+CSS}</style>}{sharedOverlays}{pw&&<PW/>}
@@ -4809,6 +5301,24 @@ NOTE: Incluse in tutte le diapositive`),
             ))}
           </div>
           <div className="hstats">{t.hero.stats.map((s,i)=><div key={i}><div className="stat-n">{s.n}</div><div className="stat-l">{s.l}</div></div>)}</div>
+
+          {/* ── SLOGAN STRIP ── */}
+          <div style={{marginTop:48,padding:"18px 24px",background:"linear-gradient(135deg,rgba(16,185,129,.08),rgba(16,185,129,.03))",border:"1px solid rgba(16,185,129,.2)",borderRadius:16,display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:12}}>
+            <div style={{display:"flex",alignItems:"center",gap:14}}>
+              <div style={{fontSize:28}}>🚀</div>
+              <div>
+                <div style={{fontFamily:"var(--hd)",fontSize:18,fontWeight:800,color:"white",letterSpacing:"-0.5px"}}>
+                  {lang==="de"?"Dein nächster Job. KI-schnell.":lang==="fr"?"Votre prochain emploi. Vitesse IA.":lang==="it"?"Il tuo prossimo lavoro. Velocità IA.":"Your next job. AI-fast."}
+                </div>
+                <div style={{fontSize:12,color:"rgba(255,255,255,.4)",marginTop:2}}>
+                  {lang==="de"?"Bewerbung in 60 Sek. · ATS-optimiert · Schweizer Standard":lang==="fr"?"Candidature en 60s · Optimisé ATS · Standard suisse":lang==="it"?"Candidatura in 60s · ATS-ottimizzato · Standard svizzero":"Application in 60s · ATS-optimized · Swiss standard"}
+                </div>
+              </div>
+            </div>
+            <button className="btn b-em" onClick={()=>navTo("app")} style={{flexShrink:0}}>
+              {lang==="de"?"Jetzt starten →":lang==="fr"?"Commencer →":lang==="it"?"Inizia →":"Start now →"}
+            </button>
+          </div>
         </div>
       </section>
 
