@@ -2920,8 +2920,11 @@ function ChatBot({ lang, pro, setPw, navTo, authSession, onAuthOpen }) {
   },[]);
 
   const isLoggedIn = !!authSession;
-  const canChat = !isLoggedIn || pro || chatUsage < C.CHAT_FREE_LIMIT;
-  const needsUpgrade = isLoggedIn && !pro && chatUsage >= C.CHAT_FREE_LIMIT;
+  const isUltimatePlan = authSession?.plan === "ultimate" || authSession?.isAdmin;
+  const isProPlan = pro && !isUltimatePlan;
+  // Ultimate: no limit. Pro: 25 questions. Free/non-logged: system prompt handles deflection.
+  const canChat = !isLoggedIn || isUltimatePlan || chatUsage < C.CHAT_FREE_LIMIT;
+  const needsUpgrade = isLoggedIn && isProPlan && chatUsage >= C.CHAT_FREE_LIMIT;
 
   // System-Prompt für nicht eingeloggte User: nur Seiten-Infos
   const SYSTEM_PUBLIC = `Du bist Stella, die freundliche KI-Assistentin von Stellify – dem Schweizer AI Career Copilot. Du beantwortest NUR Fragen zu Stellify, seinen Tools, Funktionen und Abonnements.
@@ -3032,170 +3035,197 @@ Verhalten: Antworte konkret und umsetzbar (max. 3-4 Sätze im Widget). Schreib B
 
   return (<>
     {/* Auto-Bubble */}
-    {cookieDone&&bubble&&!open&&<div style={{position:"fixed",bottom:90,right:20,maxWidth:220,background:"var(--dk2)",border:"1px solid rgba(16,185,129,.3)",borderRadius:"14px 14px 4px 14px",padding:"11px 14px",zIndex:1002,boxShadow:"0 8px 32px rgba(0,0,0,.4)",cursor:"pointer",animation:"fadeSlideUp .4s ease"}}
-      onClick={openChat}>
-      <button onClick={e=>{e.stopPropagation();setBubble(false);}} style={{position:"absolute",top:6,right:8,background:"none",border:"none",color:"rgba(255,255,255,.3)",fontSize:12,cursor:"pointer",lineHeight:1}}>✕</button>
-      <div style={{fontSize:13,color:"rgba(255,255,255,.85)",lineHeight:1.5,paddingRight:12}}>
-        {L("Hallo 👋 Welches Tool passt zu dir? Frag mich!","Hi 👋 Which tool suits you? Ask me!","Bonjour 👋 Quel outil vous convient?","Ciao 👋 Quale tool fa per te?")}
+    {cookieDone&&bubble&&!open&&(
+      <div style={{position:"fixed",bottom:96,right:20,maxWidth:230,background:"rgba(13,13,26,.98)",border:"1px solid rgba(16,185,129,.25)",borderRadius:"16px 16px 4px 16px",padding:"12px 16px",zIndex:1002,boxShadow:"0 12px 40px rgba(0,0,0,.5)",cursor:"pointer",animation:"fadeSlideUp .35s cubic-bezier(.34,1.3,.64,1)"}} onClick={openChat}>
+        <button onClick={e=>{e.stopPropagation();setBubble(false);}} style={{position:"absolute",top:8,right:10,background:"none",border:"none",color:"rgba(255,255,255,.25)",fontSize:11,cursor:"pointer",lineHeight:1,padding:2}}>✕</button>
+        <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
+          <div style={{width:20,height:20,borderRadius:"50%",background:"linear-gradient(135deg,#10b981,#059669)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,flexShrink:0}}>✦</div>
+          <span style={{fontSize:12,fontWeight:700,color:"white"}}>Stella</span>
+          <div style={{width:6,height:6,borderRadius:"50%",background:"#22c55e",boxShadow:"0 0 4px #22c55e"}}/>
+        </div>
+        <div style={{fontSize:12,color:"rgba(255,255,255,.7)",lineHeight:1.55,paddingRight:8}}>
+          {L("Hallo 👋 Wie kann ich dir helfen?","Hi 👋 How can I help you?","Bonjour 👋 Comment puis-je aider?","Ciao 👋 Come posso aiutarti?")}
+        </div>
+        <div style={{fontSize:11,color:"var(--em)",fontWeight:600,marginTop:6}}>
+          {L("Frag mich →","Ask me →","Demandez →","Chiedimi →")}
+        </div>
       </div>
-      <div style={{fontSize:11,color:"var(--em)",fontWeight:600,marginTop:5}}>{L("Mit Stella chatten →","Chat with Stella →","Discuter avec Stella →","Chatta con Stella →")}</div>
-    </div>}
+    )}
 
     {/* Floating Button */}
-    {cookieDone&&<div style={{position:"fixed",bottom:open?248:24,right:24,zIndex:1001}}>
-      {/* Apple pulse rings */}
-      {!open&&<><div style={{position:"absolute",inset:-5,borderRadius:"50%",border:"2px solid rgba(16,185,129,.45)",animation:"chatPulse 2.2s ease-out infinite",pointerEvents:"none"}}/>
-      <div style={{position:"absolute",inset:-11,borderRadius:"50%",border:"1.5px solid rgba(16,185,129,.22)",animation:"chatPulse 2.2s ease-out infinite",animationDelay:".55s",pointerEvents:"none"}}/></>}
-      <button onClick={openChat}
-        style={{position:"relative",width:56,height:56,borderRadius:"50%",background:"linear-gradient(135deg,#10b981,#059669)",border:"none",cursor:"pointer",boxShadow:"0 4px 24px rgba(16,185,129,.55),inset 0 1px 0 rgba(255,255,255,.2)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,transition:"transform .22s cubic-bezier(.34,1.56,.64,1),box-shadow .2s",transform:open?"rotate(90deg) scale(1)":"scale(1)"}}
-        onMouseEnter={e=>{e.currentTarget.style.transform=open?"rotate(90deg) scale(1.08)":"scale(1.1) translateY(-2px)";e.currentTarget.style.boxShadow="0 8px 28px rgba(16,185,129,.65),inset 0 1px 0 rgba(255,255,255,.2)"}}
-        onMouseLeave={e=>{e.currentTarget.style.transform=open?"rotate(90deg)":"scale(1)";e.currentTarget.style.boxShadow="0 4px 24px rgba(16,185,129,.55),inset 0 1px 0 rgba(255,255,255,.2)"}}>
-        {open?"✕":"💬"}
-        {bubble&&!open&&<div style={{position:"absolute",top:1,right:1,width:14,height:14,borderRadius:"50%",background:"#ef4444",border:"2px solid white",boxShadow:"0 2px 6px rgba(239,68,68,.5)"}}/>}
-      </button>
-    </div>}
-
-    {/* Chat Window */}
-    {open&&<div style={{position:"fixed",bottom:92,right:24,width:380,maxWidth:"calc(100vw - 32px)",background:"#0d0d1a",border:"1px solid rgba(255,255,255,.1)",borderRadius:24,boxShadow:"0 32px 80px rgba(0,0,0,.7),0 0 0 1px rgba(16,185,129,.08) inset",zIndex:1000,display:"flex",flexDirection:"column",overflow:"hidden",animation:"fadeSlideUp .25s ease"}}>
-
-      {/* Header */}
-      <div style={{background:"linear-gradient(180deg,rgba(16,185,129,.12) 0%,rgba(16,185,129,.04) 100%)",borderBottom:"1px solid rgba(255,255,255,.06)",padding:"14px 16px",display:"flex",alignItems:"center",gap:12}}>
-        {/* Avatar with online ring */}
-        <div style={{position:"relative",flexShrink:0}}>
-          <div style={{width:38,height:38,background:"linear-gradient(135deg,#10b981,#059669)",borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:17,boxShadow:"0 0 0 2px rgba(16,185,129,.25),0 4px 12px rgba(16,185,129,.3)"}}>✦</div>
-          <div style={{position:"absolute",bottom:1,right:1,width:9,height:9,borderRadius:"50%",background:"#22c55e",border:"2px solid #0d0d1a",boxShadow:"0 0 6px #22c55e"}}/>
-        </div>
-        <div style={{flex:1,minWidth:0}}>
-          <div style={{fontFamily:"var(--hd)",fontSize:14,fontWeight:800,color:"white",letterSpacing:"-.3px"}}>Stella</div>
-          <div style={{fontSize:11,color:"rgba(255,255,255,.35)",marginTop:1}}>
-            {L("KI-Karriere-Assistentin · Stellify","AI Career Assistant · Stellify","Assistante carrière IA · Stellify","Assistente carriera IA · Stellify")}
-          </div>
-        </div>
-        {/* Verlauf Button */}
-        <button onClick={()=>setShowHistory(h=>!h)} title={L("Verlauf","History","Historique","Cronologia")}
-          style={{background:showHistory?"rgba(16,185,129,.2)":"rgba(255,255,255,.06)",border:`1px solid ${showHistory?"rgba(16,185,129,.4)":"rgba(255,255,255,.08)"}`,borderRadius:10,width:32,height:32,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",fontSize:13,color:showHistory?"var(--em)":"rgba(255,255,255,.45)",flexShrink:0,transition:"all .2s"}}
-          onMouseEnter={e=>e.currentTarget.style.background=showHistory?"rgba(16,185,129,.3)":"rgba(255,255,255,.1)"}
-          onMouseLeave={e=>e.currentTarget.style.background=showHistory?"rgba(16,185,129,.2)":"rgba(255,255,255,.06)"}>
-          ⏱
-        </button>
-        {/* Neuer Chat */}
-        <button onClick={newChat} title={L("Neuer Chat","New chat","Nouveau chat","Nuova chat")}
-          style={{background:"rgba(255,255,255,.06)",border:"1px solid rgba(255,255,255,.08)",borderRadius:10,width:32,height:32,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",fontSize:13,color:"rgba(255,255,255,.45)",flexShrink:0,transition:"all .2s"}}
-          onMouseEnter={e=>e.currentTarget.style.background="rgba(255,255,255,.12)"}
-          onMouseLeave={e=>e.currentTarget.style.background="rgba(255,255,255,.06)"}>
-          ✎
-        </button>
-        <button onClick={()=>setOpen(false)}
-          style={{background:"rgba(255,255,255,.06)",border:"1px solid rgba(255,255,255,.08)",borderRadius:10,width:32,height:32,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",fontSize:14,color:"rgba(255,255,255,.4)",flexShrink:0,transition:"all .2s"}}
-          onMouseEnter={e=>e.currentTarget.style.background="rgba(255,255,255,.12)"}
-          onMouseLeave={e=>e.currentTarget.style.background="rgba(255,255,255,.06)"}>
-          ✕
+    {cookieDone&&(
+      <div style={{position:"fixed",bottom:24,right:24,zIndex:1001}}>
+        {!open&&<>
+          <div style={{position:"absolute",inset:-6,borderRadius:"50%",border:"2px solid rgba(16,185,129,.4)",animation:"chatPulse 2.4s ease-out infinite",pointerEvents:"none"}}/>
+          <div style={{position:"absolute",inset:-13,borderRadius:"50%",border:"1.5px solid rgba(16,185,129,.18)",animation:"chatPulse 2.4s ease-out infinite",animationDelay:".6s",pointerEvents:"none"}}/>
+        </>}
+        <button onClick={openChat}
+          style={{position:"relative",width:58,height:58,borderRadius:"50%",background:"linear-gradient(135deg,#10b981,#059669)",border:"none",cursor:"pointer",boxShadow:"0 6px 28px rgba(16,185,129,.55),0 2px 8px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.2)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,transition:"transform .3s cubic-bezier(.34,1.56,.64,1),box-shadow .2s"}}
+          onMouseEnter={e=>{e.currentTarget.style.transform="scale(1.1) translateY(-2px)";e.currentTarget.style.boxShadow="0 10px 36px rgba(16,185,129,.65),0 2px 8px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.2)";}}
+          onMouseLeave={e=>{e.currentTarget.style.transform="scale(1)";e.currentTarget.style.boxShadow="0 6px 28px rgba(16,185,129,.55),0 2px 8px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.2)";}}>
+          {open ? <span style={{fontSize:18,fontWeight:300}}>✕</span> : "💬"}
+          {bubble&&!open&&<div style={{position:"absolute",top:2,right:2,width:13,height:13,borderRadius:"50%",background:"#ef4444",border:"2px solid white",boxShadow:"0 2px 6px rgba(239,68,68,.6)"}}/>}
         </button>
       </div>
+    )}
 
-      {/* Chat-Verlauf Panel */}
-      {showHistory && (
-        <div style={{background:"rgba(5,5,12,1)",borderBottom:"1px solid rgba(255,255,255,.06)",maxHeight:260,overflowY:"auto"}}>
-          <div style={{padding:"12px 16px 6px",fontSize:10,fontWeight:700,letterSpacing:"1.5px",textTransform:"uppercase",color:"rgba(255,255,255,.2)"}}>{L("Verlauf","History","Historique","Cronologia")}</div>
-          {chats.length === 0 && (
-            <div style={{padding:"20px 16px",fontSize:12,color:"rgba(255,255,255,.25)",textAlign:"center"}}>{L("Noch keine Chats","No chats yet","Pas encore de chats","Nessuna chat")}</div>
-          )}
-          {chats.map(chat => (
-            <div key={chat.id} onClick={()=>switchChat(chat.id)}
-              style={{display:"flex",alignItems:"center",gap:10,padding:"10px 16px",cursor:"pointer",background:chat.id===activeChatId?"rgba(16,185,129,.08)":"transparent",borderLeft:`2px solid ${chat.id===activeChatId?"var(--em)":"transparent"}`,transition:"all .15s"}}
-              onMouseEnter={e=>{if(chat.id!==activeChatId)e.currentTarget.style.background="rgba(255,255,255,.03)";}}
-              onMouseLeave={e=>{if(chat.id!==activeChatId)e.currentTarget.style.background="transparent";}}>
-              <div style={{width:6,height:6,borderRadius:"50%",background:chat.id===activeChatId?"var(--em)":"rgba(255,255,255,.2)",flexShrink:0}}/>
-              <div style={{flex:1,minWidth:0}}>
-                <div style={{fontSize:12,fontWeight:600,color:chat.id===activeChatId?"rgba(255,255,255,.9)":"rgba(255,255,255,.55)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{chat.title||"Chat"}</div>
-                <div style={{fontSize:10,color:"rgba(255,255,255,.2)",marginTop:2}}>{fmtDate(chat.ts)}</div>
-              </div>
-              <button onClick={e=>deleteChat(chat.id,e)}
-                style={{background:"none",border:"none",color:"rgba(255,255,255,.15)",cursor:"pointer",fontSize:11,padding:"3px 5px",borderRadius:4,flexShrink:0,transition:"color .15s"}}
-                onMouseEnter={e=>e.currentTarget.style.color="#ef4444"}
-                onMouseLeave={e=>e.currentTarget.style.color="rgba(255,255,255,.15)"}>✕</button>
-            </div>
-          ))}
-        </div>
-      )}
+    {/* ── CHAT WINDOW ── */}
+    {open&&(
+      <div style={{position:"fixed",bottom:96,right:24,width:440,maxWidth:"calc(100vw - 32px)",height:"min(640px,calc(100vh - 110px))",background:"#08081a",border:"1px solid rgba(255,255,255,.09)",borderRadius:24,boxShadow:"0 40px 100px rgba(0,0,0,.75),0 0 0 1px rgba(16,185,129,.06) inset",zIndex:1000,display:"flex",flexDirection:"column",overflow:"hidden",animation:"chatIn .28s cubic-bezier(.34,1.2,.64,1)"}}>
 
-      {/* Login Gate */}
-      {!showHistory && needsLogin && (
-        <div style={{padding:"32px 24px",textAlign:"center",display:"flex",flexDirection:"column",alignItems:"center",gap:16}}>
-          <div style={{width:56,height:56,background:"linear-gradient(135deg,#10b981,#059669)",borderRadius:16,display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,boxShadow:"0 8px 24px rgba(16,185,129,.3)"}}>✦</div>
-          <div>
-            <div style={{fontFamily:"var(--hd)",fontSize:16,fontWeight:800,color:"white",marginBottom:6}}>
-              {lang==="de"?"Mit Stella chatten":lang==="fr"?"Chatter avec Stella":"Chat with Stella"}
-            </div>
-            <div style={{fontSize:12,color:"rgba(255,255,255,.35)",lineHeight:1.7}}>
-              {lang==="de"?"Registriere dich gratis für persönliche Karriereberatung.":lang==="fr"?"Inscrivez-vous gratuitement pour des conseils personnalisés.":"Sign up for free for personalised career coaching."}
+        {/* ── HEADER ── */}
+        <div style={{background:"linear-gradient(180deg,rgba(16,185,129,.1) 0%,transparent 100%)",borderBottom:"1px solid rgba(255,255,255,.06)",padding:"14px 16px 12px",display:"flex",alignItems:"center",gap:10,flexShrink:0}}>
+          <div style={{position:"relative",flexShrink:0}}>
+            <div style={{width:40,height:40,background:"linear-gradient(135deg,#10b981 0%,#059669 100%)",borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,boxShadow:"0 0 0 2.5px rgba(16,185,129,.2),0 4px 16px rgba(16,185,129,.35)"}}>✦</div>
+            <div style={{position:"absolute",bottom:1,right:1,width:10,height:10,borderRadius:"50%",background:"#22c55e",border:"2.5px solid #08081a",boxShadow:"0 0 8px #22c55e"}}/>
+          </div>
+          <div style={{flex:1,minWidth:0}}>
+            <div style={{fontFamily:"var(--hd)",fontSize:15,fontWeight:800,color:"white",letterSpacing:"-.4px",lineHeight:1.2}}>Stella</div>
+            <div style={{fontSize:11,color:"rgba(255,255,255,.3)",marginTop:1,letterSpacing:.2}}>
+              {L("KI-Karriere-Assistentin · Stellify","AI Career Assistant · Stellify","Assistante IA · Stellify","Assistente IA · Stellify")}
             </div>
           </div>
-          <button onClick={()=>onAuthOpen&&onAuthOpen()} style={{background:"linear-gradient(135deg,#10b981,#059669)",color:"white",border:"none",borderRadius:12,padding:"11px 28px",fontSize:13,fontWeight:700,cursor:"pointer",boxShadow:"0 4px 16px rgba(16,185,129,.35)",width:"100%"}}>
-            {lang==="de"?"Gratis registrieren →":lang==="fr"?"S'inscrire gratuitement →":"Sign up for free →"}
-          </button>
-          <div style={{fontSize:11,color:"rgba(255,255,255,.18)"}}>
-            {lang==="de"?"Kein Abo nötig · Sofort starten":"No subscription needed · Start instantly"}
-          </div>
-        </div>
-      )}
-
-      {/* Messages */}
-      {!showHistory && !needsLogin && <>
-        <div style={{flex:1,overflowY:"auto",padding:"16px 14px",display:"flex",flexDirection:"column",gap:12,maxHeight:340,minHeight:220,scrollbarWidth:"thin",scrollbarColor:"rgba(255,255,255,.08) transparent"}}>
-          {msgs.map((m,i)=>(
-            <div key={i} style={{display:"flex",gap:10,flexDirection:m.r==="u"?"row-reverse":"row",alignItems:"flex-end"}}>
-              {m.r==="ai"&&<div style={{width:26,height:26,background:"linear-gradient(135deg,#10b981,#059669)",borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,flexShrink:0,boxShadow:"0 2px 8px rgba(16,185,129,.3)"}}>✦</div>}
-              <div style={{maxWidth:"80%",background:m.r==="u"?"linear-gradient(135deg,rgba(16,185,129,.18),rgba(16,185,129,.1))":"rgba(255,255,255,.04)",border:`1px solid ${m.r==="u"?"rgba(16,185,129,.2)":"rgba(255,255,255,.06)"}`,borderRadius:m.r==="u"?"18px 18px 4px 18px":"18px 18px 18px 4px",padding:"10px 14px",fontSize:13,color:m.r==="u"?"rgba(255,255,255,.92)":"rgba(255,255,255,.78)",lineHeight:1.65,letterSpacing:"-.1px"}}>
-                {m.r==="ai"?renderMsg(m.t):m.t}
-              </div>
-            </div>
-          ))}
-          {loading&&<div style={{display:"flex",gap:10,alignItems:"flex-end"}}>
-            <div style={{width:26,height:26,background:"linear-gradient(135deg,#10b981,#059669)",borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,flexShrink:0}}>✦</div>
-            <div style={{background:"rgba(255,255,255,.04)",border:"1px solid rgba(255,255,255,.06)",borderRadius:"18px 18px 18px 4px",padding:"12px 16px",display:"flex",gap:5,alignItems:"center"}}>
-              {[0,1,2].map(j=><div key={j} style={{width:5,height:5,borderRadius:"50%",background:"var(--em)",animation:`pulse 1.2s ease-in-out ${j*0.2}s infinite`}}/>)}
-            </div>
+          {/* Plan badge */}
+          {authSession&&<div style={{fontSize:10,fontWeight:700,letterSpacing:.5,padding:"3px 9px",borderRadius:99,background:isUltimatePlan?"rgba(245,158,11,.15)":"rgba(16,185,129,.12)",color:isUltimatePlan?"#f59e0b":"var(--em)",border:`1px solid ${isUltimatePlan?"rgba(245,158,11,.25)":"rgba(16,185,129,.2)"}`}}>
+            {isUltimatePlan?"ULTIMATE":"PRO"}
           </div>}
-          <div ref={bottomRef}/>
+          {/* New chat */}
+          <button onClick={newChat} title={L("Neuer Chat","New chat","Nouveau chat","Nuova chat")}
+            style={{background:"rgba(255,255,255,.05)",border:"1px solid rgba(255,255,255,.07)",borderRadius:10,width:32,height:32,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",color:"rgba(255,255,255,.4)",flexShrink:0,transition:"all .18s",fontSize:14}}
+            onMouseEnter={e=>e.currentTarget.style.background="rgba(255,255,255,.1)"}
+            onMouseLeave={e=>e.currentTarget.style.background="rgba(255,255,255,.05)"}>✎</button>
+          {/* Close */}
+          <button onClick={()=>setOpen(false)}
+            style={{background:"rgba(255,255,255,.05)",border:"1px solid rgba(255,255,255,.07)",borderRadius:10,width:32,height:32,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",color:"rgba(255,255,255,.4)",flexShrink:0,transition:"all .18s",fontSize:13}}
+            onMouseEnter={e=>e.currentTarget.style.background="rgba(255,255,255,.1)"}
+            onMouseLeave={e=>e.currentTarget.style.background="rgba(255,255,255,.05)"}>✕</button>
         </div>
 
-        {needsUpgrade&&<div style={{padding:"12px 16px",background:"rgba(245,158,11,.06)",borderTop:"1px solid rgba(245,158,11,.1)",display:"flex",alignItems:"center",justifyContent:"space-between",gap:10}}>
-          <div style={{fontSize:12,color:"rgba(245,158,11,.8)",lineHeight:1.5}}>
-            {L("Fachliche Fragen erfordern Pro","Expert questions require Pro","Questions expertes nécessitent Pro","Domande esperte richiedono Pro")}
-          </div>
-          <button onClick={()=>setPw(true)} style={{background:"linear-gradient(135deg,#f59e0b,#d97706)",color:"white",border:"none",borderRadius:10,padding:"7px 14px",fontSize:12,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap",boxShadow:"0 2px 10px rgba(245,158,11,.3)",flexShrink:0}}>
-            Pro →
+        {/* ── CHAT HISTORY (always visible, collapsible) ── */}
+        <div style={{borderBottom:"1px solid rgba(255,255,255,.05)",background:"rgba(0,0,8,.4)",flexShrink:0}}>
+          <button onClick={()=>setShowHistory(h=>!h)}
+            style={{width:"100%",background:"none",border:"none",cursor:"pointer",padding:"8px 16px",display:"flex",alignItems:"center",gap:8,color:"rgba(255,255,255,.3)",fontFamily:"var(--bd)",fontSize:11,fontWeight:600,letterSpacing:.5}}>
+            <span style={{color:"rgba(255,255,255,.2)",fontSize:12}}>⏱</span>
+            <span style={{flex:1,textAlign:"left",textTransform:"uppercase",letterSpacing:1}}>{L("Chat-Verlauf","History","Historique","Cronologia")} {chats.length>0&&`(${chats.length})`}</span>
+            <span style={{fontSize:10,transform:showHistory?"rotate(180deg)":"none",transition:"transform .2s"}}>▾</span>
           </button>
-        </div>}
-        {!isLoggedIn&&<div style={{padding:"10px 16px",background:"rgba(16,185,129,.04)",borderTop:"1px solid rgba(16,185,129,.08)",display:"flex",alignItems:"center",justifyContent:"space-between",gap:10}}>
-          <div style={{fontSize:11,color:"rgba(255,255,255,.3)",lineHeight:1.5}}>{L("Für persönliche Beratung registrieren","Sign up for personal coaching","S'inscrire pour un coaching","Registrati per il coaching")}</div>
-          <button onClick={()=>onAuthOpen&&onAuthOpen()} style={{background:"var(--em)",color:"white",border:"none",borderRadius:8,padding:"6px 12px",fontSize:11,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0}}>
-            {L("Gratis →","Free →","Gratuit →","Gratis →")}
-          </button>
-        </div>}
+          {showHistory&&<div style={{maxHeight:180,overflowY:"auto",padding:"0 0 6px"}}>
+            {chats.length===0&&<div style={{padding:"12px 16px",fontSize:12,color:"rgba(255,255,255,.2)",textAlign:"center"}}>{L("Noch keine Chats","No chats yet","Pas de chats","Nessuna chat")}</div>}
+            {chats.map(chat=>(
+              <div key={chat.id} onClick={()=>switchChat(chat.id)}
+                style={{display:"flex",alignItems:"center",gap:10,padding:"9px 16px",cursor:"pointer",background:chat.id===activeChatId?"rgba(16,185,129,.08)":"transparent",borderLeft:`2px solid ${chat.id===activeChatId?"var(--em)":"transparent"}`,transition:"all .12s"}}
+                onMouseEnter={e=>{if(chat.id!==activeChatId)e.currentTarget.style.background="rgba(255,255,255,.03)";}}
+                onMouseLeave={e=>{if(chat.id!==activeChatId)e.currentTarget.style.background="transparent";}}>
+                <div style={{width:5,height:5,borderRadius:"50%",background:chat.id===activeChatId?"var(--em)":"rgba(255,255,255,.18)",flexShrink:0}}/>
+                <div style={{flex:1,minWidth:0}}>
+                  <div style={{fontSize:12,fontWeight:600,color:chat.id===activeChatId?"rgba(255,255,255,.9)":"rgba(255,255,255,.5)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{chat.title||"Chat"}</div>
+                  <div style={{fontSize:10,color:"rgba(255,255,255,.18)",marginTop:1}}>{fmtDate(chat.ts)}</div>
+                </div>
+                <button onClick={e=>deleteChat(chat.id,e)} style={{background:"none",border:"none",color:"rgba(255,255,255,.12)",cursor:"pointer",fontSize:11,padding:"2px 4px",borderRadius:4,transition:"color .12s"}}
+                  onMouseEnter={e=>e.currentTarget.style.color="#ef4444"} onMouseLeave={e=>e.currentTarget.style.color="rgba(255,255,255,.12)"}>✕</button>
+              </div>
+            ))}
+          </div>}
+        </div>
 
-        <div style={{borderTop:"1px solid rgba(255,255,255,.05)",padding:"12px 14px",background:"rgba(5,5,12,.6)"}}>
-          <div style={{display:"flex",gap:10,alignItems:"flex-end",background:"rgba(255,255,255,.05)",border:"1px solid rgba(255,255,255,.08)",borderRadius:16,padding:"8px 8px 8px 14px"}}>
-            <textarea value={input} onChange={e=>setInput(e.target.value)}
-              onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey&&!loading&&canChat){e.preventDefault();send();}}}
-              placeholder={needsUpgrade ? L("Pro freischalten für Karriere-Beratung","Unlock Pro for career coaching","Activer Pro pour le coaching","Sblocca Pro per il coaching") : L("Nachricht eingeben…","Type a message…","Écrire un message…","Scrivi un messaggio…")}
-              disabled={needsUpgrade||loading}
-              style={{flex:1,background:"none",border:"none",color:"rgba(255,255,255,.85)",fontSize:13,resize:"none",minHeight:20,maxHeight:80,outline:"none",lineHeight:1.6,padding:0}}
-              rows={1}/>
-            <button onClick={send} disabled={!input.trim()||loading||needsUpgrade}
-              style={{width:34,height:34,borderRadius:10,background:input.trim()&&!needsUpgrade?"linear-gradient(135deg,#10b981,#059669)":"rgba(255,255,255,.06)",border:"none",cursor:input.trim()&&!needsUpgrade?"pointer":"default",display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,flexShrink:0,transition:"all .2s",boxShadow:input.trim()&&!needsUpgrade?"0 2px 8px rgba(16,185,129,.4)":"none"}}>
-              {loading?"⏳":"➤"}
+        {/* ── LOGIN GATE ── */}
+        {needsLogin ? (
+          <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"32px 28px",textAlign:"center",gap:20}}>
+            <div style={{width:64,height:64,background:"linear-gradient(135deg,#10b981,#059669)",borderRadius:20,display:"flex",alignItems:"center",justifyContent:"center",fontSize:26,boxShadow:"0 12px 32px rgba(16,185,129,.35)"}}>✦</div>
+            <div>
+              <div style={{fontFamily:"var(--hd)",fontSize:18,fontWeight:800,color:"white",marginBottom:8,letterSpacing:"-.4px"}}>
+                {L("Mit Stella chatten","Chat with Stella","Discuter avec Stella","Chatta con Stella")}
+              </div>
+              <div style={{fontSize:13,color:"rgba(255,255,255,.35)",lineHeight:1.75,maxWidth:280}}>
+                {L("Registriere dich gratis und erhalte sofort Zugang zu persönlicher KI-Karriereberatung.","Sign up free and get instant access to personal AI career coaching.","Inscrivez-vous gratuitement pour accéder aux conseils IA personnalisés.","Registrati gratis per la consulenza di carriera IA personale.")}
+              </div>
+            </div>
+            <button onClick={()=>onAuthOpen&&onAuthOpen()} style={{background:"linear-gradient(135deg,#10b981,#059669)",color:"white",border:"none",borderRadius:14,padding:"13px 32px",fontSize:14,fontWeight:700,cursor:"pointer",boxShadow:"0 6px 20px rgba(16,185,129,.4)",width:"100%"}}>
+              {L("Gratis registrieren →","Sign up for free →","S'inscrire gratuitement →","Registrati gratis →")}
             </button>
+            <div style={{fontSize:11,color:"rgba(255,255,255,.15)"}}>
+              {L("Kein Abo · Keine Kreditkarte · Sofort starten","No subscription · No credit card · Start instantly","Sans abonnement · Sans carte","Senza abbonamento · Senza carta")}
+            </div>
           </div>
-          <div style={{textAlign:"center",fontSize:10,color:"rgba(255,255,255,.12)",marginTop:8}}>
-            {L("Stella kann Fehler machen – wichtige Entscheidungen selbst prüfen","Stella can make mistakes – verify important decisions","Stella peut faire des erreurs – vérifiez vos décisions","Stella può sbagliare – verifica le decisioni importanti")}
-          </div>
-        </div>
-      </>}
-    </div>}
+        ) : (
+          <>
+            {/* ── MESSAGES ── */}
+            <div style={{flex:1,overflowY:"auto",padding:"18px 16px",display:"flex",flexDirection:"column",gap:14,scrollbarWidth:"thin",scrollbarColor:"rgba(255,255,255,.06) transparent"}}>
+              {msgs.map((m,i)=>(
+                <div key={i} style={{display:"flex",gap:10,flexDirection:m.r==="u"?"row-reverse":"row",alignItems:"flex-end"}}>
+                  {m.r==="ai"&&<div style={{width:28,height:28,background:"linear-gradient(135deg,#10b981,#059669)",borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,flexShrink:0,boxShadow:"0 2px 10px rgba(16,185,129,.35)"}}>✦</div>}
+                  <div style={{maxWidth:"78%",background:m.r==="u"?"linear-gradient(135deg,rgba(16,185,129,.2),rgba(16,185,129,.1))":"rgba(255,255,255,.05)",border:`1px solid ${m.r==="u"?"rgba(16,185,129,.25)":"rgba(255,255,255,.07)"}`,borderRadius:m.r==="u"?"18px 18px 4px 18px":"4px 18px 18px 18px",padding:"11px 15px",fontSize:13.5,color:m.r==="u"?"rgba(255,255,255,.92)":"rgba(255,255,255,.82)",lineHeight:1.7,letterSpacing:"-.1px",wordBreak:"break-word"}}>
+                    {m.r==="ai"?renderMsg(m.t):m.t}
+                  </div>
+                  {m.r==="u"&&authSession&&<div style={{width:28,height:28,borderRadius:"50%",background:"linear-gradient(135deg,rgba(16,185,129,.3),rgba(16,185,129,.1))",border:"1px solid rgba(16,185,129,.2)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,fontWeight:800,color:"var(--em)",flexShrink:0}}>{authSession.email[0].toUpperCase()}</div>}
+                </div>
+              ))}
+              {loading&&(
+                <div style={{display:"flex",gap:10,alignItems:"flex-end"}}>
+                  <div style={{width:28,height:28,background:"linear-gradient(135deg,#10b981,#059669)",borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,flexShrink:0}}>✦</div>
+                  <div style={{background:"rgba(255,255,255,.05)",border:"1px solid rgba(255,255,255,.07)",borderRadius:"4px 18px 18px 18px",padding:"13px 18px",display:"flex",gap:5,alignItems:"center"}}>
+                    {[0,1,2].map(j=><div key={j} style={{width:5,height:5,borderRadius:"50%",background:"var(--em)",animation:`pulse 1.3s ease-in-out ${j*0.22}s infinite`}}/>)}
+                  </div>
+                </div>
+              )}
+              <div ref={bottomRef}/>
+            </div>
 
-    <style>{`@keyframes pulse{0%,100%{transform:scale(1);opacity:.7}50%{transform:scale(1.3);opacity:1}}@keyframes fadeSlideUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}@keyframes chatPulse{0%{transform:scale(1);opacity:.6}70%{transform:scale(1.25);opacity:0}100%{transform:scale(1.25);opacity:0}}`}</style>
+            {/* ── UPGRADE BANNER (Pro limit reached) ── */}
+            {needsUpgrade&&(
+              <div style={{padding:"12px 16px",background:"rgba(245,158,11,.06)",borderTop:"1px solid rgba(245,158,11,.1)",display:"flex",alignItems:"center",gap:12,flexShrink:0}}>
+                <div style={{flex:1}}>
+                  <div style={{fontSize:12,fontWeight:700,color:"#f59e0b",marginBottom:2}}>{L("Limit erreicht","Limit reached","Limite atteint","Limite raggiunto")}</div>
+                  <div style={{fontSize:11,color:"rgba(255,255,255,.35)",lineHeight:1.4}}>{L("Upgrade auf Ultimate für unlimitierte Karriereberatung","Upgrade to Ultimate for unlimited career coaching","Passez à Ultimate pour un coaching illimité","Passa a Ultimate per coaching illimitato")}</div>
+                </div>
+                <button onClick={()=>setPw(true)} style={{background:"linear-gradient(135deg,#f59e0b,#d97706)",color:"white",border:"none",borderRadius:10,padding:"8px 16px",fontSize:12,fontWeight:700,cursor:"pointer",boxShadow:"0 2px 12px rgba(245,158,11,.35)",flexShrink:0,whiteSpace:"nowrap"}}>
+                  Ultimate →
+                </button>
+              </div>
+            )}
+
+            {/* ── SIGNUP HINT (not logged in) ── */}
+            {!isLoggedIn&&(
+              <div style={{padding:"10px 16px",background:"rgba(16,185,129,.04)",borderTop:"1px solid rgba(16,185,129,.07)",display:"flex",alignItems:"center",gap:10,flexShrink:0}}>
+                <div style={{fontSize:11,color:"rgba(255,255,255,.28)",lineHeight:1.5,flex:1}}>{L("Für persönliche Karriere-Beratung anmelden","Sign in for personal career coaching","Se connecter pour le coaching","Accedi per il coaching personale")}</div>
+                <button onClick={()=>onAuthOpen&&onAuthOpen()} style={{background:"var(--em)",color:"white",border:"none",borderRadius:8,padding:"6px 14px",fontSize:11,fontWeight:700,cursor:"pointer",flexShrink:0,whiteSpace:"nowrap"}}>
+                  {L("Gratis →","Free →","Gratuit →","Gratis →")}
+                </button>
+              </div>
+            )}
+
+            {/* ── INPUT ── */}
+            <div style={{borderTop:"1px solid rgba(255,255,255,.05)",padding:"12px 14px 14px",background:"rgba(4,4,14,.6)",flexShrink:0}}>
+              <div style={{display:"flex",gap:8,alignItems:"flex-end",background:"rgba(255,255,255,.06)",border:`1px solid ${needsUpgrade?"rgba(245,158,11,.2)":"rgba(255,255,255,.08)"}`,borderRadius:18,padding:"10px 10px 10px 16px",transition:"border-color .2s"}}
+                onFocusCapture={e=>e.currentTarget.style.borderColor=needsUpgrade?"rgba(245,158,11,.3)":"rgba(16,185,129,.25)"}
+                onBlurCapture={e=>e.currentTarget.style.borderColor=needsUpgrade?"rgba(245,158,11,.2)":"rgba(255,255,255,.08)"}>
+                <textarea value={input} onChange={e=>setInput(e.target.value)}
+                  onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey&&!loading&&canChat){e.preventDefault();send();}}}
+                  placeholder={needsUpgrade ? L("Upgrade für weitere Fragen","Upgrade for more questions","Passez à l'offre supérieure","Aggiorna per altre domande") : L("Frag Stella etwas…","Ask Stella anything…","Demandez à Stella…","Chiedi a Stella…")}
+                  disabled={needsUpgrade||loading}
+                  style={{flex:1,background:"none",border:"none",color:"rgba(255,255,255,.88)",fontSize:14,resize:"none",minHeight:22,maxHeight:100,outline:"none",lineHeight:1.6,padding:0,fontFamily:"var(--bd)"}}
+                  rows={1}/>
+                <button onClick={send} disabled={!input.trim()||loading||needsUpgrade}
+                  style={{width:36,height:36,borderRadius:12,background:input.trim()&&!needsUpgrade?"linear-gradient(135deg,#10b981,#059669)":"rgba(255,255,255,.05)",border:"none",cursor:input.trim()&&!needsUpgrade?"pointer":"default",display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,flexShrink:0,transition:"all .2s",boxShadow:input.trim()&&!needsUpgrade?"0 3px 12px rgba(16,185,129,.45)":"none"}}>
+                  {loading ? <div style={{width:14,height:14,borderRadius:"50%",border:"2px solid rgba(255,255,255,.2)",borderTopColor:"var(--em)",animation:"spin .7s linear infinite"}}/> : <span style={{color:input.trim()&&!needsUpgrade?"white":"rgba(255,255,255,.2)"}}>↑</span>}
+                </button>
+              </div>
+              <div style={{textAlign:"center",fontSize:10,color:"rgba(255,255,255,.1)",marginTop:8,letterSpacing:.2}}>
+                {L("Stella kann Fehler machen – wichtige Entscheidungen selbst prüfen","Stella may make mistakes – verify important decisions","Stella peut se tromper – vérifiez les décisions importantes","Stella può sbagliare – verifica le decisioni importanti")}
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+    )}
+
+    <style>{`
+      @keyframes pulse{0%,100%{transform:scale(1);opacity:.6}50%{transform:scale(1.4);opacity:1}}
+      @keyframes fadeSlideUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+      @keyframes chatIn{from{opacity:0;transform:scale(.95) translateY(12px)}to{opacity:1;transform:none}}
+      @keyframes chatPulse{0%{transform:scale(1);opacity:.55}70%{transform:scale(1.28);opacity:0}100%{transform:scale(1.28);opacity:0}}
+      @keyframes spin{to{transform:rotate(360deg)}}
+    `}</style>
   </>);
 }
 // ════════════════════════════════════════
@@ -6176,13 +6206,21 @@ RISPOSTA: "Sarebbe possibile un bonus di CHF 15k se il budget è limitato?"`)
                     onMouseLeave={e=>{e.currentTarget.style.borderColor="rgba(255,255,255,.18)";e.currentTarget.style.background="transparent";}}>
                     {tier.btn}
                   </button>}
-                  {isPro&&<button onClick={()=>window.open(yearly?C.stripeYearly:C.stripeMonthly,"_blank")} style={{width:"100%",padding:"13px",borderRadius:12,border:"none",background:"linear-gradient(135deg,#10b981,#059669)",color:"white",fontFamily:"var(--bd)",fontSize:14,fontWeight:700,cursor:"pointer",boxShadow:"0 4px 20px rgba(16,185,129,.35)",transition:"all .2s"}}
-                    onMouseEnter={e=>{e.currentTarget.style.boxShadow="0 8px 32px rgba(16,185,129,.5)";e.currentTarget.style.transform="translateY(-1px)";}}
-                    onMouseLeave={e=>{e.currentTarget.style.boxShadow="0 4px 20px rgba(16,185,129,.35)";e.currentTarget.style.transform="none";}}>
-                    {yearly
-                      ? (lang==="de"?`Pro starten → CHF ${C.priceY}/Mo. jährlich`:lang==="en"?`Start Pro → CHF ${C.priceY}/mo yearly`:lang==="fr"?`Démarrer Pro → CHF ${C.priceY}/mois annuel`:`Avvia Pro → CHF ${C.priceY}/mese annuale`)
-                      : (lang==="de"?`Pro starten → CHF ${C.priceM}/Mo.`:lang==="en"?`Start Pro → CHF ${C.priceM}/mo`:lang==="fr"?`Démarrer Pro → CHF ${C.priceM}/mois`:`Avvia Pro → CHF ${C.priceM}/mese`)}
-                  </button>}
+                  {isPro&&<div style={{display:"flex",flexDirection:"column",gap:8}}>
+                    {/* Yearly – primary */}
+                    <button onClick={()=>window.open(C.stripeYearly,"_blank")} style={{width:"100%",padding:"13px",borderRadius:12,border:"none",background:"linear-gradient(135deg,#10b981,#059669)",color:"white",fontFamily:"var(--bd)",fontSize:14,fontWeight:700,cursor:"pointer",boxShadow:"0 4px 20px rgba(16,185,129,.35)",transition:"all .2s",position:"relative"}}
+                      onMouseEnter={e=>{e.currentTarget.style.boxShadow="0 8px 32px rgba(16,185,129,.5)";e.currentTarget.style.transform="translateY(-1px)";}}
+                      onMouseLeave={e=>{e.currentTarget.style.boxShadow="0 4px 20px rgba(16,185,129,.35)";e.currentTarget.style.transform="none";}}>
+                      <span style={{position:"absolute",top:-9,right:12,background:"#f59e0b",color:"white",fontSize:10,fontWeight:800,padding:"2px 8px",borderRadius:99}}>–17%</span>
+                      {lang==="de"?`Jährlich → CHF ${C.priceY}/Mo.`:lang==="en"?`Yearly → CHF ${C.priceY}/mo`:lang==="fr"?`Annuel → CHF ${C.priceY}/mois`:`Annuale → CHF ${C.priceY}/mese`}
+                    </button>
+                    {/* Monthly – secondary */}
+                    <button onClick={()=>window.open(C.stripeMonthly,"_blank")} style={{width:"100%",padding:"10px",borderRadius:12,border:"1px solid rgba(255,255,255,.12)",background:"transparent",color:"rgba(255,255,255,.45)",fontFamily:"var(--bd)",fontSize:13,fontWeight:600,cursor:"pointer",transition:"all .2s"}}
+                      onMouseEnter={e=>{e.currentTarget.style.borderColor="rgba(255,255,255,.3)";e.currentTarget.style.color="rgba(255,255,255,.7)";}}
+                      onMouseLeave={e=>{e.currentTarget.style.borderColor="rgba(255,255,255,.12)";e.currentTarget.style.color="rgba(255,255,255,.45)";}}>
+                      {lang==="de"?`Monatlich → CHF ${C.priceM}/Mo.`:lang==="en"?`Monthly → CHF ${C.priceM}/mo`:lang==="fr"?`Mensuel → CHF ${C.priceM}/mois`:`Mensile → CHF ${C.priceM}/mese`}
+                    </button>
+                  </div>}
                   {isUlt&&<button onClick={()=>window.open(yearly?C.stripeUltimateYearly:C.stripeUltimate,"_blank")} style={{width:"100%",padding:"13px",borderRadius:12,border:"1.5px solid rgba(245,158,11,.4)",background:"transparent",color:"#f59e0b",fontFamily:"var(--bd)",fontSize:14,fontWeight:700,cursor:"pointer",transition:"all .2s"}}
                     onMouseEnter={e=>{e.currentTarget.style.background="rgba(245,158,11,.08)";}}
                     onMouseLeave={e=>{e.currentTarget.style.background="transparent";}}>
@@ -6194,12 +6232,6 @@ RISPOSTA: "Sarebbe possibile un bonus di CHF 15k se il budget è limitato?"`)
                 </div>
               );
             })}
-          </div>
-
-          {/* Value Box */}
-          <div className="vb" style={{marginTop:40}}>
-            <h4>{t.price.valTitle}</h4>
-            {t.price.valPts.map((p,i)=><div key={i} className="vp"><span style={{color:"var(--em)",flexShrink:0}}>✓</span>{p}</div>)}
           </div>
 
           {/* Payment methods */}
