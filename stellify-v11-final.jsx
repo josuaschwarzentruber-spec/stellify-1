@@ -10,6 +10,8 @@ const C = {
   email: "support@stellify.ch",
   address: "6300 Zug, Schweiz",
   owner: "JTSP",
+  stripeStarter: "https://buy.stripe.com/PLACEHOLDER_STARTER_990", // Einmalzahlung 9.90 CHF via Twint
+  priceStarter: "9.90",
   stripeMonthly: "https://buy.stripe.com/cNi14m58gbdve0MbaZ2B202",
   stripeYearly:  "https://buy.stripe.com/8x2cN4asAchzg8U92R2B205",
   priceM: "19.90",
@@ -762,6 +764,22 @@ const mkT = (lang) => {
       save:   L("2 Monate gratis","2 mois offerts","2 mesi gratis","2 months free"),
       recom:  L("Empfohlen","Recommandé","Consigliato","Recommended"),
       tiers:[
+        {id:"starter",name:L("🎒 Starter","🎒 Starter","🎒 Starter","🎒 Starter"),priceM:9.90,oneTime:true,
+         note:L("Einmalig CHF 9.90 – kein Abo, zahle mit Twint!","One-time CHF 9.90 – no subscription, pay with Twint!","Unique CHF 9.90 – sans abonnement, paiement par Twint!","Una tantum CHF 9.90 – nessun abbonamento!"),
+         desc:L(
+           "Perfekt für Schüler und Lehrstellensuchende: 1 vollständige Bewerbungsmappe mit KI – Lebenslauf (Swiss-Apprentice-Format mit Schnupperlehren-Sektion) + Motivationsschreiben nach Schweizer Standard. Einmalig, kein Abo.",
+           "Perfect for students seeking apprenticeships: 1 complete application with AI – CV (Swiss-Apprentice format with trial placement section) + cover letter to Swiss standard. One-time, no subscription.",
+           "Parfait pour les élèves cherchant un apprentissage: 1 dossier de candidature IA complet. Paiement unique, sans abonnement.",
+           "Perfetto per studenti in cerca di apprendistato: 1 dossier candidatura completo. Pagamento unico, senza abbonamento."
+         ),
+         list:L(
+           ["✦ 1 vollständige KI-Bewerbungsmappe (Motivationsschreiben + Lebenslauf)","Schweizer Format: Schnupperlehren-Sektion, Foto-Platzierung oben rechts","Schweizer Terminologie: Lehrstelle, Berufslehre, Motivationsschreiben","Noten-Feld für Lieblingsfächer (Mathe, Deutsch) – Lehrbetriebe schauen darauf!","Referenz-Sektion: Lehrer oder Schnupperlehre-Betreuer eintragen","PDF-Export druckfertig","Kein Abo · Einmalzahlung · ✅ Twint-Zahlung möglich"],
+           ["✦ 1 complete AI application pack (cover letter + CV)","Swiss format: trial placement section, photo top right","Swiss terminology: Lehrstelle, Berufslehre, Motivationsschreiben","Grades field for favourite subjects – employers look for this!","Reference section: teacher or trial placement supervisor","Print-ready PDF export","No subscription · One-time payment · ✅ Twint payment accepted"],
+           ["✦ 1 dossier IA complet (lettre de motivation + CV)","Format suisse: section Schnupperlehre, photo en haut à droite","Terminologie suisse: Lehrstelle, Berufslehre","Champ notes matières préférées","Section références: professeur ou encadrant de stage","Export PDF prêt à imprimer","Sans abonnement · Paiement unique · ✅ Twint"],
+           ["✦ 1 dossier IA completo (lettera + CV)","Formato svizzero: sezione Schnupperlehre, foto in alto a destra","Terminologia svizzera: Lehrstelle, Berufslehre","Campo voti materie preferite","Sezione referenze","Export PDF pronto","Senza abbonamento · Pagamento unico · ✅ Twint"]
+         ),
+         twint:true,
+         btn:L("Starter kaufen – CHF 9.90 🇨🇭","Buy Starter – CHF 9.90 🇨🇭","Acheter Starter – CHF 9.90 🇨🇭","Acquista Starter – CHF 9.90 🇨🇭"),btnS:"b-em"},
         {id:"free",name:L("Gratis","Gratuit","Gratuito","Free"),price:0,
          note:L("Kostenlos loslegen – ohne Kreditkarte.","Start for free – no credit card needed.","Gratuit pour toujours – sans carte.","Gratis per sempre – senza carta."),
          desc:L(
@@ -1122,12 +1140,52 @@ const GENERIC_TOOLS = [
       {k:"name",   lbl:{de:"Dein Name",en:"Your name",fr:"Votre nom",it:"Il tuo nome"},ph:{de:"Max Mustermann",en:"John Doe",fr:"Jean Dupont",it:"Mario Rossi"},req:true},
       {k:"alter",  lbl:{de:"Alter / Schuljahr",en:"Age / School year",fr:"Âge / Année scolaire",it:"Età / Anno scolastico"},ph:{de:"z.B. 15 Jahre, 3. Sek",en:"e.g. 15 years, 9th grade",fr:"ex. 15 ans, 3e secondaire",it:"es. 15 anni, 3a media"},req:false},
       {k:"staerken",lbl:{de:"Stärken & Interessen",en:"Strengths & interests",fr:"Points forts & intérêts",it:"Punti di forza & interessi"},ph:{de:"z.B. Mathe gut, fleissig, computererfahren",en:"e.g. Good at maths, hardworking, computer savvy",fr:"ex. Bon en maths, travailleur, à l'aise en informatique",it:"es. Bravo in matematica, laborioso, esperto di computer"},type:"textarea",req:false},
+      {k:"schnupper",lbl:{de:"🔑 Schnupperlehre (Swiss-USP!)",en:"🔑 Trial placement (Schnupperlehre)",fr:"🔑 Stage d'orientation (Schnupperlehre)",it:"🔑 Stage orientamento (Schnupperlehre)"},ph:{de:"z.B. 3 Tage bei UBS, 14.–16. Jan. 2026 – was hat dich beeindruckt?",en:"e.g. 3 days at UBS, 14–16 Jan 2026 – what impressed you?",fr:"ex. 3 jours chez UBS, 14–16 jan. 2026 – qu'est-ce qui vous a impressionné?",it:"es. 3 giorni da UBS, 14–16 gen. 2026 – cosa ti ha impressionato?"},type:"textarea",req:false},
+      {k:"noten",   lbl:{de:"Noten Mathe / Deutsch (optional)",en:"Grades Maths / German (optional)",fr:"Notes Maths / Allemand (optionnel)",it:"Voti Matematica / Tedesco (opzionale)"},ph:{de:"z.B. Mathe 5.5, Deutsch 5 – Lehrbetriebe schauen genau hin!",en:"e.g. Maths A, German B – companies check these!",fr:"ex. Maths 5.5, Allemand 5",it:"es. Matematica 5.5, Tedesco 5"},req:false},
     ],
     prompt:(v,l)=>({
-      de:`Schreibe ein professionelles Motivationsschreiben für eine Lehrstelle auf Schweizer Hochdeutsch (kein ß).\nLehrberuf: ${v.beruf} | Firma: ${v.firma} | Name: ${v.name} | Alter: ${v.alter||"nicht angegeben"} | Stärken: ${v.staerken||"nicht angegeben"}\nTon: jugendlich aber professionell, authentisch, enthusiastisch. Schweizer Lehrstellenformat. ~250 Wörter.`,
-      en:`Write a professional motivation letter for an apprenticeship in English for the Swiss system.\nTrade: ${v.beruf} | Company: ${v.firma} | Name: ${v.name} | Age: ${v.alter||"not provided"} | Strengths: ${v.staerken||"not provided"}\nTone: youthful but professional, authentic, enthusiastic. ~250 words.`,
-      fr:`Rédige une lettre de motivation pour un apprentissage en français pour le système suisse.\nMétier: ${v.beruf} | Entreprise: ${v.firma} | Nom: ${v.name} | Âge: ${v.alter||"n/a"} | Points forts: ${v.staerken||"n/a"}\nTon: jeune mais professionnel, authentique. ~250 mots.`,
-      it:`Scrivi una lettera di motivazione per un apprendistato in italiano per il sistema svizzero.\nMestiere: ${v.beruf} | Azienda: ${v.firma} | Nome: ${v.name} | Età: ${v.alter||"n/d"} | Punti di forza: ${v.staerken||"n/d"}\nTono: giovanile ma professionale, autentico. ~250 parole.`,
+      de:`Schreibe ein professionelles Motivationsschreiben für eine Lehrstelle auf Schweizer Hochdeutsch (kein ß, kein "Ausbildungsplatz" – immer "Lehrstelle"/"Lernende*r").
+PFLICHTSTRUKTUR (Swiss-Apprentice-Format):
+1. EINLEITUNG: Bezug auf Berufsmesse oder Schnupperlehre bei ${v.firma}
+2. HAUPTTEIL 1 – Motivation & Talent: Warum dieser Lehrberuf, persönliche Stärken
+3. HAUPTTEIL 2 – Warum ${v.firma}: Konkreter Bezug auf die Firma
+4. HAUPTTEIL 3 (WICHTIGSTER TEIL!): Schnupperlehre-Erlebnis: ${v.schnupper||"falls vorhanden – Datum, Ort, konkretes Erlebnis, Fazit"}
+5. SCHLUSS: Einladung zum Vorstellungsgespräch
+
+FORMAT: Absenderadresse links oben | Datum rechtsbündig "Zürich, ${new Date().toLocaleDateString("de-CH",{day:"numeric",month:"long",year:"numeric"})}" | Betreff fett: **Bewerbung als Lernende*r ${v.beruf} EFZ**
+
+Daten: Lehrberuf: ${v.beruf} | Firma: ${v.firma} | Name: ${v.name} | Alter: ${v.alter||"nicht angegeben"} | Stärken: ${v.staerken||"nicht angegeben"} | Noten: ${v.noten||"nicht angegeben"}
+Schweizer Rechtschreibung. ~280 Wörter. Ton: jugendlich, authentisch, professionell.`,
+      en:`Write a professional motivation letter for a Swiss apprenticeship in English.
+MANDATORY STRUCTURE:
+1. INTRODUCTION: Reference to career fair or trial placement at ${v.firma}
+2. MAIN PART 1 – Motivation & talent: Why this trade, personal strengths
+3. MAIN PART 2 – Why ${v.firma}: Specific reference to the company
+4. MAIN PART 3 (MOST IMPORTANT!): Trial placement (Schnupperlehre): ${v.schnupper||"if applicable – dates, location, experience, conclusion"}
+5. CLOSING: Invite to interview
+
+Data: Trade: ${v.beruf} | Company: ${v.firma} | Name: ${v.name} | Age: ${v.alter||"not provided"} | Strengths: ${v.staerken||"not provided"} | Grades: ${v.noten||"not provided"}
+~280 words. Tone: youthful but professional, authentic.`,
+      fr:`Rédige une lettre de motivation pour un apprentissage en suisse en français.
+STRUCTURE OBLIGATOIRE:
+1. INTRODUCTION: Référence à la foire professionnelle ou stage chez ${v.firma}
+2. PARTIE PRINCIPALE 1 – Motivation & talent
+3. PARTIE PRINCIPALE 2 – Pourquoi ${v.firma}
+4. PARTIE PRINCIPALE 3 (LA PLUS IMPORTANTE!): Stage d'orientation: ${v.schnupper||"si applicable – dates, lieu, expérience, conclusion"}
+5. CONCLUSION: Invitation à l'entretien
+
+Données: Métier: ${v.beruf} | Entreprise: ${v.firma} | Nom: ${v.name} | Âge: ${v.alter||"n/a"} | Points forts: ${v.staerken||"n/a"} | Notes: ${v.noten||"n/a"}
+~280 mots. Ton: jeune mais professionnel, authentique.`,
+      it:`Scrivi una lettera di motivazione per un apprendistato svizzero in italiano.
+STRUTTURA OBBLIGATORIA:
+1. INTRODUZIONE: Riferimento a fiera professionale o stage da ${v.firma}
+2. PARTE PRINCIPALE 1 – Motivazione & talento
+3. PARTE PRINCIPALE 2 – Perché ${v.firma}
+4. PARTE PRINCIPALE 3 (LA PIÙ IMPORTANTE!): Stage orientamento: ${v.schnupper||"se applicabile – date, luogo, esperienza, conclusione"}
+5. CHIUSURA: Invito a colloquio
+
+Dati: Mestiere: ${v.beruf} | Azienda: ${v.firma} | Nome: ${v.name} | Età: ${v.alter||"n/d"} | Punti di forza: ${v.staerken||"n/d"} | Voti: ${v.noten||"n/d"}
+~280 parole. Tono: giovanile ma professionale, autentico.`,
     }[l]),
   },
   { id:"lernplan", ico:"📚", color:"#0891b2", cat:"ausbildung",
@@ -2963,7 +3021,18 @@ Preise: Pro CHF 19.90/Mo. oder CHF 14.90/Mo. jährlich. Ultimate CHF 49.90/Mo. o
 
   const SYSTEM_FULL = `Du bist Stella, die KI-Karriere-Assistentin von Stellify. Du hast tiefes Wissen über Karriere, Bewerbungen, den Schweizer Arbeitsmarkt und Produktivität.
 
-Dein Wissen umfasst: Schweizer Bewerbungsunterlagen (Motivationsschreiben, Lebenslauf mit Foto, 1-2 Seiten), ATS-Optimierung, Schweizer Arbeitsrecht (Kündigungsfristen, Sperrfristen, Zeugnis-Code: "stets zu vollsten Zufriedenheit"=sehr gut), Gehälter nach Branche/Erfahrung, LinkedIn-Optimierung, Interview-Vorbereitung (STAR-Methode), Gehaltsverhandlungs-Taktiken, Schweizer Bildungssystem (EFZ, FH, Uni, CAS/MAS).
+Dein Wissen umfasst: Schweizer Bewerbungsunterlagen (Motivationsschreiben, Lebenslauf mit Foto oben rechts, 1-2 Seiten), ATS-Optimierung, Schweizer Arbeitsrecht (Kündigungsfristen, Sperrfristen, Zeugnis-Code: "stets zu vollsten Zufriedenheit"=sehr gut), Gehälter nach Branche/Erfahrung, LinkedIn-Optimierung, Interview-Vorbereitung (STAR-Methode), Gehaltsverhandlungs-Taktiken, Schweizer Bildungssystem (EFZ, EBA, FH, Uni, CAS/MAS).
+
+🇨🇭 SCHWEIZER LEHRSTELLENWISSEN (besonders wichtig!):
+- Immer "Lehrstelle" (nie "Ausbildungsplatz"), "Lernende*r" (nie "Azubi"), "Motivationsschreiben" (nie "Anschreiben"), "Berufslehre" (nie "Ausbildung")
+- Schnupperlehre ist der WICHTIGSTE Teil einer Lehrstellenbewerbung in der Schweiz – fast niemand bekommt eine Lehrstelle ohne vorheriges Schnuppern. Immer Datum + Betrieb + konkretes Erlebnis + Fazit erwähnen.
+- Swiss-Apprentice CV-Format: Kopfzeile Name links, Foto oben rechts, Schnupperlehren-Sektion als zweite Sektion (nach persönlichen Daten), Noten (Mathe/Deutsch/Englisch) separat ausweisen, Referenzen (Lehrer, Schnupperlehre-Betreuer)
+- Motivationsschreiben-Struktur: Einleitung (Bezug Berufsmesse/Schnuppern) → HT1 (Motivation/Talent) → HT2 (Warum diese Firma) → HT3 WICHTIGSTER TEIL: Schnupperlehre mit Details → Schluss (Interview-Einladung)
+- Format: Datum rechtsbündig "Ort, DD. Monat JJJJ", Betreff fett "Bewerbung als Lernende*r [Beruf] EFZ/EBA", Schweizer Rechtschreibung (kein ß → ss)
+- Multicheck / Basic-Check: Viele Firmen (v.a. grosse) verlangen diese Tests. Tipp: Multicheck-Übungshefte, Zeitmanagement üben
+- Typische Lehrberufe Schweiz: Kaufmann/-frau EFZ, Informatiker EFZ, Detailhandelsfachmann/-frau EFZ, Polymechaniker EFZ, Mediamatiker EFZ, Fachmann/-frau Gesundheit EFZ (FaGe), Coiffeur/-euse EFZ
+- EFZ = Eidgenössisches Fähigkeitszeugnis (3-4 Jahre), EBA = Eidgenössisches Berufsattest (2 Jahre)
+- Berufsmessen Schweiz: Berufsmesse Zürich (Oktober), Didacta, Gibb Bern, Sprungbrett Basel
 
 Tools von Stellify:
 ✍️ Bewerbungen (1× gratis), 💼 LinkedIn Optimierung, 🤖 ATS-Simulation, 📜 Zeugnis-Analyse, 🎯 Job-Matching, 🎤 Interview-Coach, 📊 Excel-Generator, 📽️ PowerPoint-Maker, 💰 Gehaltsverhandlung, 🤝 Networking-Nachricht, 📤 Kündigung schreiben, 🗓️ 30-60-90-Tage-Plan, 🏆 Referenzschreiben, 📚 Lernplan, 📝 Zusammenfassung, 🎓 Lehrstelle, ✉️ E-Mail, 📋 Protokoll, 🌍 Übersetzer, 💰 KI-Gehaltsrechner Schweiz, 📋 Bewerbungs-Tracker, ✍️ LinkedIn-Post Generator
@@ -3220,7 +3289,11 @@ Verhalten: Antworte konkret und umsetzbar (max. 3-4 Sätze im Widget). Schreib B
   </>);
 }
 // ════════════════════════════════════════
-// 📋 BEWERBUNGS-TRACKER
+// 📋 BEWERBUNGS-TRACKER (inkl. RAV-Export)
+const TRACKER_KEY = "stf_tracker_v2";
+function loadTrackerJobs() { try { const r=localStorage.getItem(TRACKER_KEY); return r?JSON.parse(r):[]; } catch { return []; } }
+function saveTrackerJobs(jobs) { try { localStorage.setItem(TRACKER_KEY,JSON.stringify(jobs)); } catch {} }
+
 function BewerbungsTracker({lang, pro, setPw, navTo}) {
   const L=(d,e,f,i)=>({de:d,en:e,fr:f,it:i}[lang]||d);
   const STATUS = {
@@ -3231,21 +3304,27 @@ function BewerbungsTracker({lang, pro, setPw, navTo}) {
     abgelehnt: {de:"Abgelehnt",      en:"Rejected",      fr:"Refusé",       it:"Rifiutato",    col:"#ef4444", bg:"rgba(239,68,68,.1)"},
     zurueck:   {de:"Zurückgezogen",  en:"Withdrawn",     fr:"Retiré",       it:"Ritirato",     col:"#6b7280", bg:"rgba(107,114,128,.1)"},
   };
-  const DEMO = [
-    {id:1, firma:"Migros", stelle:"Product Manager", datum:"2026-02-15", status:"interview", prio:"hoch", notiz:"2. Interview am 20.3."},
-    {id:2, firma:"Swiss Re", stelle:"Risk Analyst", datum:"2026-02-20", status:"pruefung", prio:"mittel", notiz:""},
-    {id:3, firma:"Nestlé", stelle:"Marketing Manager", datum:"2026-03-01", status:"beworben", prio:"tief", notiz:"Über LinkedIn beworben"},
-  ];
-  const [jobs, setJobs] = useState(DEMO);
+  const ART = ["Schriftlich (E-Mail/Portal)","Telefonisch","Persönlich (Spontanbesuch)","Brief (Post)","Online-Formular"];
+  const ERGEBNIS = ["Ausstehend","Einladung zum Interview","Absage erhalten","Angebot erhalten","Kein Feedback"];
+
+  const [jobs, setJobs] = useState(()=>{ const saved=loadTrackerJobs(); return saved.length>0?saved:[
+    {id:1, firma:"Migros", ort:"Zürich", stelle:"Product Manager", kontakt:"Personalabteilung", art:"Schriftlich (E-Mail/Portal)", datum:"2026-02-15", status:"interview", ergebnis:"Einladung zum Interview", prio:"hoch", notiz:"2. Interview am 20.3."},
+    {id:2, firma:"Swiss Re", ort:"Zürich", stelle:"Risk Analyst", kontakt:"", art:"Online-Formular", datum:"2026-02-20", status:"pruefung", ergebnis:"Ausstehend", prio:"mittel", notiz:""},
+    {id:3, firma:"Nestlé", ort:"Vevey", stelle:"Marketing Manager", kontakt:"hr@nestle.com", art:"Schriftlich (E-Mail/Portal)", datum:"2026-03-01", status:"beworben", ergebnis:"Ausstehend", prio:"tief", notiz:"Über LinkedIn beworben"},
+  ]; });
   const [filter, setFilter] = useState("alle");
-  const [modal, setModal] = useState(null); // null | {mode:"add"} | {mode:"edit", job}
-  const [form, setForm] = useState({firma:"",stelle:"",datum:"",status:"beworben",prio:"mittel",notiz:""});
+  const [modal, setModal] = useState(null);
+  const emptyForm = {firma:"",ort:"",stelle:"",kontakt:"",art:"Schriftlich (E-Mail/Portal)",datum:new Date().toISOString().slice(0,10),status:"beworben",ergebnis:"Ausstehend",prio:"mittel",notiz:""};
+  const [form, setForm] = useState(emptyForm);
+
+  // Persist to localStorage whenever jobs change
+  useEffect(()=>{ saveTrackerJobs(jobs); },[jobs]);
 
   const filtered = filter==="alle" ? jobs : jobs.filter(j=>j.status===filter);
   const stats = Object.keys(STATUS).map(k=>({key:k, label:STATUS[k][lang]||STATUS[k].de, count:jobs.filter(j=>j.status===k).length, col:STATUS[k].col}));
 
-  function openAdd() { setForm({firma:"",stelle:"",datum:new Date().toISOString().slice(0,10),status:"beworben",prio:"mittel",notiz:""}); setModal({mode:"add"}); }
-  function openEdit(job) { setForm({...job}); setModal({mode:"edit",job}); }
+  function openAdd() { setForm({...emptyForm,datum:new Date().toISOString().slice(0,10)}); setModal({mode:"add"}); }
+  function openEdit(job) { setForm({...emptyForm,...job}); setModal({mode:"edit",job}); }
   function save() {
     if(!form.firma||!form.stelle) return;
     if(modal.mode==="add") setJobs(j=>[...j,{...form,id:Date.now()}]);
@@ -3254,6 +3333,36 @@ function BewerbungsTracker({lang, pro, setPw, navTo}) {
   }
   function del(id) { setJobs(j=>j.filter(x=>x.id!==id)); }
   function changeStatus(id,st) { setJobs(j=>j.map(x=>x.id===id?{...x,status:st}:x)); }
+
+  // RAV PDF Export (Nachweis der persönlichen Arbeitsbemühungen – SECO)
+  function exportRAV() {
+    const month = new Date().toLocaleDateString("de-CH",{month:"long",year:"numeric"});
+    const rows = jobs.map((j,i)=>`| ${String(i+1).padStart(2," ")} | ${j.datum||"-"} | ${j.firma||"-"} | ${j.ort||"-"} | ${j.stelle||"-"} | ${j.art||"-"} | ${j.kontakt||"Personalabteilung"} | ${j.ergebnis||"Ausstehend"} |`).join("\n");
+    const txt = `NACHWEIS DER PERSÖNLICHEN ARBEITSBEMÜHUNGEN
+Formular gemäss SECO / ALK – Monat: ${month}
+Erstellt mit Stellify.ch | Datum: ${new Date().toLocaleDateString("de-CH")}
+════════════════════════════════════════════════════════════════
+
+Nr. | Datum       | Firma              | Ort       | Stelle/Funktion        | Art der Bewerbung           | Kontaktperson       | Ergebnis
+----+-------------+--------------------+-----------+------------------------+-----------------------------+---------------------+-------------------
+${jobs.map((j,i)=>`${String(i+1).padStart(3," ")} | ${(j.datum||"-").padEnd(11," ")} | ${(j.firma||"-").padEnd(18," ")} | ${(j.ort||"-").padEnd(9," ")} | ${(j.stelle||"-").padEnd(22," ")} | ${(j.art||"-").padEnd(27," ")} | ${(j.kontakt||"Personalabteilung").padEnd(19," ")} | ${j.ergebnis||"Ausstehend"}`).join("\n")}
+
+TOTAL BEWERBUNGEN DIESEN MONAT: ${jobs.length}
+
+Unterschrift: ________________________    Datum: ________________
+
+════════════════════════════════════════════════════════════════
+Hinweis: Dieses Dokument wurde automatisch generiert.
+Bitte beim RAV-Berater / der RAV-Beraterin abgeben.
+Pflichtfelder gemäss ALV Art. 17: Datum, Firma, Ort, Funktion, Art der Bewerbung, Kontaktperson.
+`;
+    const blob = new Blob([txt],{type:"text/plain;charset=utf-8"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href=url; a.download=`RAV-Nachweis-${new Date().toISOString().slice(0,7)}.txt`;
+    document.body.appendChild(a); a.click();
+    setTimeout(()=>{ URL.revokeObjectURL(url); document.body.removeChild(a); },300);
+  }
 
   const prioCol = {hoch:"#ef4444",mittel:"#f59e0b",tief:"#6b7280"};
 
@@ -3299,10 +3408,18 @@ function BewerbungsTracker({lang, pro, setPw, navTo}) {
             ))}
           </div>
 
-          {/* Add button */}
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
+          {/* Add + RAV Export buttons */}
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16,flexWrap:"wrap",gap:10}}>
             <div style={{fontSize:13,color:"var(--mu)"}}>{filtered.length} {L("Einträge","entries","entrées","voci")}</div>
-            <button className="btn b-em b-sm" onClick={openAdd}>+ {L("Neue Bewerbung","New application","Nouvelle candidature","Nuova candidatura")}</button>
+            <div style={{display:"flex",gap:10,flexWrap:"wrap"}}>
+              <button className="btn b-sm" style={{background:"rgba(239,68,68,.08)",border:"1px solid rgba(239,68,68,.25)",color:"#dc2626",fontWeight:700}} onClick={exportRAV}>
+                📄 {L("RAV-Nachweis exportieren","Export RAV proof","Exporter preuve RAV","Esporta prova RAV")}
+              </button>
+              <button className="btn b-em b-sm" onClick={openAdd}>+ {L("Neue Bewerbung","New application","Nouvelle candidature","Nuova candidatura")}</button>
+            </div>
+          </div>
+          <div style={{background:"rgba(239,68,68,.05)",border:"1px solid rgba(239,68,68,.12)",borderRadius:10,padding:"10px 14px",marginBottom:16,fontSize:12,color:"#b91c1c"}}>
+            💡 {L(`RAV-Pflichtfelder: Datum, Firma, Ort, Stelle, Art der Bewerbung, Kontaktperson. Exportiere am Monatsende den "Nachweis der persönlichen Arbeitsbemühungen" (SECO).`,`RAV required fields: date, company, location, position, type, contact. Export the monthly proof at month-end.`,`Champs RAV obligatoires: date, entreprise, lieu, poste, type, contact. Exportez le justificatif mensuel.`,`Campi RAV obbligatori: data, azienda, luogo, posizione, tipo, contatto. Esporta la prova mensile.`)}
           </div>
 
           {/* List */}
@@ -3317,7 +3434,10 @@ function BewerbungsTracker({lang, pro, setPw, navTo}) {
                   <div style={{fontFamily:"var(--hd)",fontSize:16,fontWeight:700}}>{job.stelle}</div>
                   <div style={{width:8,height:8,borderRadius:"50%",background:prioCol[job.prio],flexShrink:0}} title={job.prio}/>
                 </div>
-                <div style={{fontSize:13,color:"var(--mu)",marginBottom:job.notiz?6:0}}>{job.firma} · {job.datum}</div>
+                <div style={{fontSize:13,color:"var(--mu)",marginBottom:4}}>{job.firma}{job.ort?` · ${job.ort}`:""} · {job.datum}</div>
+                {job.art&&<div style={{fontSize:11,color:"rgba(59,130,246,.8)",background:"rgba(59,130,246,.08)",borderRadius:5,padding:"2px 8px",display:"inline-block",marginBottom:job.kontakt||job.notiz?4:0}}>{job.art}</div>}
+                {job.kontakt&&<div style={{fontSize:11,color:"var(--mu)",display:"block",marginBottom:job.notiz?4:0}}>👤 {job.kontakt}</div>}
+                {job.ergebnis&&job.ergebnis!=="Ausstehend"&&<div style={{fontSize:11,color:"#059669",background:"rgba(5,150,105,.08)",borderRadius:5,padding:"2px 8px",display:"inline-block",marginBottom:job.notiz?4:0}}>{job.ergebnis}</div>}
                 {job.notiz && <div style={{fontSize:12,color:"var(--mu)",background:"var(--bos)",borderRadius:6,padding:"4px 9px",display:"inline-block"}}>{job.notiz}</div>}
               </div>
               <div style={{display:"flex",flexWrap:"wrap",gap:8,alignItems:"center"}}>
@@ -3338,13 +3458,28 @@ function BewerbungsTracker({lang, pro, setPw, navTo}) {
         <div className="mbg" onClick={e=>{if(e.target===e.currentTarget)setModal(null)}}>
           <div className="mod" style={{maxWidth:520}}>
             <h2 style={{marginBottom:20}}>{modal.mode==="add"?L("Neue Bewerbung","New application","Nouvelle candidature","Nuova candidatura"):L("Bearbeiten","Edit","Modifier","Modifica")}</h2>
+            <div style={{background:"rgba(239,68,68,.05)",border:"1px solid rgba(239,68,68,.12)",borderRadius:8,padding:"8px 12px",fontSize:11.5,color:"#b91c1c",marginBottom:14}}>
+              📄 {L("RAV-Pflichtfelder: Firma, Ort, Stelle, Art der Bewerbung und Kontaktperson werden für den SECO-Export benötigt.","RAV required: Company, location, position, type and contact are needed for the SECO export.","Champs RAV obligatoires pour l'export SECO.","Campi RAV obbligatori per l'export SECO.")}
+            </div>
             <div className="fg2" style={{textAlign:"left"}}>
-              <div className="field"><label>{L("Stelle *","Position *","Poste *","Posizione *")}</label><input value={form.stelle} onChange={e=>setForm(f=>({...f,stelle:e.target.value}))} placeholder={L("z.B. Product Manager","e.g. Product Manager","ex. Chef de produit","es. Product Manager")}/></div>
-              <div className="field"><label>{L("Firma *","Company *","Entreprise *","Azienda *")}</label><input value={form.firma} onChange={e=>setForm(f=>({...f,firma:e.target.value}))} placeholder={L("z.B. Nestlé AG","e.g. Nestlé AG","ex. Nestlé SA","es. Nestlé SA")}/></div>
+              <div className="field"><label>{L("Stelle / Funktion *","Position *","Poste *","Posizione *")}</label><input value={form.stelle} onChange={e=>setForm(f=>({...f,stelle:e.target.value}))} placeholder={L("z.B. Informatiker EFZ (Systemtechnik)","e.g. Commercial Employee EFZ","ex. Employée de commerce AFC","es. Impiegata di commercio AFC")}/></div>
+              <div className="field"><label>{L("Firma *","Company *","Entreprise *","Azienda *")}</label><input value={form.firma} onChange={e=>setForm(f=>({...f,firma:e.target.value}))} placeholder={L("z.B. Swisscom AG","e.g. Swisscom AG","ex. Swisscom SA","es. Swisscom SA")}/></div>
+              <div className="field"><label>{L("Ort (RAV-Pflicht)","Location (RAV)","Lieu (RAV)","Luogo (RAV)")}</label><input value={form.ort||""} onChange={e=>setForm(f=>({...f,ort:e.target.value}))} placeholder={L("z.B. Zürich","e.g. Zurich","ex. Zurich","es. Zurigo")}/></div>
+              <div className="field"><label>{L("Kontaktperson (RAV-Pflicht)","Contact person (RAV)","Personne de contact (RAV)","Persona di contatto (RAV)")}</label><input value={form.kontakt||""} onChange={e=>setForm(f=>({...f,kontakt:e.target.value}))} placeholder={L("z.B. Personalabteilung, Frau Müller","e.g. HR department","ex. Service RH","es. Ufficio HR")}/></div>
+              <div className="field"><label>{L("Art der Bewerbung (RAV-Pflicht)","Application type (RAV)","Type candidature (RAV)","Tipo candidatura (RAV)")}</label>
+                <select value={form.art||"Schriftlich (E-Mail/Portal)"} onChange={e=>setForm(f=>({...f,art:e.target.value}))} style={{width:"100%",padding:"10px 13px",border:"1.5px solid var(--bo)",borderRadius:10,fontFamily:"var(--bd)",fontSize:14,background:"#fafafa"}}>
+                  {ART.map(a=><option key={a} value={a}>{a}</option>)}
+                </select>
+              </div>
               <div className="field"><label>{L("Datum","Date","Date","Data")}</label><input type="date" value={form.datum} onChange={e=>setForm(f=>({...f,datum:e.target.value}))}/></div>
               <div className="field"><label>Status</label>
                 <select value={form.status} onChange={e=>setForm(f=>({...f,status:e.target.value}))} style={{width:"100%",padding:"10px 13px",border:"1.5px solid var(--bo)",borderRadius:10,fontFamily:"var(--bd)",fontSize:14,background:"#fafafa"}}>
                   {Object.entries(STATUS).map(([k,v])=><option key={k} value={k}>{v[lang]||v.de}</option>)}
+                </select>
+              </div>
+              <div className="field"><label>{L("Ergebnis","Result","Résultat","Risultato")}</label>
+                <select value={form.ergebnis||"Ausstehend"} onChange={e=>setForm(f=>({...f,ergebnis:e.target.value}))} style={{width:"100%",padding:"10px 13px",border:"1.5px solid var(--bo)",borderRadius:10,fontFamily:"var(--bd)",fontSize:14,background:"#fafafa"}}>
+                  {ERGEBNIS.map(r=><option key={r} value={r}>{r}</option>)}
                 </select>
               </div>
               <div className="field"><label>{L("Priorität","Priority","Priorité","Priorità")}</label>
@@ -3355,9 +3490,9 @@ function BewerbungsTracker({lang, pro, setPw, navTo}) {
                 </select>
               </div>
             </div>
-            <div className="field" style={{textAlign:"left",marginTop:12}}>
+            <div className="field" style={{textAlign:"left",marginTop:4}}>
               <label>{L("Notiz","Note","Note","Nota")}</label>
-              <textarea value={form.notiz} onChange={e=>setForm(f=>({...f,notiz:e.target.value}))} placeholder={L("z.B. Nächster Schritt, Kontaktperson…","e.g. Next step, contact person…","ex. Prochaine étape, contact…","es. Prossimo passo, contatto…")} style={{width:"100%",padding:"10px 13px",border:"1.5px solid var(--bo)",borderRadius:10,fontFamily:"var(--bd)",fontSize:14,background:"#fafafa",minHeight:64,resize:"none"}}/>
+              <textarea value={form.notiz} onChange={e=>setForm(f=>({...f,notiz:e.target.value}))} placeholder={L("z.B. Nächster Schritt, Interview-Datum…","e.g. Next step, interview date…","ex. Prochaine étape…","es. Prossimo passo…")} style={{width:"100%",padding:"10px 13px",border:"1.5px solid var(--bo)",borderRadius:10,fontFamily:"var(--bd)",fontSize:14,background:"#fafafa",minHeight:64,resize:"none"}}/>
             </div>
             <div style={{display:"flex",gap:10,marginTop:20}}>
               <button className="btn b-outd" style={{flex:1}} onClick={()=>setModal(null)}>{L("Abbrechen","Cancel","Annuler","Annulla")}</button>
@@ -5022,55 +5157,70 @@ Come sviluppatore senior con 6 anni di esperienza, sono interessato alle opportu
 Cordiali saluti, Marco Berger"`),
 
     lehrstelle: L(
-`🎓 LEHRSTELLEN-BEWERBUNG
+`🎓 LEHRSTELLEN-BEWERBUNG (Swiss-Apprentice Format)
 
 Lehrberuf: Kaufmann/-frau EFZ | Firma: UBS AG, Zürich | Name: Lena Müller, 15 J.
+Schnupperlehre: ✅ 3 Tage bei UBS, 14.–16. Jan. 2026
 
 ──────────────────────────────────────
-Lena Müller
-Musterstrasse 12, 8001 Zürich
-lena.mueller@gmail.com | 079 123 45 67
+Lena Müller · Seestrasse 12 · 8001 Zürich
+lena.mueller@gmail.com · 079 123 45 67 · geb. 15.04.2010
+Heimatort: Küsnacht ZH
 
-UBS AG
-Human Resources
+UBS AG – Personalabteilung
 Bahnhofstrasse 45
 8001 Zürich
 
-Zürich, März 2026
+                                    Zürich, 18. März 2026
 
-Bewerbung als Kauffrau EFZ – Lehrstelle 2026
+**Bewerbung als Lernende Kauffrau EFZ (Dienstleistung & Administration) – Lehrstelle 2026**
 
-Sehr geehrte Damen und Herren,
+Sehr geehrte Damen und Herren
 
-seit ich in der Schule bei einem Betriebsbesuch bei der UBS die Welt der Finanzen kennenlernen durfte, weiss ich: Ich möchte Kauffrau werden – und zwar bei der UBS.
+Anlässlich der Berufsmesse Zürich 2025, an welcher ich Ihren Stand besuchte, habe ich mein Interesse für die UBS vertieft und mich daraufhin für eine Schnupperlehre beworben.
 
-Ich bin Lena, 15 Jahre alt und besuche die 3. Sekundarschule in Zürich. In Mathematik und Wirtschaft gehöre ich zu den Besten meiner Klasse. Zahlen faszinieren mich – ob beim Nachhilfe-Geben für Mitschüler oder beim Verwalten der Klassenkasse, die ich seit zwei Jahren führe.
+Während meiner 3-tägigen Schnupperlehre vom 14. bis 16. Januar 2026 bei der UBS Filiale Zürich-City konnte ich erste wertvolle Einblicke in den Berufsalltag einer Kauffrau EFZ gewinnen. Besonders beeindruckt hat mich die professionelle Zusammenarbeit im Team und der direkte Kundenkontakt. Dieser Einblick hat meinen Berufswunsch nachhaltig bestätigt.
 
-Was mich besonders an der UBS begeistert: Ihre globale Präsenz und das Engagement für Nachhaltigkeit. In meiner Berufsmaturität möchte ich diese Werte mitgestalten.
+Ich bin Lena, 15 Jahre alt, und besuche die 3. Klasse Sekundarschule Niveau A in Zürich-Altstetten. In Mathematik (Note 5.5) und Deutsch (Note 5) gehöre ich zu den Besten meiner Klasse. Seit zwei Jahren führe ich als Klassenkassierin die Vereinsrechnung – eine Aufgabe, die meine Freude an kaufmännischer Arbeit täglich stärkt.
 
-Ich freue mich sehr auf ein Schnupperpraktikum und ein persönliches Gespräch.
+Die UBS wähle ich, weil sie als grösste Schweizer Privatbank für Qualität, Verlässlichkeit und echte Entwicklungsmöglichkeiten steht. Das von Ihnen angebotene interne Ausbildungsprogramm für Lernende und die Möglichkeit der Berufsmaturität sind für meine Karriere genau das Richtige.
+
+Gerne stelle ich mich Ihnen in einem persönlichen Gespräch vor und überzeuge Sie davon, dass ich die richtige Kandidatin für Ihre Lehrstelle bin.
 
 Mit freundlichen Grüssen
 Lena Müller
 
-Beilagen: Lebenslauf, letzte Schulzeugnisse, Motivationsbrief`,
-`🎓 APPRENTICESHIP APPLICATION
+Beilagen: Lebenslauf inkl. Bewerbungsfoto, Schulzeugnis 2025/26, Schnupperlehrbestätigung UBS
+──────────────────────────────────────
+✓ Schweizer Rechtschreibung (kein ß)  ✓ Schnupperlehre erwähnt (Swiss USP!)
+✓ Datum + Ort rechtsbündig  ✓ Betreff fett + EFZ  ✓ Noten angegeben`,
+`🎓 SWISS APPRENTICESHIP APPLICATION
 
 Trade: Commercial employee EFZ | Company: UBS AG, Zurich | Name: Lena Müller, 15
+Trial placement (Schnupperlehre): ✅ 3 days at UBS, 14–16 Jan 2026
 
-Lena Müller | Zurich | lena.mueller@gmail.com
+Lena Müller · Seestrasse 12 · 8001 Zurich
+lena.mueller@gmail.com · 079 123 45 67
 
-Dear UBS Team,
+                              Zurich, 18 March 2026
 
-Ever since I visited UBS during a school trip and discovered the world of finance, I knew: I want to become a commercial employee – at UBS.
+**Application for Apprenticeship as Commercial Employee EFZ – 2026**
 
-I'm Lena, 15 years old, in my final year of secondary school. In maths and economics I'm among the top students. I've been managing our class fund for two years.
+Dear HR Team
 
-What excites me about UBS: your global presence and commitment to sustainability.
+At the Berufsmesse Zürich 2025, I visited your stand and was inspired to apply for a trial placement (Schnupperlehre).
 
-I look forward to a trial work placement and a personal interview.
+During my 3-day trial placement from 14–16 January 2026 at UBS Zurich-City, I gained valuable insight into the daily work of a commercial employee. I was particularly impressed by the teamwork and direct client contact. This experience confirmed my career choice.
 
-Kind regards, Lena Müller`,
+I am Lena, 15 years old, in 3rd year secondary school (Niveau A) in Zurich. In maths (5.5) and German (5) I rank among the top students. For two years I have managed our class fund – work that strengthens my passion for commercial tasks daily.
+
+I would be delighted to present myself in a personal interview.
+
+Kind regards, Lena Müller
+
+Enclosures: CV with photo, school report 2025/26, Schnupperlehre confirmation UBS
+──────────────────────────────────────
+✓ Swiss format  ✓ Trial placement highlighted (Swiss USP!)  ✓ Grades included`,
 `🎓 CANDIDATURE APPRENTISSAGE
 
 Métier: Employée de commerce AFC | Entreprise: UBS SA, Zurich
@@ -5611,7 +5761,6 @@ RISPOSTA: "Sarebbe possibile un bonus di CHF 15k se il budget è limitato?"`)
   if(page==="landing") return(<>{<style>{FONTS+CSS}</style>}{sharedOverlays}{pw&&<PW/>}
     {showProfiles&&<ProfileManager lang={lang} onClose={()=>setShowProfiles(false)} onSelect={p=>{if(p){setActiveProfile(p);setProf({name:p.name||"",beruf:p.beruf||"",erfahrung:p.erfahrung||"",skills:p.skills||"",sprachen:p.sprachen||"",ausbildung:p.ausbildung||""});}}}/>}
     {authModals}
-    <ChatBot lang={lang} pro={pro} setPw={setPw} navTo={navTo} authSession={authSession} onAuthOpen={()=>{setAuthMode("login");setShowAuth(true);}}/>
     {cookieBanner&&<CookieBanner lang={lang} onAccept={acceptCookie}/>}
     <div>
       <Nav/>
@@ -6143,8 +6292,8 @@ RISPOSTA: "Sarebbe possibile un bonus di CHF 15k se il budget è limitato?"`)
             </div>
           </div>
 
-          {/* 3-Spalten Pricing Grid */}
-          <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:16,maxWidth:980,margin:"0 auto"}}>
+          {/* 4-Spalten Pricing Grid */}
+          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))",gap:16,maxWidth:1100,margin:"0 auto"}}>
             {t.price.tiers.filter(t=>t.id!=="free"||true).map(tier=>{
               const savePct = tier.priceM ? Math.round((1-(tier.priceY/tier.priceM))*100) : 0;
               const annualTotal = tier.priceY ? (tier.priceY*12).toFixed(0) : null;
@@ -6152,30 +6301,42 @@ RISPOSTA: "Sarebbe possibile un bonus di CHF 15k se il budget è limitato?"`)
               const isFree = tier.id==="free";
               const isPro = tier.id==="pro";
               const isUlt = tier.id==="ultimate";
+              const isStarter = tier.id==="starter";
               const tierIdx = t.price.tiers.indexOf(tier);
               return (
                 <div key={tier.id} className="reveal" style={{
                   borderRadius:20,padding:"28px 24px",position:"relative",
-                  border: isPro ? "2px solid var(--em)" : isUlt ? "2px solid rgba(245,158,11,.4)" : "1.5px solid rgba(255,255,255,.09)",
-                  background: isPro ? "rgba(16,185,129,.07)" : isUlt ? "rgba(245,158,11,.04)" : "var(--dk3)",
-                  boxShadow: isPro ? "0 0 0 1px rgba(16,185,129,.15),0 20px 60px rgba(16,185,129,.1)" : "none",
+                  border: isPro ? "2px solid var(--em)" : isUlt ? "2px solid rgba(245,158,11,.4)" : isStarter ? "2px solid rgba(239,68,68,.4)" : "1.5px solid rgba(255,255,255,.09)",
+                  background: isPro ? "rgba(16,185,129,.07)" : isUlt ? "rgba(245,158,11,.04)" : isStarter ? "rgba(239,68,68,.04)" : "var(--dk3)",
+                  boxShadow: isPro ? "0 0 0 1px rgba(16,185,129,.15),0 20px 60px rgba(16,185,129,.1)" : isStarter ? "0 0 0 1px rgba(239,68,68,.15),0 20px 40px rgba(239,68,68,.08)" : "none",
                   transition:"transform .22s cubic-bezier(.34,1.56,.64,1),box-shadow .22s,opacity .6s,transform .65s",
                   transitionDelay:`${tierIdx*0.1}s`
                 }}
                   onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-4px)";}}
                   onMouseLeave={e=>{e.currentTarget.style.transform="none";}}>
                   {isPro&&<div style={{position:"absolute",top:-14,left:"50%",transform:"translateX(-50%)",background:"linear-gradient(135deg,#10b981,#059669)",color:"white",fontSize:11,fontWeight:700,padding:"5px 18px",borderRadius:999,whiteSpace:"nowrap",boxShadow:"0 4px 14px rgba(16,185,129,.4)",letterSpacing:.3}}>{t.price.recom}</div>}
+                  {isStarter&&<div style={{position:"absolute",top:-14,left:"50%",transform:"translateX(-50%)",background:"linear-gradient(135deg,#ef4444,#dc2626)",color:"white",fontSize:11,fontWeight:700,padding:"5px 18px",borderRadius:999,whiteSpace:"nowrap",boxShadow:"0 4px 14px rgba(239,68,68,.4)",letterSpacing:.3}}>
+                    {lang==="de"?"🎒 Für Schüler & Lehrstellen":lang==="en"?"🎒 For Students & Apprentices":lang==="fr"?"🎒 Pour Élèves & Apprentis":"🎒 Per Studenti & Apprendisti"}
+                  </div>}
                   {isUlt&&savedTotal&&<div style={{position:"absolute",top:-14,left:"50%",transform:"translateX(-50%)",background:"linear-gradient(135deg,#f59e0b,#d97706)",color:"white",fontSize:11,fontWeight:700,padding:"5px 18px",borderRadius:999,whiteSpace:"nowrap",boxShadow:"0 4px 14px rgba(245,158,11,.35)"}}>
                     {lang==="de"?`Spare CHF ${savedTotal}/Jahr`:lang==="en"?`Save CHF ${savedTotal}/year`:lang==="fr"?`Économisez CHF ${savedTotal}/an`:`Risparmia CHF ${savedTotal}/anno`}
                   </div>}
 
                   {/* Plan name */}
-                  <div style={{fontSize:11,fontWeight:700,letterSpacing:2,textTransform:"uppercase",color:isPro?"var(--em)":isUlt?"#f59e0b":"rgba(255,255,255,.28)",marginBottom:12}}>{tier.name}</div>
+                  <div style={{fontSize:11,fontWeight:700,letterSpacing:2,textTransform:"uppercase",color:isPro?"var(--em)":isUlt?"#f59e0b":isStarter?"#ef4444":"rgba(255,255,255,.28)",marginBottom:12}}>{tier.name}</div>
 
                   {/* Price display */}
                   {isFree&&<>
                     <div style={{fontFamily:"var(--hd)",fontSize:42,fontWeight:800,color:"white",lineHeight:1,marginBottom:4,letterSpacing:"-2px"}}>CHF 0</div>
                     <div style={{fontSize:12,color:"rgba(255,255,255,.3)",marginBottom:20}}>{lang==="de"?"Kostenlos starten":lang==="en"?"Start for free":lang==="fr"?"Démarrer gratuitement":"Inizia gratis"}</div>
+                  </>}
+                  {isStarter&&<>
+                    <div style={{fontFamily:"var(--hd)",fontSize:42,fontWeight:800,color:"white",lineHeight:1,letterSpacing:"-2px"}}>CHF {C.priceStarter}</div>
+                    <div style={{fontSize:12,color:"rgba(255,255,255,.3)",marginBottom:10}}>{lang==="de"?"Einmalig · kein Abo":lang==="en"?"One-time · no subscription":lang==="fr"?"Unique · sans abonnement":"Una tantum · senza abbonamento"}</div>
+                    <div style={{display:"inline-flex",alignItems:"center",gap:6,background:"rgba(0,0,0,.3)",border:"1px solid rgba(255,255,255,.12)",borderRadius:8,padding:"4px 10px",marginBottom:16}}>
+                      <span style={{background:"#ef4444",color:"white",fontWeight:900,fontSize:11,padding:"2px 7px",borderRadius:4,letterSpacing:.5}}>TWINT</span>
+                      <span style={{fontSize:11,color:"rgba(255,255,255,.45)"}}>· Visa · Mastercard</span>
+                    </div>
                   </>}
                   {tier.priceY&&<>
                     <div style={{fontFamily:"var(--hd)",fontSize:42,fontWeight:800,color:"white",lineHeight:1,letterSpacing:"-2px"}}>
@@ -6250,7 +6411,17 @@ RISPOSTA: "Sarebbe possibile un bonus di CHF 15k se il budget è limitato?"`)
                       {lang==="de"?`Monatlich → CHF ${C.priceUltimate}/Mo.`:lang==="en"?`Monthly → CHF ${C.priceUltimate}/mo`:lang==="fr"?`Mensuel → CHF ${C.priceUltimate}/mois`:`Mensile → CHF ${C.priceUltimate}/mese`}
                     </button>
                   </div>}
-                  <div style={{textAlign:"center",fontSize:11,color:"rgba(255,255,255,.18)",marginTop:10}}>{lang==="de"?"Stripe · Twint · Jederzeit kündbar":lang==="en"?"Stripe · Twint · Cancel anytime":lang==="fr"?"Stripe · Twint · Résiliable":"Stripe · Twint · Cancellabile"}</div>
+                  {isStarter&&<div>
+                    <button onClick={()=>window.open(C.stripeStarter,"_blank")} style={{width:"100%",padding:"13px",borderRadius:12,border:"none",background:"linear-gradient(135deg,#ef4444,#dc2626)",color:"white",fontFamily:"var(--bd)",fontSize:14,fontWeight:700,cursor:"pointer",boxShadow:"0 4px 20px rgba(239,68,68,.35)",transition:"all .2s"}}
+                      onMouseEnter={e=>{e.currentTarget.style.boxShadow="0 8px 32px rgba(239,68,68,.5)";e.currentTarget.style.transform="translateY(-1px)";}}
+                      onMouseLeave={e=>{e.currentTarget.style.boxShadow="0 4px 20px rgba(239,68,68,.35)";e.currentTarget.style.transform="none";}}>
+                      {tier.btn||`Starter kaufen – CHF ${C.priceStarter} 🇨🇭`}
+                    </button>
+                    <div style={{fontSize:11,textAlign:"center",marginTop:8,color:"rgba(255,255,255,.28)",lineHeight:1.5}}>
+                      {lang==="de"?"Sichere deinem Kind den entscheidenden Vorteil.":lang==="en"?"Give your child the decisive advantage.":lang==="fr"?"Offrez à votre enfant l'avantage décisif.":"Dai al tuo figlio il vantaggio decisivo."}
+                    </div>
+                  </div>}
+                  <div style={{textAlign:"center",fontSize:11,color:"rgba(255,255,255,.18)",marginTop:10}}>{isStarter?(lang==="de"?"Stripe · ✅ Twint · Einmalig":lang==="en"?"Stripe · ✅ Twint · One-time":lang==="fr"?"Stripe · ✅ Twint · Unique":"Stripe · ✅ Twint · Una tantum"):(lang==="de"?"Stripe · Twint · Jederzeit kündbar":lang==="en"?"Stripe · Twint · Cancel anytime":lang==="fr"?"Stripe · Twint · Résiliable":"Stripe · Twint · Cancellabile")}</div>
                 </div>
               );
             })}
@@ -6407,7 +6578,6 @@ RISPOSTA: "Sarebbe possibile un bonus di CHF 15k se il budget è limitato?"`)
   if(page==="app") return(<>{<style>{FONTS+CSS}</style>}{sharedOverlays}{pw&&<PW/>}
     {authModals}
     {showProfiles&&<ProfileManager lang={lang} onClose={()=>setShowProfiles(false)} onSelect={p=>{if(p){setActiveProfile(p);setProf({name:p.name||"",beruf:p.beruf||"",erfahrung:p.erfahrung||"",skills:p.skills||"",sprachen:p.sprachen||"",ausbildung:p.ausbildung||""});}}}/>}
-    <ChatBot lang={lang} pro={pro} setPw={setPw} navTo={navTo} authSession={authSession} onAuthOpen={()=>{setAuthMode("login");setShowAuth(true);}}/>
     <Nav dark/>
     <div className="page-hdr dk">
       <h1>{t.app.title}</h1><p>{t.app.sub}</p>
@@ -6545,7 +6715,6 @@ RISPOSTA: "Sarebbe possibile un bonus di CHF 15k se il budget è limitato?"`)
   if(page==="ats") return(<>{<style>{FONTS+CSS}</style>}{pw&&<PW/>}
     {authModals}
     {showProfiles&&<ProfileManager lang={lang} onClose={()=>setShowProfiles(false)} onSelect={p=>{if(p){setActiveProfile(p);setProf({name:p.name||"",beruf:p.beruf||"",erfahrung:p.erfahrung||"",skills:p.skills||"",sprachen:p.sprachen||"",ausbildung:p.ausbildung||""});}}}/>}
-    <ChatBot lang={lang} pro={pro} setPw={setPw} navTo={navTo} authSession={authSession} onAuthOpen={()=>{setAuthMode("login");setShowAuth(true);}}/>
     <Nav dark/>
     <div className="page-hdr dk"><h1>{t.ats.title}</h1><p>{t.ats.sub}</p></div>
     <div className="abody">
@@ -6619,7 +6788,6 @@ RISPOSTA: "Sarebbe possibile un bonus di CHF 15k se il budget è limitato?"`)
   if(page==="zeugnis") return(<>{<style>{FONTS+CSS}</style>}{pw&&<PW/>}
     {authModals}
     {showProfiles&&<ProfileManager lang={lang} onClose={()=>setShowProfiles(false)} onSelect={p=>{if(p){setActiveProfile(p);setProf({name:p.name||"",beruf:p.beruf||"",erfahrung:p.erfahrung||"",skills:p.skills||"",sprachen:p.sprachen||"",ausbildung:p.ausbildung||""});}}}/>}
-    <ChatBot lang={lang} pro={pro} setPw={setPw} navTo={navTo} authSession={authSession} onAuthOpen={()=>{setAuthMode("login");setShowAuth(true);}}/>
     <Nav dark/>
     <div className="page-hdr am"><h1>{t.zeugnis.title}</h1><p>{t.zeugnis.sub}</p></div>
     <div className="abody">
@@ -6684,7 +6852,6 @@ RISPOSTA: "Sarebbe possibile un bonus di CHF 15k se il budget è limitato?"`)
   if(page==="jobmatch") return(<>{<style>{FONTS+CSS}</style>}{pw&&<PW/>}
     {authModals}
     {showProfiles&&<ProfileManager lang={lang} onClose={()=>setShowProfiles(false)} onSelect={p=>{if(p){setActiveProfile(p);setProf({name:p.name||"",beruf:p.beruf||"",erfahrung:p.erfahrung||"",skills:p.skills||"",sprachen:p.sprachen||"",ausbildung:p.ausbildung||""});}}}/>}
-    <ChatBot lang={lang} pro={pro} setPw={setPw} navTo={navTo} authSession={authSession} onAuthOpen={()=>{setAuthMode("login");setShowAuth(true);}}/>
     <Nav dark/>
     <div className="page-hdr vi"><h1>{t.jobmatch.title}</h1><p>{t.jobmatch.sub}</p></div>
     <div className="abody">
@@ -6738,7 +6905,6 @@ RISPOSTA: "Sarebbe possibile un bonus di CHF 15k se il budget è limitato?"`)
   if(page==="linkedin") return(<>{<style>{FONTS+CSS}</style>}{pw&&<PW/>}
     {authModals}
     {showProfiles&&<ProfileManager lang={lang} onClose={()=>setShowProfiles(false)} onSelect={p=>{if(p){setActiveProfile(p);setProf({name:p.name||"",beruf:p.beruf||"",erfahrung:p.erfahrung||"",skills:p.skills||"",sprachen:p.sprachen||"",ausbildung:p.ausbildung||""});}}}/>}
-    <ChatBot lang={lang} pro={pro} setPw={setPw} navTo={navTo} authSession={authSession} onAuthOpen={()=>{setAuthMode("login");setShowAuth(true);}}/>
     <Nav dark/>
     <div className="page-hdr bl"><h1>{t.linkedin.title}</h1><p>{t.linkedin.sub}</p></div>
     <div className="abody">
@@ -6810,7 +6976,6 @@ RISPOSTA: "Sarebbe possibile un bonus di CHF 15k se il budget è limitato?"`)
   if(page==="coach") return(<>{<style>{FONTS+CSS}</style>}{sharedOverlays}{pw&&<PW/>}
     {authModals}
     {showProfiles&&<ProfileManager lang={lang} onClose={()=>setShowProfiles(false)} onSelect={p=>{if(p){setActiveProfile(p);setProf({name:p.name||"",beruf:p.beruf||"",erfahrung:p.erfahrung||"",skills:p.skills||"",sprachen:p.sprachen||"",ausbildung:p.ausbildung||""});}}}/>}
-    <ChatBot lang={lang} pro={pro} setPw={setPw} navTo={navTo} authSession={authSession} onAuthOpen={()=>{setAuthMode("login");setShowAuth(true);}}/>
     <Nav dark/>
     <div className="page-hdr dk"><h1>{t.coach.title}</h1><p>{t.coach.sub}</p></div>
     <div className="abody">
@@ -6867,7 +7032,6 @@ RISPOSTA: "Sarebbe possibile un bonus di CHF 15k se il budget è limitato?"`)
   if(page==="excel") return(<>{<style>{FONTS+CSS}</style>}{sharedOverlays}{pw&&<PW/>}
     {authModals}
     {showProfiles&&<ProfileManager lang={lang} onClose={()=>setShowProfiles(false)} onSelect={p=>{if(p){setActiveProfile(p);setProf({name:p.name||"",beruf:p.beruf||"",erfahrung:p.erfahrung||"",skills:p.skills||"",sprachen:p.sprachen||"",ausbildung:p.ausbildung||""});}}}/>}
-    <ChatBot lang={lang} pro={pro} setPw={setPw} navTo={navTo} authSession={authSession} onAuthOpen={()=>{setAuthMode("login");setShowAuth(true);}}/>
     <Nav dark/>
     <div className="page-hdr" style={{background:"linear-gradient(135deg,#166534,#15803d)",padding:"48px 28px 0",textAlign:"center"}}>
       <h1 style={{fontFamily:"var(--hd)",fontSize:32,fontWeight:800,color:"white",marginBottom:7,letterSpacing:"-1px"}}>📊 {t.nav.excel}</h1>
@@ -6984,7 +7148,6 @@ RISPOSTA: "Sarebbe possibile un bonus di CHF 15k se il budget è limitato?"`)
   if(page==="pptx") return(<>{<style>{FONTS+CSS}</style>}{sharedOverlays}{pw&&<PW/>}
     {authModals}
     {showProfiles&&<ProfileManager lang={lang} onClose={()=>setShowProfiles(false)} onSelect={p=>{if(p){setActiveProfile(p);setProf({name:p.name||"",beruf:p.beruf||"",erfahrung:p.erfahrung||"",skills:p.skills||"",sprachen:p.sprachen||"",ausbildung:p.ausbildung||""});}}}/>}
-    <ChatBot lang={lang} pro={pro} setPw={setPw} navTo={navTo} authSession={authSession} onAuthOpen={()=>{setAuthMode("login");setShowAuth(true);}}/>
     <Nav dark/>
     <div className="page-hdr" style={{background:"linear-gradient(135deg,#1e3a5f,#2563eb)",padding:"48px 28px 0",textAlign:"center"}}>
       <h1 style={{fontFamily:"var(--hd)",fontSize:32,fontWeight:800,color:"white",marginBottom:7,letterSpacing:"-1px"}}>📽️ {t.nav.pptx}</h1>
@@ -7153,9 +7316,16 @@ Karriereplanung:
 - Du kennst Netzwerk-Strategien, Cold-Outreach-Taktiken
 - Du kennst Weiterbildungsmöglichkeiten in der Schweiz (CAS, MAS, MBA, Berufsprüfung, eidg. Diplom)
 
-Schule & Ausbildung:
+Schule & Ausbildung (Schweizer Lehrstellensystem – WICHTIG!):
 - Du kennst das Schweizer Bildungssystem (Berufslehre EFZ/EBA, Gymnasium, FH, Uni, ETH)
-- Du kannst Lehrstellen-Bewerbungen und Motivationsschreiben für Jugendliche schreiben
+- Du weisst: IMMER "Lehrstelle" (NIE "Ausbildungsplatz"), "Lernende*r" (NIE "Azubi"), "Motivationsschreiben" (NIE "Anschreiben"), "Berufslehre" (NIE "Ausbildung")
+- Schnupperlehre ist DER entscheidende Swiss-USP: Fast keine Lehrstelle ohne Schnuppern. Immer nach Schnupperlehre-Erfahrung fragen und in Motivationsschreiben als HT3 ausführlich beschreiben (Datum, Betrieb, konkretes Erlebnis, Fazit)
+- Swiss-Apprentice CV: Foto oben rechts, Schnupperlehren-Sektion an 2. Stelle, Noten (Mathe/Deutsch) ausweisen, Referenzen (Lehrer, Schnupperlehre-Betreuer)
+- Motivationsschreiben-Struktur: 1. Einleitung (Berufsmesse/Schnupperlehre) → 2. Motivation/Talent → 3. Warum diese Firma → 4. SCHNUPPERLEHRE-DETAILS (wichtigster Teil!) → 5. Interview-Einladung
+- Format: Datum rechtsbündig "Ort, DD. Monat JJJJ", Betreff fett "Bewerbung als Lernende*r [Beruf] EFZ/EBA", Schweizer Rechtschreibung (kein ß)
+- Multicheck/Basic-Check: Viele grosse Firmen verlangen diese Tests – Übungshefte empfehlen
+- EFZ = 3-4 Jahre, EBA = 2 Jahre. Typische Lehrberufe: Kaufmann/-frau EFZ, Informatiker EFZ, FaGe EFZ, Detailhandelsfachmann/-frau EFZ, Polymechaniker EFZ
+- RAV/ALV: Nachweis Arbeitsbemühungen braucht: Datum, Firma+Ort, Stelle, Art der Bewerbung (Schriftlich/Telefonisch/Persönlich), Kontaktperson – Stellify Tracker hilft dabei!
 - Du kannst Lernpläne, Zusammenfassungen und Prüfungsstrategien erstellen
 
 Produktivität & Kommunikation:
@@ -7570,7 +7740,6 @@ Bleibe freundlich, motivierend und konsequent. Beantworte keine konkreten Karrie
   if(page==="tracker") return(<>{<style>{FONTS+CSS}</style>}{sharedOverlays}{pw&&<PW/>}
     {authModals}
     {showProfiles&&<ProfileManager lang={lang} onClose={()=>setShowProfiles(false)} onSelect={p=>{if(p){setActiveProfile(p);setProf({name:p.name||"",beruf:p.beruf||"",erfahrung:p.erfahrung||"",skills:p.skills||"",sprachen:p.sprachen||"",ausbildung:p.ausbildung||""});}}}/>}
-    <ChatBot lang={lang} pro={pro} setPw={setPw} navTo={navTo} authSession={authSession} onAuthOpen={()=>{setAuthMode("login");setShowAuth(true);}}/>
     <Nav dark/>
     <BewerbungsTracker lang={lang} pro={pro} setPw={setPw} navTo={navTo}/>
     <Footer/>
