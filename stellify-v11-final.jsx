@@ -263,10 +263,10 @@ async function callAIWithFileStreaming(file, prompt, onChunk) {
 
 
 // ── FONTS & CSS ──
-const FONTS = `@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Figtree:wght@300;400;500;600&display=swap');`;
+const FONTS = `@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap');`;
 const CSS = `
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{--ink:#0b0b12;--bg:#f2f3f7;--em:#10b981;--em2:#059669;--em3:rgba(16,185,129,.11);--am:#f59e0b;--am2:rgba(245,158,11,.14);--bl:#3b82f6;--bl2:rgba(59,130,246,.12);--mu:rgba(11,11,18,.46);--bo:rgba(11,11,18,.1);--bos:rgba(11,11,18,.06);--dk:#07070e;--dk2:#0f0f1a;--dk3:#161624;--hd:'Bricolage Grotesque',system-ui,sans-serif;--bd:'Figtree',system-ui,sans-serif;--r:12px;--r2:20px}
+:root{--ink:#1A1A18;--bg:#FAFAF8;--em:#2563EB;--em2:#1D4ED8;--em3:rgba(37,99,235,.10);--am:#f59e0b;--am2:rgba(245,158,11,.14);--bl:#2563EB;--bl2:rgba(37,99,235,.12);--mu:#5C5C58;--bo:rgba(26,26,24,.09);--bos:rgba(26,26,24,.05);--dk:#0F0F0E;--dk2:#141412;--dk3:#1A1A18;--hd:'Instrument Serif',Georgia,serif;--bd:'DM Sans',system-ui,sans-serif;--r:12px;--r2:18px}
 /* ── APPLE-STYLE ENHANCEMENTS ──────────────────── */
 @supports(backdrop-filter:blur(0)){
   .glass{background:rgba(255,255,255,.08)!important;backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border:1px solid rgba(255,255,255,.12)!important}
@@ -297,8 +297,8 @@ const CSS = `
 /* Scrollbar Apple-style */
 ::-webkit-scrollbar{width:5px;height:5px}
 ::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:rgba(16,185,129,.3);border-radius:99px}
-::-webkit-scrollbar-thumb:hover{background:rgba(16,185,129,.5)}
+::-webkit-scrollbar-thumb{background:rgba(37,99,235,.25);border-radius:99px}
+::-webkit-scrollbar-thumb:hover{background:rgba(37,99,235,.45)}
 /* SF-style focus ring */
 *:focus-visible{outline:2px solid var(--em);outline-offset:3px;border-radius:6px}
 /* Smooth page transitions */
@@ -656,7 +656,139 @@ footer{background:var(--dk);padding:50px 28px 24px}
   .testi-grid,.steps-grid{grid-template-columns:1fr;gap:14px}
   .step-arr{display:none}
 }
+
+/* ══════════════════════════════════════════
+   PROTOTYPE DESIGN – LIGHT LANDING PAGE
+══════════════════════════════════════════ */
+
+/* Hero */
+.lp-hero{background:var(--bg);padding:80px 0;min-height:calc(100vh - 64px);display:flex;align-items:center}
+.lp-hero-inner{display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:64px}
+@media(max-width:900px){.lp-hero-inner{grid-template-columns:1fr;gap:44px}}
+.lp-hero-badge{display:inline-flex;align-items:center;gap:8px;background:var(--em3);color:var(--em);font-size:13px;font-weight:500;padding:6px 14px;border-radius:100px;margin-bottom:28px;border:1px solid rgba(37,99,235,.18)}
+.lp-badge-dot{width:6px;height:6px;border-radius:50%;background:var(--em);display:inline-block;flex-shrink:0}
+.lp-h1{font-family:var(--hd);font-size:clamp(40px,5vw,60px);font-weight:400;line-height:1.06;letter-spacing:-1.5px;color:var(--ink);margin-bottom:24px}
+.lp-h1 em{font-style:italic;color:var(--em)}
+.lp-hero-sub{font-size:18px;font-weight:300;color:var(--mu);line-height:1.7;margin-bottom:40px;max-width:480px}
+.lp-hero-actions{display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-bottom:48px}
+.lp-hero-stats{display:flex;gap:32px;padding-top:24px;border-top:1px solid var(--bo);flex-wrap:wrap}
+.lp-stat-num{font-family:var(--hd);font-size:24px;font-weight:400;color:var(--ink);display:block;letter-spacing:-.5px}
+.lp-stat-label{font-size:12px;color:var(--mu);display:block;margin-top:2px}
+.lp-hero-visual{position:relative}
+@media(max-width:900px){.lp-hero-visual{display:none}}
+
+/* Chat mockup */
+.lp-chat{background:white;border:1px solid var(--bo);border-radius:24px;padding:22px;box-shadow:0 12px 48px rgba(0,0,0,.09),0 4px 16px rgba(0,0,0,.04);position:relative;overflow:hidden}
+.lp-chat::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--em) 0%,#818CF8 50%,#06B6D4 100%);border-radius:24px 24px 0 0}
+.lp-chat-hdr{display:flex;align-items:center;gap:12px;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--bo)}
+.lp-chat-av{width:34px;height:34px;border-radius:9px;background:var(--em);display:flex;align-items:center;justify-content:center;font-family:var(--hd);font-size:14px;color:#fff;flex-shrink:0}
+.lp-chat-name{font-size:14px;font-weight:500;color:var(--ink)}
+.lp-chat-status{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--mu);margin-top:1px}
+.lp-status-dot{width:7px;height:7px;border-radius:50%;background:#22c55e;display:inline-block;flex-shrink:0}
+.lp-msgs{display:flex;flex-direction:column;gap:10px}
+.lp-msg-u{align-self:flex-end;background:var(--em);color:white;padding:9px 13px;border-radius:14px 14px 4px 14px;font-size:13px;max-width:84%;line-height:1.5}
+.lp-msg-a{align-self:flex-start;background:var(--bg);color:var(--ink);border:1px solid var(--bo);padding:9px 13px;border-radius:14px 14px 14px 4px;font-size:13px;max-width:88%;line-height:1.55}
+.lp-typing{display:flex;align-items:center;gap:4px;padding:10px 13px;background:var(--bg);border:1px solid var(--bo);border-radius:14px;align-self:flex-start;margin-top:2px}
+.lp-typing-dot{width:7px;height:7px;border-radius:50%;background:var(--mu);opacity:.5;animation:lpTyp 1.2s ease-in-out infinite}
+.lp-typing-dot:nth-child(2){animation-delay:.2s}
+.lp-typing-dot:nth-child(3){animation-delay:.4s}
+@keyframes lpTyp{0%,80%,100%{transform:scale(.5);opacity:.25}40%{transform:scale(1);opacity:.7}}
+.lp-fc{position:absolute;background:white;border:1px solid var(--bo);border-radius:12px;padding:9px 13px;box-shadow:0 4px 18px rgba(0,0,0,.1);font-size:12px;display:flex;align-items:center;gap:7px;white-space:nowrap}
+.lp-fc1{bottom:-16px;left:-18px}
+.lp-fc2{top:20px;right:-18px}
+.lp-fc-green{font-weight:700;color:#22c55e}
+.lp-fc-blue{font-weight:700;color:var(--em)}
+
+/* Logos */
+.lp-logos{padding:36px 0;border-top:1px solid var(--bo);border-bottom:1px solid var(--bo);text-align:center;background:white}
+.lp-logos-label{font-size:11px;font-weight:600;color:var(--mu);letter-spacing:.1em;text-transform:uppercase;margin-bottom:20px}
+.lp-logos-mw{overflow:hidden;position:relative}
+.lp-logos-mw::before,.lp-logos-mw::after{content:'';position:absolute;top:0;bottom:0;width:80px;z-index:2;pointer-events:none}
+.lp-logos-mw::before{left:0;background:linear-gradient(to right,white,transparent)}
+.lp-logos-mw::after{right:0;background:linear-gradient(to left,white,transparent)}
+.lp-logos-m{display:flex;align-items:center;gap:52px;width:max-content;animation:lpMar 26s linear infinite}
+.lp-logos-m:hover{animation-play-state:paused}
+@keyframes lpMar{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.lp-logo{font-family:var(--hd);font-size:16px;color:var(--mu);opacity:.4;white-space:nowrap;user-select:none;transition:opacity .2s}
+.lp-logo:hover{opacity:.8}
+
+/* Section headers */
+.lp-section{padding:88px 0}
+.lp-section-alt{background:white}
+.lp-label{font-size:12px;font-weight:600;color:var(--em);letter-spacing:.1em;text-transform:uppercase;margin-bottom:14px;display:block}
+.lp-title{font-family:var(--hd);font-size:clamp(28px,3.5vw,44px);font-weight:400;line-height:1.1;letter-spacing:-1px;color:var(--ink);margin-bottom:16px}
+.lp-title em{font-style:italic;color:var(--em)}
+.lp-sub{font-size:16px;font-weight:300;color:var(--mu);line-height:1.75;max-width:560px}
+.lp-center{text-align:center}.lp-center .lp-sub{margin:0 auto}
+
+/* Tool cards */
+.lp-tool-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+@media(max-width:1000px){.lp-tool-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.lp-tool-grid{grid-template-columns:1fr}}
+.lp-tool-card{background:white;border:1.5px solid var(--bo);border-radius:var(--r2);padding:26px;cursor:pointer;transition:transform .2s cubic-bezier(.34,1.56,.64,1),box-shadow .2s,border-color .2s;position:relative;overflow:hidden;text-align:left}
+.lp-tool-card:hover{transform:translateY(-3px);box-shadow:0 8px 28px rgba(0,0,0,.09);border-color:var(--em)}
+.lp-tool-ico{font-size:26px;margin-bottom:12px;display:inline-block;transition:transform .2s cubic-bezier(.34,1.56,.64,1)}
+.lp-tool-card:hover .lp-tool-ico{transform:scale(1.15) translateY(-2px)}
+.lp-tool-title{font-family:var(--hd);font-size:16px;font-weight:400;color:var(--ink);margin-bottom:6px}
+.lp-tool-desc{font-size:13px;color:var(--mu);line-height:1.7}
+.lp-badge{font-size:10px;font-weight:600;padding:2px 9px;border-radius:20px;letter-spacing:.3px;position:absolute;top:14px;right:14px}
+.lp-badge-free{background:var(--em3);color:var(--em)}
+.lp-badge-pro{background:rgba(37,99,235,.08);color:var(--em);border:1px solid rgba(37,99,235,.2)}
+
+/* How it works */
+.lp-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+@media(max-width:900px){.lp-steps{grid-template-columns:1fr 1fr}}
+@media(max-width:480px){.lp-steps{grid-template-columns:1fr}}
+.lp-step{background:white;border:1.5px solid var(--bo);border-radius:var(--r2);padding:26px 22px;transition:transform .2s,box-shadow .2s}
+.lp-step:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.08)}
+.lp-step-n{width:42px;height:42px;border-radius:50%;background:var(--em3);border:1.5px solid rgba(37,99,235,.2);display:flex;align-items:center;justify-content:center;font-family:var(--hd);font-size:16px;font-weight:400;color:var(--em);margin-bottom:16px;flex-shrink:0}
+.lp-step h4{font-family:var(--hd);font-size:16px;font-weight:400;color:var(--ink);margin-bottom:8px}
+.lp-step p{font-size:13px;line-height:1.7;color:var(--mu)}
+
+/* Testimonials light */
+.lp-testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+@media(max-width:900px){.lp-testi-grid{grid-template-columns:1fr}}
+.lp-testi-card{background:white;border:1.5px solid var(--bo);border-radius:var(--r2);padding:24px;transition:transform .2s,box-shadow .2s}
+.lp-testi-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.08)}
+.lp-testi-stars{color:#f59e0b;font-size:14px;letter-spacing:2px;margin-bottom:14px}
+.lp-testi-text{font-size:14px;line-height:1.8;color:var(--mu);font-style:italic;margin-bottom:20px;font-weight:300}
+.lp-testi-author{display:flex;align-items:center;gap:12px;padding-top:16px;border-top:1px solid var(--bo)}
+.lp-testi-av{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13px;color:white;flex-shrink:0}
+.lp-testi-name{font-size:13px;font-weight:500;color:var(--ink)}
+.lp-testi-role{font-size:11px;color:var(--mu);margin-top:2px}
+
+/* CV Compare */
+.lp-cv-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;max-width:860px;margin:0 auto}
+@media(max-width:680px){.lp-cv-grid{grid-template-columns:1fr}}
+.lp-cv-card{background:var(--bg);border:1px solid var(--bo);border-radius:var(--r2);overflow:hidden}
+.lp-cv-hdr{padding:11px 16px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--bo);font-size:13px;font-weight:500}
+.lp-cv-hdr.bad{background:#FFF5F5;color:#B91C1C}
+.lp-cv-hdr.good{background:#F0FDF4;color:#059669}
+.lp-cv-body{padding:16px;display:flex;flex-direction:column;gap:9px}
+.lp-cv-block{padding:10px 11px;border-radius:8px;border:1px solid var(--bo);background:white;display:flex;flex-direction:column;gap:6px}
+.lp-cv-block.bad{border-color:rgba(239,68,68,.2)}
+.lp-cv-block.good{border-color:rgba(5,150,105,.25)}
+.lp-cv-label{font-size:10px;font-weight:600;color:var(--mu);letter-spacing:.05em;text-transform:uppercase}
+.lp-cv-line{height:8px;border-radius:100px;background:var(--bo)}
+.lp-cv-line.sh{width:40%}.lp-cv-line.md{width:65%}.lp-cv-line.lg{width:88%}.lp-cv-line.fl{width:100%}
+.lp-cv-block.good .lp-cv-line{background:rgba(5,150,105,.2)}
+.lp-cv-ai{font-size:10px;font-weight:600;color:#059669;background:#F0FDF4;border-radius:20px;padding:2px 8px;display:inline-block;width:fit-content}
+.lp-cv-score{padding:10px 11px}
+.lp-cv-score-row{display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px}
+.lp-cv-track{height:6px;border-radius:100px;background:var(--bo);overflow:hidden}
+.lp-cv-fill{height:100%;border-radius:100px}
+
+/* CTA section */
+.lp-cta{background:var(--ink);padding:88px 0;text-align:center;position:relative;overflow:hidden}
+.lp-cta::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 60% at 50% 50%,rgba(37,99,235,.12),transparent);pointer-events:none}
+.btn-white{font-family:var(--bd);font-size:16px;font-weight:500;color:var(--ink);background:white;border:none;cursor:pointer;padding:15px 32px;border-radius:var(--r2);display:inline-flex;align-items:center;gap:8px;transition:transform .15s,box-shadow .15s;box-shadow:0 4px 16px rgba(0,0,0,.15)}
+.btn-white:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.2)}
+
+/* Reveal animation on landing */
+.lp-reveal{opacity:0;transform:translateY(18px);transition:opacity .5s ease,transform .5s ease}
+.lp-reveal.v{opacity:1;transform:none}
 `;
+
 
 // ── ALL TEXT (single language factory) ──
 const mkT = (lang) => {
@@ -4459,9 +4591,9 @@ export default function App() {
   useEffect(()=>{
     const timer = setTimeout(()=>{
       const obs = new IntersectionObserver((entries)=>{
-        entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add("on"); obs.unobserve(e.target); }});
+        entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add("on"); e.target.classList.add("v"); obs.unobserve(e.target); }});
       },{threshold:0.1,rootMargin:"0px 0px -40px 0px"});
-      document.querySelectorAll(".reveal").forEach(el=>obs.observe(el));
+      document.querySelectorAll(".reveal,.lp-reveal").forEach(el=>obs.observe(el));
       return ()=>obs.disconnect();
     },80);
     return ()=>clearTimeout(timer);
@@ -5917,815 +6049,319 @@ RISPOSTA: "Sarebbe possibile un bonus di CHF 15k se il budget è limitato?"`)
     {cookieBanner&&<CookieBanner lang={lang} onAccept={acceptCookie}/>}
     <div>
       <Nav/>
-      {/* HERO */}
-      <section className="hero" style={{position:"relative",overflow:"hidden"}}>
-        <div className="orb" style={{width:600,height:600,background:"radial-gradient(circle,rgba(16,185,129,.28),transparent)",top:"-200px",left:"-180px",animationDelay:"0s"}}/>
-        <div className="orb" style={{width:500,height:500,background:"radial-gradient(circle,rgba(99,102,241,.2),transparent)",top:"80px",right:"-120px",animationDelay:"-4s"}}/>
-        <div className="orb" style={{width:380,height:380,background:"radial-gradient(circle,rgba(245,158,11,.15),transparent)",bottom:"-100px",left:"38%",animationDelay:"-7s"}}/>
-        <div className="hbg"/><div className="hdots"/>
-        <div className="con">
-          <div className="hero-inner">
-            {/* Left: Text */}
-            <div className="hero-text">
-              <div className="eyebrow">{t.hero.eye}</div>
-              <h1 className="hh">{t.hero.h1a}<br/>{t.hero.h1b} <em>{t.hero.h1c}</em></h1>
-              <p className="hsub">{t.hero.sub}</p>
-              <div className="hctas">
-                <button className="btn b-em b-lg" onClick={()=>navTo("app")}>{t.hero.cta}</button>
-                <button className="btn b-out" onClick={()=>document.getElementById("tools")?.scrollIntoView({behavior:"smooth"})}>{t.hero.how}</button>
-              </div>
-              {/* Trust signals */}
-              <div style={{display:"flex",flexWrap:"wrap",gap:"8px 18px",marginTop:20,alignItems:"center"}}>
-                {[
-                  {ico:"🔒", txt:lang==="de"?"Keine Kreditkarte":lang==="fr"?"Sans carte":lang==="it"?"Senza carta":"No credit card"},
-                  {ico:"🇨🇭", txt:lang==="de"?"Schweizer Unternehmen":lang==="fr"?"Entreprise suisse":lang==="it"?"Azienda svizzera":"Swiss company"},
-                  {ico:"⚡", txt:lang==="de"?"1× gratis testen":lang==="fr"?"1× gratuit":lang==="it"?"1× gratis":"1× free"},
-                ].map((tr,i)=>(
-                  <div key={i} style={{display:"flex",alignItems:"center",gap:5,fontSize:12,color:"rgba(255,255,255,.38)",fontWeight:500}}>
-                    <span style={{fontSize:12}}>{tr.ico}</span><span>{tr.txt}</span>
-                  </div>
-                ))}
-              </div>
-              <div className="hstats">{t.hero.stats.map((s,i)=><AnimatedStatBox key={i} n={s.n} l={s.l}/>)}</div>
+
+      {/* ── HERO ── */}
+      <section className="lp-hero">
+        <div className="lp-hero-inner con">
+          {/* Left text */}
+          <div>
+            <div className="lp-hero-badge">
+              <span className="lp-badge-dot"/>
+              {lang==="de"?"KI-gestützt für den Schweizer Arbeitsmarkt":lang==="fr"?"Propulsé par l'IA pour le marché suisse":lang==="it"?"Potenziato dall'IA per il mercato svizzero":"AI-powered for the Swiss job market"}
             </div>
-
-            {/* Right: Product Preview Card */}
-            <div className="hero-preview">
-              <div style={{position:"relative",width:"100%",maxWidth:420}}>
-                {/* Glow behind card */}
-                <div style={{position:"absolute",inset:-30,background:"radial-gradient(circle,rgba(16,185,129,.18),transparent 70%)",pointerEvents:"none",zIndex:0}}/>
-                {/* Main card */}
-                <div style={{position:"relative",zIndex:1,background:"rgba(15,15,28,.95)",border:"1px solid rgba(255,255,255,.1)",borderRadius:20,padding:"22px",backdropFilter:"blur(20px)",boxShadow:"0 32px 80px rgba(0,0,0,.6)"}}>
-                  {/* Card header */}
-                  <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:18,paddingBottom:14,borderBottom:"1px solid rgba(255,255,255,.07)"}}>
-                    <div style={{display:"flex",gap:5}}>
-                      <div style={{width:10,height:10,borderRadius:"50%",background:"#ef4444"}}/>
-                      <div style={{width:10,height:10,borderRadius:"50%",background:"#f59e0b"}}/>
-                      <div style={{width:10,height:10,borderRadius:"50%",background:"#10b981"}}/>
-                    </div>
-                    <div style={{flex:1,textAlign:"center",fontSize:11,color:"rgba(255,255,255,.3)",fontWeight:600,letterSpacing:.5}}>
-                      ✦ Stellify AI — {lang==="de"?"Motivationsschreiben":lang==="fr"?"Lettre de motivation":lang==="it"?"Lettera di motivazione":"Cover Letter"}
-                    </div>
-                    <div style={{width:10,height:10,borderRadius:3,background:"rgba(16,185,129,.4)"}}/>
-                  </div>
-                  {/* ATS Score badge */}
-                  <div style={{display:"flex",alignItems:"center",gap:8,background:"rgba(16,185,129,.1)",border:"1px solid rgba(16,185,129,.2)",borderRadius:10,padding:"8px 12px",marginBottom:16}}>
-                    <div style={{fontSize:18,fontFamily:"var(--hd)",fontWeight:800,color:"var(--em)"}}>92%</div>
-                    <div>
-                      <div style={{fontSize:11,fontWeight:700,color:"var(--em)"}}>ATS-Score</div>
-                      <div style={{fontSize:10,color:"rgba(255,255,255,.3)"}}>
-                        {lang==="de"?"Sehr gut – passt zur Stelle":"Very good – matches the role"}
-                      </div>
-                    </div>
-                    <div style={{marginLeft:"auto",display:"flex",gap:2}}>
-                      {[1,1,1,1,.3].map((o,j)=><div key={j} style={{width:6,height:6,borderRadius:"50%",background:`rgba(16,185,129,${o})`}}/>)}
-                    </div>
-                  </div>
-                  {/* Preview text lines */}
-                  <div style={{fontSize:12,color:"rgba(255,255,255,.7)",lineHeight:1.85,fontFamily:"var(--bd)"}}>
-                    <div style={{fontSize:11,fontWeight:700,color:"rgba(255,255,255,.25)",letterSpacing:1,textTransform:"uppercase",marginBottom:8}}>
-                      {lang==="de"?"Motivationsschreiben":lang==="fr"?"Lettre de motivation":lang==="it"?"Lettera di motivazione":"Cover Letter"}
-                    </div>
-                    <div style={{color:"rgba(255,255,255,.55)",fontSize:12,lineHeight:1.8}}>
-                      {lang==="de"
-                        ? <>Sehr geehrte Damen und Herren,<br/><br/>mit grossem Interesse habe ich Ihre Stellenausschreibung als <span style={{color:"var(--em)",fontWeight:600}}>Senior Marketing Manager</span> gelesen. Mit meiner 5-jährigen Erfahrung im digitalen Marketing und nachgewiesenen Erfolgen bei der Lead-Generierung…</>
-                        : <>Dear Hiring Team,<br/><br/>I am excited to apply for the <span style={{color:"var(--em)",fontWeight:600}}>Senior Marketing Manager</span> position. With 5 years of digital marketing experience and proven results in lead generation…</>}
-                    </div>
-                  </div>
-                  {/* Bottom row */}
-                  <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginTop:16,paddingTop:14,borderTop:"1px solid rgba(255,255,255,.06)"}}>
-                    <div style={{display:"flex",gap:6}}>
-                      {["PDF","Word","Kopieren"].map((a,j)=>(
-                        <div key={j} style={{fontSize:10,fontWeight:700,background:"rgba(255,255,255,.07)",color:"rgba(255,255,255,.4)",padding:"3px 8px",borderRadius:6}}>{a}</div>
-                      ))}
-                    </div>
-                    <div style={{fontSize:10,color:"rgba(255,255,255,.2)"}}>
-                      ⚡ {lang==="de"?"Generiert in 8s":"Generated in 8s"}
-                    </div>
-                  </div>
-                </div>
-                {/* Floating badge */}
-                <div style={{position:"absolute",top:-14,right:16,background:"linear-gradient(135deg,#10b981,#059669)",color:"white",fontSize:11,fontWeight:700,padding:"5px 14px",borderRadius:99,boxShadow:"0 4px 16px rgba(16,185,129,.4)",zIndex:2,whiteSpace:"nowrap"}}>
-                  ✦ {lang==="de"?"KI-generiert in Echtzeit":lang==="fr"?"Généré par IA":"AI-generated live"}
-                </div>
-              </div>
+            <h1 className="lp-h1">{t.hero.h1a}<br/>{t.hero.h1b} <em>{t.hero.h1c}</em></h1>
+            <p className="lp-hero-sub">{t.hero.sub}</p>
+            <div className="lp-hero-actions">
+              <button className="btn b-em b-lg" onClick={()=>navTo("app")}>{t.hero.cta}</button>
+              <button className="btn b-outd" onClick={()=>document.getElementById("tools")?.scrollIntoView({behavior:"smooth"})}>{t.hero.how}</button>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ═══ HOW IT WORKS ═══ */}
-      <section style={{padding:"80px 0 72px",background:"white"}}>
-        <div className="con">
-          <div className="sh shc">
-            <div className="seye">✦ {lang==="de"?"So einfach":"How it works"}</div>
-            <h2 className="st" style={{color:"var(--ink)"}}>{lang==="de"?"In 3 Schritten zur perfekten Bewerbung":lang==="en"?"3 steps to your perfect application":lang==="fr"?"3 étapes pour votre candidature parfaite":"3 passi per la candidatura perfetta"}</h2>
-            <p className="ss" style={{color:"var(--mu)"}}>{lang==="de"?"Kein Aufwand. Sofortige Resultate. Schweizer Qualität.":lang==="en"?"Zero effort. Instant results. Swiss quality.":lang==="fr"?"Zéro effort. Résultats instantanés.":"Zero sforzo. Risultati istantanei."}</p>
-          </div>
-          <div className="steps-grid">
-            {[
-              {n:"01",ico:"📋",title:lang==="de"?"Profil ausfüllen":lang==="en"?"Fill your profile":lang==="fr"?"Remplir le profil":"Compilare il profilo",desc:lang==="de"?"Trage Beruf, Erfahrung und Skills ein – oder lade deinen CV hoch. Stellify liest ihn automatisch.":lang==="en"?"Enter job title, experience and skills – or upload your CV. Stellify reads it automatically.":lang==="fr"?"Entrez votre poste, expérience et compétences – ou importez votre CV.":"Inserisci ruolo, esperienza e competenze – o carica il tuo CV."},
-              {n:"02",ico:"⚡",title:lang==="de"?"KI generiert in Sekunden":lang==="en"?"AI generates in seconds":lang==="fr"?"L'IA génère en secondes":"L'IA genera in secondi",desc:lang==="de"?"Stellify erstellt ein ATS-optimiertes Motivationsschreiben, überarbeiteten Lebenslauf und gibt dir einen ATS-Score.":lang==="en"?"Stellify creates an ATS-optimized cover letter, revised CV and gives you an ATS score.":lang==="fr"?"Stellify crée une lettre de motivation ATS-optimisée, un CV révisé et votre score ATS.":"Stellify crea una lettera di motivazione ATS-ottimizzata, CV rivisto e punteggio ATS."},
-              {n:"03",ico:"🚀",title:lang==="de"?"Bewerben und Job landen":lang==="en"?"Apply and land the job":lang==="fr"?"Postuler et décrocher le poste":"Candidarsi e ottenere il lavoro",desc:lang==="de"?"Kopiere den Text, exportiere als PDF oder schick die Bewerbung direkt ab. Fertig – in unter 3 Minuten.":lang==="en"?"Copy the text, export as PDF or send the application directly. Done – in under 3 minutes.":lang==="fr"?"Copiez le texte, exportez en PDF ou envoyez directement. Terminé en moins de 3 minutes.":"Copia il testo, esporta come PDF o invia direttamente. Fatto in meno di 3 minuti."},
-            ].map((s,i)=>(
-              <div key={i} className="step-card reveal" style={{transitionDelay:`${i*0.12}s`}}>
-                {i<2&&<div className="step-arr">→</div>}
-                <div className="step-num">{s.n}</div>
-                <div style={{fontSize:36,marginBottom:16,lineHeight:1}}>{s.ico}</div>
-                <div style={{fontFamily:"var(--hd)",fontSize:18,fontWeight:700,color:"var(--ink)",marginBottom:10,letterSpacing:"-0.3px",lineHeight:1.3}}>{s.title}</div>
-                <p style={{fontSize:14,color:"var(--mu)",lineHeight:1.75,margin:0}}>{s.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ═══ TOOLS HEADER ═══ */}
-      <section style={{padding:"72px 0 48px",background:"var(--bg)"}} id="tools">
-        <div className="con">
-          <div className="sh shc">
-            <div className="seye">{lang==="de"?"✦ 20+ Tools – ein Abo":lang==="en"?"✦ 20+ Tools – one subscription":lang==="fr"?"✦ 20+ outils – un abonnement":"✦ 20+ strumenti – un abbonamento"}</div>
-            <h2 className="st">{lang==="de"?"Nicht nur für Jobsuchende.":lang==="en"?"Not just for job seekers.":lang==="fr"?"Pas seulement pour les chercheurs d'emploi.":"Non solo per chi cerca lavoro."}</h2>
-            <p className="ss" style={{margin:"0 auto"}}>{lang==="de"?"Karriere, Schule, Produktivität – alles in einem Abo für CHF 19.90/Monat.":lang==="en"?"Career, school, productivity – all in one subscription for CHF 19.90/month.":lang==="fr"?"Carrière, école, productivité – tout pour CHF 19.90/mois.":"Carriera, scuola, produttività – tutto per CHF 19.90/mese."}</p>
-            {/* Category pills */}
-            <div style={{display:"flex",flexWrap:"wrap",justifyContent:"center",gap:8,marginTop:24}}>
-              {[
-                {ico:"💼",lbl:lang==="de"?"Karriere":lang==="fr"?"Carrière":lang==="it"?"Carriera":"Career",n:"8"},
-                {ico:"🎓",lbl:lang==="de"?"Schule":lang==="fr"?"École":lang==="it"?"Scuola":"School",n:"3"},
-                {ico:"⚡",lbl:lang==="de"?"Produktivität":lang==="fr"?"Productivité":lang==="it"?"Produttività":"Productivity",n:"3"},
-                {ico:"🌐",lbl:lang==="de"?"4 Sprachen":lang==="fr"?"4 langues":lang==="it"?"4 lingue":"4 languages",n:""},
-              ].map((p,i)=>(
-                <div key={i} style={{display:"flex",alignItems:"center",gap:6,background:"white",border:"1.5px solid var(--bo)",borderRadius:30,padding:"7px 16px",fontSize:13,fontWeight:600,color:"var(--ink)"}}>
-                  <span>{p.ico}</span><span>{p.lbl}</span>{p.n&&<span style={{background:"var(--em3)",color:"var(--em2)",borderRadius:20,padding:"1px 7px",fontSize:11,fontWeight:700}}>{p.n}</span>}
+            <div className="lp-hero-stats">
+              {[{n:"18+",l:t.hero.stats[0].l},{n:"3'000+",l:t.hero.stats[1].l},{n:"4",l:t.hero.stats[2].l}].map((s,i)=>(
+                <div key={i}>
+                  <span className="lp-stat-num">{s.n}</span>
+                  <span className="lp-stat-label">{s.l}</span>
                 </div>
               ))}
             </div>
-            {/* Price strip – schlank */}
-            <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:12,marginTop:22,flexWrap:"wrap"}}>
-              <div style={{display:"inline-flex",alignItems:"center",gap:12,background:"white",border:"1.5px solid rgba(16,185,129,.22)",borderRadius:40,padding:"10px 10px 10px 20px",boxShadow:"0 2px 12px rgba(16,185,129,.07)"}}>
-                <div style={{fontSize:13,color:"var(--mu)",fontWeight:500}}>
-                  {lang==="de"?"Ab":lang==="fr"?"Dès":lang==="it"?"Da":"From"}{" "}
-                  <span style={{fontFamily:"var(--hd)",fontSize:17,fontWeight:800,color:"var(--ink)"}}>CHF {C.priceY}</span>
-                  <span style={{fontSize:12,color:"var(--mu)"}}>/Mo.</span>
-                  <span style={{fontSize:10,color:"var(--mu)",fontStyle:"italic",marginLeft:2}}>{lang==="de"?"(jährlich)":lang==="fr"?"(annuel)":lang==="it"?"(annuale)":"(annual)"}</span>
-                  <span style={{marginLeft:8,fontSize:11,background:"rgba(16,185,129,.1)",color:"var(--em2)",borderRadius:20,padding:"2px 9px",fontWeight:700}}>🔥 –25%</span>
+          </div>
+
+          {/* Right: Chat mockup */}
+          <div className="lp-hero-visual">
+            <div style={{position:"relative"}}>
+              <div className="lp-chat">
+                <div className="lp-chat-hdr">
+                  <div className="lp-chat-av">S</div>
+                  <div>
+                    <div className="lp-chat-name">Stella – KI-Assistentin</div>
+                    <div className="lp-chat-status"><span className="lp-status-dot"/>{lang==="de"?"Online – bereit zu helfen":"Online – ready to help"}</div>
+                  </div>
                 </div>
-                <button onClick={()=>document.getElementById("preise")?.scrollIntoView({behavior:"smooth"})} style={{background:"var(--em)",color:"white",border:"none",borderRadius:25,padding:"9px 18px",fontSize:12,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap"}}>
-                  {lang==="de"?"Jetzt starten →":lang==="fr"?"Commencer →":lang==="it"?"Inizia →":"Get started →"}
-                </button>
+                <div className="lp-msgs">
+                  <div className="lp-msg-u">{lang==="de"?"Kannst du mein CV für eine UX Designer Stelle optimieren?":lang==="fr"?"Peux-tu optimiser mon CV pour un poste UX Designer ?":"Can you optimize my CV for a UX Designer role?"}</div>
+                  <div className="lp-msg-a">
+                    <strong>{lang==="de"?"Natürlich!":lang==="fr"?"Bien sûr !":"Of course!"}</strong>
+                    {lang==="de"?" Ich habe dein CV analysiert und 3 Verbesserungen gefunden:":lang==="fr"?" J'ai analysé ton CV et trouvé 3 améliorations :":" I've analysed your CV and found 3 improvements:"}
+                    <br/><br/>
+                    {lang==="de"?"1. Portfolio-Projekte · 2. ATS-Keywords · 3. CH-Format":lang==="fr"?"1. Portfolio · 2. Mots-clés ATS · 3. Format CH":"1. Portfolio · 2. ATS keywords · 3. CH format"}
+                  </div>
+                  <div className="lp-typing"><div className="lp-typing-dot"/><div className="lp-typing-dot"/><div className="lp-typing-dot"/></div>
+                </div>
               </div>
-              <div style={{fontSize:11,color:"var(--mu)"}}>🔒 {lang==="de"?"1× gratis · keine Kreditkarte":lang==="fr"?"1× gratuit · sans carte":"1× free · no credit card"}</div>
+              <div className="lp-fc lp-fc1">
+                <span>📈</span>
+                <div>
+                  <div style={{fontSize:11,fontWeight:500,color:"var(--ink)"}}>CV-Score</div>
+                  <div className="lp-fc-green">54 → 94 &nbsp;+40↑</div>
+                </div>
+              </div>
+              <div className="lp-fc lp-fc2">
+                <span>🎯</span>
+                <div>
+                  <div style={{fontSize:11,fontWeight:500,color:"var(--ink)"}}>{lang==="de"?"Jobs gefunden":lang==="fr"?"Offres trouvées":"Jobs found"}</div>
+                  <div className="lp-fc-blue">24 {lang==="de"?"passende":lang==="fr"?"correspondantes":"matching"}</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </section>
-      <section style={{background:"var(--dk)",padding:"0 0 72px",position:"relative",overflow:"hidden"}}>
-        <div style={{position:"absolute",inset:0,backgroundImage:"radial-gradient(rgba(16,185,129,.05) 1px,transparent 1px)",backgroundSize:"28px 28px",pointerEvents:"none"}}/>
-        <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse 60% 70% at 80% 50%,rgba(16,185,129,.07),transparent)",pointerEvents:"none"}}/>
-        <div className="con" style={{position:"relative"}}>
-          <div style={{display:"flex",alignItems:"center",gap:12,paddingTop:52,marginBottom:28}}>
-            <div style={{width:36,height:36,background:"var(--em3)",border:"1.5px solid rgba(16,185,129,.3)",borderRadius:10,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18}}>💼</div>
-            <div>
-              <div style={{fontFamily:"var(--hd)",fontSize:21,fontWeight:800,color:"white",letterSpacing:"-.5px"}}>{lang==="de"?"Karriere & Bewerbung":lang==="en"?"Career & Applications":lang==="fr"?"Carrière & Candidatures":"Carriera & Candidature"}</div>
-              <div style={{fontSize:12,color:"rgba(255,255,255,.3)",marginTop:2}}>{lang==="de"?"Für Jobsuchende & Berufstätige":lang==="en"?"For job seekers & professionals":lang==="fr"?"Pour chercheurs d'emploi & professionnels":"Per chi cerca lavoro & professionisti"}</div>
-            </div>
-          </div>
 
-          {/* ✦ LI2JOB HERO CARD – Alleinstellungsmerkmal */}
-          <div onClick={()=>navTo("li2job")} style={{cursor:"pointer",background:"linear-gradient(135deg,#0a66c2 0%,#004182 55%,#003068 100%)",border:"none",borderRadius:24,padding:"0",marginBottom:20,position:"relative",overflow:"hidden",transition:"all .28s",boxShadow:"0 8px 40px rgba(10,102,194,.25)"}}
-            onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-5px)";e.currentTarget.style.boxShadow="0 28px 64px rgba(10,102,194,.45)";}}
-            onMouseLeave={e=>{e.currentTarget.style.transform="none";e.currentTarget.style.boxShadow="0 8px 40px rgba(10,102,194,.25)";}}>
-            {/* Background design elements */}
-            <div style={{position:"absolute",inset:0,backgroundImage:"radial-gradient(rgba(255,255,255,.04) 1px,transparent 1px)",backgroundSize:"22px 22px",pointerEvents:"none"}}/>
-            <div style={{position:"absolute",top:-60,right:-20,width:280,height:280,background:"radial-gradient(circle,rgba(255,255,255,.08),transparent 70%)",pointerEvents:"none"}}/>
-            <div style={{position:"absolute",bottom:-40,left:-20,width:200,height:200,background:"radial-gradient(circle,rgba(10,102,194,.4),transparent 70%)",pointerEvents:"none"}}/>
-            {/* Content */}
-            <div style={{display:"flex",alignItems:"stretch",position:"relative"}}>
-              {/* Left: Main content */}
-              <div style={{flex:1,padding:"28px 30px"}}>
-                <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:14}}>
-                  <span style={{fontSize:10,fontWeight:800,background:"white",color:"#0a66c2",padding:"4px 12px",borderRadius:20,letterSpacing:"1.5px",textTransform:"uppercase"}}>✦ {lang==="de"?"NEU & EINZIGARTIG":lang==="en"?"NEW & UNIQUE":lang==="fr"?"NOUVEAU":"UNICO"}</span>
-                  <span style={{fontSize:10,fontWeight:700,background:"rgba(255,255,255,.12)",color:"rgba(255,255,255,.85)",padding:"4px 10px",borderRadius:20,border:"1px solid rgba(255,255,255,.2)",letterSpacing:"1px"}}>PRO</span>
-                </div>
-                <div style={{fontFamily:"var(--hd)",fontSize:"clamp(20px,2.5vw,28px)",fontWeight:900,color:"white",letterSpacing:"-1px",marginBottom:10,lineHeight:1.05}}>
-                  LinkedIn → {lang==="de"?"Bewerbung":lang==="en"?"Application":lang==="fr"?"Candidature":"Candidatura"}
-                </div>
-                <p style={{fontSize:13,color:"rgba(255,255,255,.62)",lineHeight:1.75,marginBottom:18,maxWidth:500}}>
-                  {lang==="de"?"Profil + Stelleninserat → KI erstellt Motivationsschreiben, CV-Highlights & Top-Argumente. In 30 Sekunden.":
-                   lang==="en"?"Profile + job posting → AI creates cover letter, CV highlights & top arguments. In 30 seconds.":
-                   lang==="fr"?"Profil + offre → l'IA crée lettre, points forts CV & arguments. En 30 secondes.":
-                   "Profilo + offerta → l'IA crea lettera, punti CV & argomenti. In 30 secondi."}
-                </p>
-                <div style={{display:"flex",flexWrap:"wrap",gap:6,marginBottom:20}}>
-                  {(lang==="de"?["✓ Motivationsschreiben","✓ CV-Highlights","✓ 3 Killer-Argumente","✓ Auf Stelle zugeschnitten"]:
-                    lang==="en"?["✓ Cover letter","✓ CV highlights","✓ 3 killer arguments","✓ Job-tailored"]:
-                    lang==="fr"?["✓ Lettre de motivation","✓ Points forts CV","✓ 3 arguments","✓ Adapté"]:
-                    ["✓ Lettera","✓ Punti CV","✓ 3 argomenti","✓ Su misura"]).map((tag,j)=>(
-                    <span key={j} style={{fontSize:11,fontWeight:600,background:"rgba(255,255,255,.1)",color:"rgba(255,255,255,.78)",padding:"4px 12px",borderRadius:20,border:"1px solid rgba(255,255,255,.12)",backdropFilter:"blur(4px)"}}>{tag}</span>
-                  ))}
-                </div>
-                <div style={{display:"inline-flex",alignItems:"center",gap:8,background:"white",color:"#0a66c2",padding:"11px 24px",borderRadius:12,fontSize:13,fontWeight:800,boxShadow:"0 4px 16px rgba(0,0,0,.2)",letterSpacing:"-.2px"}}>
-                  {lang==="de"?"Jetzt ausprobieren →":lang==="en"?"Try it now →":lang==="fr"?"Essayer →":"Prova ora →"}
-                </div>
-              </div>
-              {/* Right: LinkedIn "in" logo as bold design element */}
-              <div style={{width:140,flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center",borderLeft:"1px solid rgba(255,255,255,.08)",background:"rgba(0,0,0,.12)",position:"relative",overflow:"hidden"}}>
-                <div style={{position:"absolute",inset:0,background:"linear-gradient(135deg,transparent,rgba(0,0,0,.15))"}}/>
-                <div style={{fontFamily:"Georgia,serif",fontSize:96,fontWeight:900,color:"white",opacity:.18,lineHeight:1,letterSpacing:"-6px",userSelect:"none",transform:"rotate(-5deg)"}}>in</div>
-                <div style={{position:"absolute",bottom:16,right:16,width:36,height:36,background:"rgba(255,255,255,.1)",border:"1px solid rgba(255,255,255,.15)",borderRadius:8,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,fontFamily:"Georgia,serif",fontWeight:900,color:"white"}}>in</div>
-              </div>
-            </div>
+      {/* ── LOGOS ── */}
+      <div className="lp-logos">
+        <p className="lp-logos-label">{lang==="de"?"Vertrauen von Jobsuchenden bei":lang==="fr"?"La confiance des candidats chez":lang==="it"?"La fiducia dei candidati presso":"Trusted by job seekers at"}</p>
+        <div className="lp-logos-mw">
+          <div className="lp-logos-m">
+            {["Swisscom","Migros","UBS","Nestlé","Roche","SBB","ABB","Zurich","Novartis","PostFinance",
+              "Swisscom","Migros","UBS","Nestlé","Roche","SBB","ABB","Zurich","Novartis","PostFinance"].map((l,i)=>(
+              <span key={i} className="lp-logo">{l}</span>
+            ))}
           </div>
+        </div>
+      </div>
 
-          {/* ✦ LIPOST HERO CARD – LinkedIn-Post Generator */}
-          <div onClick={()=>navTo("lipost")} style={{cursor:"pointer",background:"linear-gradient(135deg,#001f3f 0%,#003d7a 50%,#0a66c2 100%)",border:"none",borderRadius:20,padding:"0",marginBottom:12,position:"relative",overflow:"hidden",transition:"all .25s",boxShadow:"0 4px 24px rgba(10,102,194,.18)"}}
-            onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-4px)";e.currentTarget.style.boxShadow="0 20px 48px rgba(10,102,194,.35)";}}
-            onMouseLeave={e=>{e.currentTarget.style.transform="none";e.currentTarget.style.boxShadow="0 4px 24px rgba(10,102,194,.18)";}}>
-            <div style={{position:"absolute",inset:0,backgroundImage:"radial-gradient(rgba(255,255,255,.03) 1px,transparent 1px)",backgroundSize:"18px 18px",pointerEvents:"none"}}/>
-            <div style={{display:"flex",alignItems:"center",position:"relative"}}>
-              <div style={{flex:1,padding:"22px 26px"}}>
-                <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
-                  <span style={{fontSize:10,fontWeight:800,background:"linear-gradient(90deg,#0a66c2,#005fa3)",color:"white",padding:"3px 11px",borderRadius:20,letterSpacing:"1.5px",textTransform:"uppercase",border:"1px solid rgba(255,255,255,.2)"}}>✍️ {lang==="de"?"LINKEDIN POSTS":lang==="en"?"LINKEDIN POSTS":lang==="fr"?"POSTS LINKEDIN":"POSTS LINKEDIN"}</span>
-                  <span style={{fontSize:10,fontWeight:700,background:"rgba(255,255,255,.1)",color:"rgba(255,255,255,.75)",padding:"3px 9px",borderRadius:20,border:"1px solid rgba(255,255,255,.15)"}}>PRO</span>
-                </div>
-                <div style={{fontFamily:"var(--hd)",fontSize:"clamp(16px,2vw,21px)",fontWeight:800,color:"white",letterSpacing:"-.5px",marginBottom:7,lineHeight:1.1}}>
-                  {lang==="de"?"Automatische LinkedIn-Posts – Swiss-Style":lang==="en"?"Auto LinkedIn Posts – Swiss Style":lang==="fr"?"Posts LinkedIn automatiques":"Post LinkedIn automatici"}
-                </div>
-                <p style={{fontSize:12.5,color:"rgba(255,255,255,.55)",lineHeight:1.65,marginBottom:14,maxWidth:480}}>
-                  {lang==="de"?"3 massgeschneiderte Posts in Sekunden – keine Corporate-Floskeln, kein «Freue mich riesig». Sofort kopieren.":
-                   lang==="en"?"3 tailored posts in seconds – no corporate clichés. Copy immediately.":
-                   lang==="fr"?"3 posts sur mesure en secondes – pas de clichés. Copiez immédiatement.":
-                   "3 post su misura in secondi – niente cliché. Copia subito."}
-                </p>
-                <div style={{display:"flex",flexWrap:"wrap",gap:6,marginBottom:16}}>
-                  {(lang==="de"?["✓ 3 Post-Varianten","✓ Neuer Job · Zertifikat · Insight","✓ Schweizer Stil","✓ Sofort kopierbar"]:
-                    lang==="en"?["✓ 3 post variants","✓ New job · Certificate · Insight","✓ Swiss style","✓ Copy instantly"]:
-                    lang==="fr"?["✓ 3 variantes","✓ Nouveau poste · Certificat","✓ Style suisse","✓ Prêt à copier"]:
-                    ["✓ 3 varianti","✓ Nuovo posto · Certificato","✓ Stile svizzero","✓ Copia subito"]).map((tag,j)=>(
-                    <span key={j} style={{fontSize:11,fontWeight:600,background:"rgba(255,255,255,.08)",color:"rgba(255,255,255,.7)",padding:"3px 10px",borderRadius:20,border:"1px solid rgba(255,255,255,.1)"}}>{tag}</span>
-                  ))}
-                </div>
-                <div style={{display:"inline-flex",alignItems:"center",gap:7,background:"rgba(255,255,255,.12)",color:"white",padding:"9px 20px",borderRadius:10,fontSize:12,fontWeight:700,border:"1px solid rgba(255,255,255,.18)"}}>
-                  {lang==="de"?"Post generieren →":lang==="en"?"Generate post →":lang==="fr"?"Générer post →":"Genera post →"}
-                </div>
-              </div>
-              {/* Right visual */}
-              <div style={{width:120,flexShrink:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:6,padding:"20px 16px",borderLeft:"1px solid rgba(255,255,255,.06)"}}>
-                {["Post 1","Post 2","Post 3"].map((p,i)=>(
-                  <div key={i} style={{width:"100%",background:"rgba(255,255,255,.07)",border:"1px solid rgba(255,255,255,.1)",borderRadius:8,padding:"7px 10px",fontSize:10,color:"rgba(255,255,255,.5)",fontFamily:"var(--hd)",fontWeight:600}}>{p} ✨</div>
-                ))}
-              </div>
-            </div>
+      {/* ── TOOLS ── */}
+      <section className="lp-section" id="tools">
+        <div className="con">
+          <div style={{marginBottom:48}} className="lp-reveal">
+            <span className="lp-label">{t.tools.label}</span>
+            <h2 className="lp-title">{t.tools.title}</h2>
+            <p className="lp-sub">{t.tools.sub}</p>
           </div>
-
-          {/* ✦ 2-Column: Gehaltsrechner + Tracker */}
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:16}}>
-            {/* Gehaltsrechner */}
-            <div onClick={()=>navTo("gehaltsrechner")} style={{cursor:"pointer",background:"linear-gradient(135deg,rgba(5,150,105,.14),rgba(5,150,105,.04))",border:"1.5px solid rgba(5,150,105,.3)",borderRadius:18,padding:"20px 22px",position:"relative",overflow:"hidden",transition:"all .22s"}}
-              onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-3px)";e.currentTarget.style.borderColor="rgba(5,150,105,.55)";e.currentTarget.style.boxShadow="0 12px 36px rgba(5,150,105,.14)";}}
-              onMouseLeave={e=>{e.currentTarget.style.transform="none";e.currentTarget.style.borderColor="rgba(5,150,105,.3)";e.currentTarget.style.boxShadow="none";}}>
-              <div style={{position:"absolute",top:-16,right:-16,width:80,height:80,background:"radial-gradient(circle,rgba(16,185,129,.12),transparent)",borderRadius:"50%",pointerEvents:"none"}}/>
-              <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:10}}>
-                <div style={{width:36,height:36,background:"rgba(16,185,129,.15)",border:"1.5px solid rgba(16,185,129,.3)",borderRadius:10,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>💰</div>
-                <div>
-                  <div style={{fontFamily:"var(--hd)",fontSize:14,fontWeight:800,color:"white",letterSpacing:"-.3px",lineHeight:1.2}}>{lang==="de"?"KI-Gehaltsrechner Schweiz":lang==="en"?"AI Salary Calculator CH":lang==="fr"?"Calculateur salaire IA CH":"Calcolatore stipendio CH"}</div>
-                  <div style={{fontSize:10,fontWeight:700,color:"var(--em)",letterSpacing:"1px",textTransform:"uppercase",marginTop:2}}>PRO</div>
-                </div>
-              </div>
-              <p style={{fontSize:12,color:"rgba(255,255,255,.45)",lineHeight:1.6,marginBottom:14}}>
-                {lang==="de"?"Branche, Erfahrung, Kanton → KI analysiert Marktlöhne & gibt dir deine Verhandlungsbasis.":
-                 lang==="en"?"Industry, experience, canton → AI analyses market salaries & gives your negotiation base.":
-                 lang==="fr"?"Secteur, expérience, canton → analyse des salaires du marché.":
-                 "Settore, esperienza, cantone → analisi salari di mercato."}
-              </p>
-              <div style={{fontSize:12,color:"var(--em)",fontWeight:700}}>Gehalt berechnen →</div>
-            </div>
-            {/* Bewerbungs-Tracker */}
-            <div onClick={()=>navTo("tracker")} style={{cursor:"pointer",background:"linear-gradient(135deg,rgba(139,92,246,.12),rgba(139,92,246,.04))",border:"1.5px solid rgba(139,92,246,.3)",borderRadius:18,padding:"20px 22px",position:"relative",overflow:"hidden",transition:"all .22s"}}
-              onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-3px)";e.currentTarget.style.borderColor="rgba(139,92,246,.55)";e.currentTarget.style.boxShadow="0 12px 36px rgba(139,92,246,.14)";}}
-              onMouseLeave={e=>{e.currentTarget.style.transform="none";e.currentTarget.style.borderColor="rgba(139,92,246,.3)";e.currentTarget.style.boxShadow="none";}}>
-              <div style={{position:"absolute",top:-16,right:-16,width:80,height:80,background:"radial-gradient(circle,rgba(139,92,246,.14),transparent)",borderRadius:"50%",pointerEvents:"none"}}/>
-              <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:10}}>
-                <div style={{width:36,height:36,background:"rgba(139,92,246,.15)",border:"1.5px solid rgba(139,92,246,.3)",borderRadius:10,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>📋</div>
-                <div>
-                  <div style={{fontFamily:"var(--hd)",fontSize:14,fontWeight:800,color:"white",letterSpacing:"-.3px",lineHeight:1.2}}>{lang==="de"?"Bewerbungs-Tracker":lang==="en"?"Application Tracker":lang==="fr"?"Suivi candidatures":"Tracker candidature"}</div>
-                  <div style={{fontSize:10,fontWeight:700,color:"#a78bfa",letterSpacing:"1px",textTransform:"uppercase",marginTop:2}}>PRO</div>
-                </div>
-              </div>
-              <p style={{fontSize:12,color:"rgba(255,255,255,.45)",lineHeight:1.6,marginBottom:14}}>
-                {lang==="de"?"Status-Board für alle Bewerbungen – Kanban, Prioritäten, Notizen. Immer den Überblick.":
-                 lang==="en"?"Status board for all applications – Kanban, priorities, notes. Always stay on top.":
-                 lang==="fr"?"Tableau de bord pour toutes vos candidatures – Kanban, priorités, notes.":
-                 "Bacheca candidature – Kanban, priorità, note. Sempre aggiornato."}
-              </p>
-              <div style={{fontSize:12,color:"#a78bfa",fontWeight:700}}>Status-Board öffnen →</div>
-            </div>
-          </div>
-
-          {/* Featured row */}
-          <div className="feat-row">
-            {(()=>{const item=t.tools.items[0]; return(
-              <div className="feat-big" onClick={()=>navTo(item.page)} style={{cursor:"pointer",background:"linear-gradient(135deg,rgba(16,185,129,.14),rgba(16,185,129,.04))",border:"1.5px solid rgba(16,185,129,.3)",borderRadius:20,padding:30,position:"relative",overflow:"hidden",transition:"all .22s",gridRow:"span 2"}}
-                onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-4px)";e.currentTarget.style.boxShadow="0 20px 48px rgba(16,185,129,.18)";}}
-                onMouseLeave={e=>{e.currentTarget.style.transform="none";e.currentTarget.style.boxShadow="none";}}>
-                <div style={{position:"absolute",top:-20,right:-20,width:110,height:110,background:"radial-gradient(circle,rgba(16,185,129,.18),transparent)",borderRadius:"50%",pointerEvents:"none"}}/>
-                <div style={{fontSize:42,marginBottom:12}}>{item.ico}</div>
-                <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
-                  <div style={{fontFamily:"var(--hd)",fontSize:22,fontWeight:800,color:"white",letterSpacing:"-.5px"}}>{item.t}</div>
-                  <span style={{fontSize:10,fontWeight:700,background:"rgba(16,185,129,.2)",color:"var(--em)",border:"1px solid rgba(16,185,129,.3)",padding:"2px 9px",borderRadius:20,textTransform:"uppercase",letterSpacing:"1px",flexShrink:0}}>1× Gratis</span>
-                </div>
-                <p style={{fontSize:13,color:"rgba(255,255,255,.48)",lineHeight:1.75,marginBottom:18}}>{item.p}</p>
-                <div style={{display:"flex",flexWrap:"wrap",gap:6,marginBottom:22}}>
-                  {["Motivationsschreiben","CV","Live-Streaming","PDF"].map((tag,j)=>(
-                    <span key={j} style={{fontSize:11,fontWeight:600,background:"rgba(255,255,255,.05)",border:"1px solid rgba(255,255,255,.09)",color:"rgba(255,255,255,.45)",padding:"3px 10px",borderRadius:20}}>{tag}</span>
-                  ))}
-                </div>
-                <div style={{display:"inline-flex",alignItems:"center",gap:7,background:"var(--em)",color:"white",padding:"10px 20px",borderRadius:10,fontSize:13,fontWeight:700}}>
-                  {lang==="de"?"Jetzt starten →":lang==="en"?"Start now →":lang==="fr"?"Commencer →":"Inizia →"}
-                </div>
-              </div>
-            );})()}
-            {[t.tools.items[1],t.tools.items[2]].map((item,i)=>(
-              <div key={i} onClick={()=>navTo(item.page)} style={{cursor:"pointer",background:"rgba(59,130,246,.08)",border:"1.5px solid rgba(59,130,246,.2)",borderRadius:16,padding:22,transition:"all .22s"}}
-                onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-3px)";e.currentTarget.style.borderColor="rgba(59,130,246,.45)";e.currentTarget.style.boxShadow="0 8px 32px rgba(59,130,246,.12)";}}
-                onMouseLeave={e=>{e.currentTarget.style.transform="none";e.currentTarget.style.borderColor="rgba(59,130,246,.2)";e.currentTarget.style.boxShadow="none";}}>
-                <div style={{display:"flex",justifyContent:"space-between",marginBottom:10}}><div style={{fontSize:26}}>{item.ico}</div><span style={{fontSize:10,fontWeight:700,background:"rgba(59,130,246,.15)",color:"#60a5fa",border:"1px solid rgba(59,130,246,.2)",padding:"2px 8px",borderRadius:20}}>PRO</span></div>
-                <div style={{fontFamily:"var(--hd)",fontSize:16,fontWeight:700,color:"white",marginBottom:5}}>{item.t}</div>
-                <div style={{fontSize:12,color:"rgba(255,255,255,.38)",lineHeight:1.65}}>{item.p}</div>
-                <div style={{marginTop:11,fontSize:12,color:"#60a5fa",fontWeight:600}}>{lang==="de"?"Öffnen →":"Open →"}</div>
+          <div className="lp-tool-grid">
+            {t.tools.items.map((item,i)=>(
+              <div key={i} className="lp-tool-card lp-reveal" style={{transitionDelay:`${i*.08}s`}} onClick={()=>navTo(item.page)}>
+                <span className={`lp-badge ${item.badge==="1× Gratis"||item.badge==="1× Free"||item.badge==="1× Gratuit"||item.badge==="1× Gratuito"?"lp-badge-free":"lp-badge-pro"}`}>{item.badge}</span>
+                <div className="lp-tool-ico">{item.ico}</div>
+                <div className="lp-tool-title">{item.t}</div>
+                <div className="lp-tool-desc">{item.p}</div>
               </div>
             ))}
           </div>
-
-          {/* 4 equal cards */}
-          <div className="g5-grid">
-            {t.tools.items.slice(3).map((item,i)=>{
-              const C2=[
-                {bg:"rgba(245,158,11,.08)",bd:"rgba(245,158,11,.22)",hv:"rgba(245,158,11,.4)",tc:"#fbbf24"},
-                {bg:"rgba(16,185,129,.07)",bd:"rgba(16,185,129,.2)",hv:"rgba(16,185,129,.4)",tc:"#34d399"},
-                {bg:"rgba(167,139,250,.08)",bd:"rgba(167,139,250,.22)",hv:"rgba(167,139,250,.4)",tc:"#a78bfa"},
-                {bg:"rgba(251,113,133,.08)",bd:"rgba(251,113,133,.18)",hv:"rgba(251,113,133,.38)",tc:"#fb7185"},
-              ][i%4];
-              return(
-                <div key={i} onClick={()=>navTo(item.page)} style={{cursor:"pointer",background:C2.bg,border:`1.5px solid ${C2.bd}`,borderRadius:16,padding:20,transition:"all .22s"}}
-                  onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-3px)";e.currentTarget.style.borderColor=C2.hv;e.currentTarget.style.boxShadow=`0 8px 28px ${C2.bg}`;}}
-                  onMouseLeave={e=>{e.currentTarget.style.transform="none";e.currentTarget.style.borderColor=C2.bd;e.currentTarget.style.boxShadow="none";}}>
-                  <div style={{display:"flex",justifyContent:"space-between",marginBottom:8}}><div style={{fontSize:24}}>{item.ico}</div><span style={{fontSize:10,fontWeight:700,background:`${C2.tc}22`,color:C2.tc,padding:"2px 8px",borderRadius:20}}>PRO</span></div>
-                  <div style={{fontFamily:"var(--hd)",fontSize:14,fontWeight:700,color:"white",marginBottom:4}}>{item.t}</div>
-                  <div style={{fontSize:12,color:"rgba(255,255,255,.38)",lineHeight:1.6,marginBottom:10}}>{item.p}</div>
-                  <div style={{fontSize:12,color:C2.tc,fontWeight:600}}>{lang==="de"?"Öffnen →":"Open →"}</div>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Karriere mini tools */}
-          <div style={{fontSize:11,fontWeight:700,letterSpacing:"2px",textTransform:"uppercase",color:"rgba(255,255,255,.18)",marginBottom:10}}>
-            {lang==="de"?"Weitere Karriere-Tools":lang==="en"?"More career tools":lang==="fr"?"Plus d'outils":"Altri strumenti"}
-          </div>
-
-          <div className="mini-g">
-            {GENERIC_TOOLS.filter(g=>g.cat==="karriere" && g.id!=="li2job").map(g=>(
-              <div key={g.id} onClick={()=>navTo(g.id)} style={{cursor:"pointer",background:"rgba(255,255,255,.03)",border:"1px solid rgba(255,255,255,.07)",borderRadius:13,padding:"14px 16px",transition:"all .2s",display:"flex",flexDirection:"column",gap:7}}
-                onMouseEnter={e=>{e.currentTarget.style.background="rgba(255,255,255,.06)";e.currentTarget.style.borderColor="rgba(16,185,129,.25)";e.currentTarget.style.transform="translateY(-2px)";}}
-                onMouseLeave={e=>{e.currentTarget.style.background="rgba(255,255,255,.03)";e.currentTarget.style.borderColor="rgba(255,255,255,.07)";e.currentTarget.style.transform="none";}}>
-                <div style={{fontSize:20}}>{g.ico}</div>
-                <div style={{fontFamily:"var(--hd)",fontSize:12,fontWeight:700,color:"white",lineHeight:1.3}}>{g.t[lang]}</div>
-                <div style={{fontSize:11,color:"rgba(255,255,255,.28)",lineHeight:1.45,flex:1}}>{g.sub[lang]}</div>
-                <div style={{fontSize:11,color:"var(--em)",fontWeight:600}}>→</div>
-              </div>
+          {/* Mini tools strip */}
+          {GENERIC_TOOLS.length>0&&<div style={{marginTop:32,display:"flex",flexWrap:"wrap",gap:10,justifyContent:"center"}}>
+            <div style={{width:"100%",textAlign:"center",fontSize:12,fontWeight:600,color:"var(--mu)",letterSpacing:".08em",textTransform:"uppercase",marginBottom:8}}>{lang==="de"?"& weitere Tools":"& more tools"}</div>
+            {GENERIC_TOOLS.map(g=>(
+              <button key={g.id} onClick={()=>navTo(g.id)} style={{display:"flex",alignItems:"center",gap:8,background:"white",border:"1.5px solid var(--bo)",borderRadius:30,padding:"8px 16px",fontSize:13,fontWeight:500,color:"var(--ink)",cursor:"pointer",transition:"all .18s",fontFamily:"var(--bd)"}}
+                onMouseEnter={e=>{e.currentTarget.style.borderColor="var(--em)";e.currentTarget.style.color="var(--em)";}}
+                onMouseLeave={e=>{e.currentTarget.style.borderColor="var(--bo)";e.currentTarget.style.color="var(--ink)";}}>
+                <span>{g.ico}</span><span>{g.t[lang]||g.t.de}</span>
+              </button>
             ))}
+          </div>}
+        </div>
+      </section>
+
+      {/* ── HOW IT WORKS ── */}
+      <section className="lp-section lp-section-alt">
+        <div className="con">
+          <div style={{textAlign:"center",marginBottom:48}} className="lp-reveal">
+            <span className="lp-label">{lang==="de"?"So funktioniert's":lang==="fr"?"Comment ça marche":lang==="it"?"Come funziona":"How it works"}</span>
+            <h2 className="lp-title" style={{textAlign:"center",margin:"0 auto 16px"}}>
+              {lang==="de"?"In 3 Schritten zum":lang==="fr"?"En 3 étapes vers":lang==="it"?"In 3 passi verso":"In 3 steps to your"} <em>{lang==="de"?"Traumjob":lang==="fr"?"poste idéal":lang==="it"?"lavoro dei sogni":"dream job"}</em>
+            </h2>
+            <p className="lp-sub" style={{margin:"0 auto"}}>{t.how.sub}</p>
           </div>
-
-          {/* ✦ DEMO – direkt bei den Tools */}
-          <div style={{marginTop:52,borderTop:"1px solid rgba(255,255,255,.06)",paddingTop:48}}>
-            <div style={{marginBottom:28}}>
-              <div style={{fontSize:11,fontWeight:700,letterSpacing:"2px",textTransform:"uppercase",color:"var(--em)",marginBottom:8}}>✦ {lang==="de"?"LIVE-VORSCHAU – SO SIEHT DAS ERGEBNIS AUS":lang==="en"?"LIVE PREVIEW – THIS IS WHAT YOU GET":lang==="fr"?"APERÇU LIVE – VOICI LE RÉSULTAT":"ANTEPRIMA LIVE – ECCO IL RISULTATO"}</div>
-              <div style={{fontFamily:"var(--hd)",fontSize:24,fontWeight:800,color:"white",letterSpacing:"-.4px"}}>
-                {lang==="de"?"Klick auf ein Tool – sieh sofort den Output.":lang==="en"?"Click a tool – see the output instantly.":lang==="fr"?"Cliquez sur un outil – voyez le résultat.":"Clicca su uno strumento – vedi subito il risultato."}
-              </div>
-            </div>
-            <DemoSection lang={lang} navTo={navTo}/>
-          </div>
-        </div>
-      </section>
-
-      {/* ── SCHULE & PRODUKTIVITÄT LIGHT SECTION ── */}
-      <section style={{background:"var(--bg)",padding:"64px 0 88px"}}>
-        <div className="con">
-          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))",gap:44}}>
-            <div>
-              <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:22}}>
-                <div style={{width:36,height:36,background:"rgba(8,145,178,.1)",border:"1.5px solid rgba(8,145,178,.22)",borderRadius:10,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18}}>🎓</div>
-                <div>
-                  <div style={{fontFamily:"var(--hd)",fontSize:19,fontWeight:800,letterSpacing:"-.3px"}}>{lang==="de"?"Schule & Ausbildung":lang==="en"?"School & Education":lang==="fr"?"École & Formation":"Scuola & Formazione"}</div>
-                  <div style={{fontSize:12,color:"var(--mu)",marginTop:2}}>{lang==="de"?"Für Lernende, Lehrlinge & Studierende":lang==="en"?"For learners, apprentices & students":lang==="fr"?"Pour apprenants, apprentis & étudiants":"Per apprendisti e studenti"}</div>
-                </div>
-              </div>
-              <div style={{display:"flex",flexDirection:"column",gap:8}}>
-                {GENERIC_TOOLS.filter(g=>g.cat==="ausbildung").map(g=>(
-                  <div key={g.id} onClick={()=>navTo(g.id)} style={{cursor:"pointer",background:"white",border:"1.5px solid var(--bo)",borderRadius:14,padding:"15px 20px",display:"flex",alignItems:"center",gap:13,transition:"all .2s",boxShadow:"0 1px 4px rgba(11,11,18,.04)"}}
-                    onMouseEnter={e=>{e.currentTarget.style.borderColor="rgba(8,145,178,.35)";e.currentTarget.style.transform="translateX(5px)";e.currentTarget.style.boxShadow="0 4px 20px rgba(8,145,178,.09)";}}
-                    onMouseLeave={e=>{e.currentTarget.style.borderColor="var(--bo)";e.currentTarget.style.transform="none";e.currentTarget.style.boxShadow="0 1px 4px rgba(11,11,18,.04)";}}>
-                    <div style={{width:40,height:40,background:"rgba(8,145,178,.07)",border:"1.5px solid rgba(8,145,178,.14)",borderRadius:10,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0}}>{g.ico}</div>
-                    <div style={{flex:1,minWidth:0}}>
-                      <div style={{fontFamily:"var(--hd)",fontSize:14,fontWeight:700,marginBottom:2}}>{g.t[lang]}</div>
-                      <div style={{fontSize:12,color:"var(--mu)",lineHeight:1.5,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{g.sub[lang]}</div>
-                    </div>
-                    <div style={{fontSize:14,color:"#0891b2",fontWeight:700,flexShrink:0}}>→</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div>
-              <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:22}}>
-                <div style={{width:36,height:36,background:"rgba(124,58,237,.09)",border:"1.5px solid rgba(124,58,237,.22)",borderRadius:10,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18}}>⚡</div>
-                <div>
-                  <div style={{fontFamily:"var(--hd)",fontSize:19,fontWeight:800,letterSpacing:"-.3px"}}>{lang==="de"?"Produktivität":lang==="en"?"Productivity":lang==="fr"?"Productivité":"Produttività"}</div>
-                  <div style={{fontSize:12,color:"var(--mu)",marginTop:2}}>{lang==="de"?"Für alle – Excel, PPT, E-Mail, Übersetzer":lang==="en"?"For all – Excel, PPT, email, translator":lang==="fr"?"Pour tous – Excel, PPT, e-mail, traducteur":"Per tutti – Excel, PPT, e-mail, traduttore"}</div>
-                </div>
-              </div>
-              <div style={{display:"flex",flexDirection:"column",gap:8}}>
-                {[{page:"excel",ico:"📊",tl:{de:"Excel-Generator",en:"Excel Generator",fr:"Générateur Excel",it:"Generatore Excel"},sl:{de:"Profi-Tabellen mit Formeln per Beschreibung",en:"Pro spreadsheets with formulas from description",fr:"Tableaux pros avec formules sur description",it:"Fogli pro con formule da descrizione"},c:"#059669"},
-                  {page:"pptx",ico:"📽️",tl:{de:"PowerPoint-Maker",en:"PowerPoint Maker",fr:"Créateur PowerPoint",it:"Creatore PowerPoint"},sl:{de:"Präsentationen für Schule, Uni & Arbeit",en:"Presentations for school, uni & work",fr:"Présentations pour école, université & travail",it:"Presentazioni per scuola, università e lavoro"},c:"#2563eb"},
-                ].map(g=>(
-                  <div key={g.page} onClick={()=>navTo(g.page)} style={{cursor:"pointer",background:"white",border:`1.5px solid ${g.c}28`,borderRadius:14,padding:"15px 20px",display:"flex",alignItems:"center",gap:13,transition:"all .2s",boxShadow:"0 1px 4px rgba(11,11,18,.04)"}}
-                    onMouseEnter={e=>{e.currentTarget.style.transform="translateX(5px)";e.currentTarget.style.boxShadow=`0 4px 20px ${g.c}18`;}}
-                    onMouseLeave={e=>{e.currentTarget.style.transform="none";e.currentTarget.style.boxShadow="0 1px 4px rgba(11,11,18,.04)";}}>
-                    <div style={{width:40,height:40,background:`${g.c}14`,border:`1.5px solid ${g.c}28`,borderRadius:10,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0}}>{g.ico}</div>
-                    <div style={{flex:1}}><div style={{fontFamily:"var(--hd)",fontSize:14,fontWeight:700,marginBottom:2}}>{g.tl[lang]}</div><div style={{fontSize:12,color:"var(--mu)"}}>{g.sl[lang]}</div></div>
-                    <div style={{fontSize:14,color:g.c,fontWeight:700,flexShrink:0}}>→</div>
-                  </div>
-                ))}
-                {GENERIC_TOOLS.filter(g=>g.cat==="produktivitaet").map(g=>(
-                  <div key={g.id} onClick={()=>navTo(g.id)} style={{cursor:"pointer",background:"white",border:"1.5px solid var(--bo)",borderRadius:14,padding:"15px 20px",display:"flex",alignItems:"center",gap:13,transition:"all .2s",boxShadow:"0 1px 4px rgba(11,11,18,.04)"}}
-                    onMouseEnter={e=>{e.currentTarget.style.borderColor="rgba(124,58,237,.3)";e.currentTarget.style.transform="translateX(5px)";e.currentTarget.style.boxShadow="0 4px 20px rgba(124,58,237,.08)";}}
-                    onMouseLeave={e=>{e.currentTarget.style.borderColor="var(--bo)";e.currentTarget.style.transform="none";e.currentTarget.style.boxShadow="0 1px 4px rgba(11,11,18,.04)";}}>
-                    <div style={{width:40,height:40,background:"rgba(124,58,237,.06)",border:"1.5px solid rgba(124,58,237,.14)",borderRadius:10,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0}}>{g.ico}</div>
-                    <div style={{flex:1,minWidth:0}}><div style={{fontFamily:"var(--hd)",fontSize:14,fontWeight:700,marginBottom:2}}>{g.t[lang]}</div><div style={{fontSize:12,color:"var(--mu)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{g.sub[lang]}</div></div>
-                    <div style={{fontSize:14,color:"#7c3aed",fontWeight:700,flexShrink:0}}>→</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-
-      {/* TESTI */}
-      <section className="sec sec-dk2">
-        <div className="con">
-          <div className="sh shc"><div className="seye">{t.testi.label}</div><h2 className="st">{t.testi.title}</h2></div>
-          <div className="tg">{t.testi.items.map((x,i)=><div key={i} className="tc2"><div className="ts">{x.s}</div><p className="tq">«{x.t}»</p><div className="tn">{x.a}</div><div className="tr">{x.r}</div></div>)}</div>
-        </div>
-      </section>
-
-      {/* HOW */}
-      <section className="sec sec-dk">
-        <div className="con">
-          <div className="sh"><div className="seye">{t.how.label}</div><h2 className="st">{t.how.title}</h2><p className="ss">{t.how.sub}</p></div>
-          <div className="srow">{t.how.steps.map((s,i)=><div key={i} className="sc"><div className="sn">{s.n}</div><h3>{s.t}</h3><p>{s.p}</p></div>)}</div>
-        </div>
-      </section>
-
-      {/* WHY */}
-      <section className="sec sec-w">
-        <div className="con">
-          <div className="sh"><div className="seye">{t.why.label}</div><h2 className="st">{t.why.title}</h2><p className="ss">{t.why.sub}</p></div>
-          <div className="why-vs">
-            <div className="why-col bad"><h4 style={{color:"#dc2626"}}>{t.why.badH}</h4><ul>{t.why.badL.map((x,i)=><li key={i}><span style={{color:"#fca5a5",flexShrink:0}}>✗</span><span>{x}</span></li>)}</ul></div>
-            <div className="why-col good"><h4 style={{color:"var(--em2)"}}>{t.why.goodH}</h4><ul>{t.why.goodL.map((x,i)=><li key={i}><span style={{color:"var(--em)",flexShrink:0}}>✓</span><span>{x}</span></li>)}</ul></div>
-          </div>
-        </div>
-      </section>
-
-      {/* MARKET – Zahlen & Fakten */}
-      <section className="sec sec-bg">
-        <div className="con">
-          <div className="sh shc"><div className="seye">{t.market.label}</div><h2 className="st">{t.market.title}</h2></div>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(240px,1fr))",gap:18}}>
-            {t.market.points.map((p,i)=>(
-              <div key={i} style={{padding:"24px",background:"white",border:"1.5px solid var(--bo)",borderRadius:"var(--r2)"}}>
-                <div style={{fontSize:28,marginBottom:10}}>{p.ico}</div>
-                <div style={{fontFamily:"var(--hd)",fontSize:16,fontWeight:700,marginBottom:7}}>{p.t}</div>
-                <div style={{fontSize:13,color:"var(--mu)",lineHeight:1.7}}>{p.p}</div>
+          <div className="lp-steps">
+            {t.how.steps.map((s,i)=>(
+              <div key={i} className="lp-step lp-reveal" style={{transitionDelay:`${i*.1}s`}}>
+                <div className="lp-step-n">{s.n}</div>
+                <h4>{s.t}</h4>
+                <p>{s.p}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* PRICING */}
+      {/* ── PRICING ── */}
       <section className="sec sec-dk" id="preise" style={{position:"relative",overflow:"hidden"}}>
-        <div className="orb" style={{width:500,height:500,background:"radial-gradient(circle,rgba(16,185,129,.15),transparent)",top:"-120px",right:"-100px",animationDelay:"-2s",opacity:.4}}/>
-        <div className="orb" style={{width:400,height:400,background:"radial-gradient(circle,rgba(99,102,241,.1),transparent)",bottom:"-80px",left:"-80px",animationDelay:"-6s",opacity:.3}}/>
+        <div className="orb" style={{width:500,height:500,background:"radial-gradient(circle,rgba(37,99,235,.15),transparent)",top:"-120px",right:"-100px",animationDelay:"-2s",opacity:.4}}/>
         <div className="con">
-          <div className="sh shc">
+          <div className="sh shc lp-reveal">
             <div className="seye">{t.price.label}</div>
             <h2 className="st">{t.price.title}</h2>
             <p className="ss">{t.price.sub}</p>
-            {/* Billing Toggle */}
             <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:8,marginTop:24}}>
               <div style={{display:"inline-flex",alignItems:"center",background:"rgba(255,255,255,.06)",border:"1px solid rgba(255,255,255,.1)",borderRadius:99,padding:4,gap:4}}>
-                <button onClick={()=>setYearly(false)} style={{padding:"8px 22px",borderRadius:99,border:"none",background:!yearly?"white":"transparent",color:!yearly?"var(--ink)":"rgba(255,255,255,.45)",fontSize:13,fontWeight:700,cursor:"pointer",transition:"all .22s",whiteSpace:"nowrap"}}>
-                  {lang==="de"?"Monatlich":lang==="en"?"Monthly":lang==="fr"?"Mensuel":"Mensile"}
-                </button>
-                <button onClick={()=>setYearly(true)} style={{padding:"8px 22px",borderRadius:99,border:"none",background:yearly?"linear-gradient(135deg,#10b981,#059669)":"transparent",color:yearly?"white":"rgba(255,255,255,.45)",fontSize:13,fontWeight:700,cursor:"pointer",transition:"all .22s",display:"flex",alignItems:"center",gap:8,whiteSpace:"nowrap"}}>
-                  {lang==="de"?"Jährlich":lang==="en"?"Yearly":lang==="fr"?"Annuel":"Annuale"}
-                  <span style={{background:yearly?"rgba(255,255,255,.2)":"rgba(16,185,129,.25)",color:yearly?"white":"var(--em)",borderRadius:99,padding:"1px 8px",fontSize:11,fontWeight:700,transition:"all .22s"}}>
-                    {lang==="de"?"–17%":lang==="en"?"–17%":lang==="fr"?"–17%":"–17%"}
-                  </span>
+                <button onClick={()=>setYearly(false)} style={{padding:"8px 22px",borderRadius:99,border:"none",background:!yearly?"white":"transparent",color:!yearly?"var(--ink)":"rgba(255,255,255,.45)",fontSize:13,fontWeight:600,cursor:"pointer",transition:"all .22s",fontFamily:"var(--bd)",whiteSpace:"nowrap"}}>{t.price.monthly}</button>
+                <button onClick={()=>setYearly(true)} style={{padding:"8px 22px",borderRadius:99,border:"none",background:yearly?"var(--em)":"transparent",color:yearly?"white":"rgba(255,255,255,.45)",fontSize:13,fontWeight:600,cursor:"pointer",transition:"all .22s",display:"flex",alignItems:"center",gap:8,fontFamily:"var(--bd)",whiteSpace:"nowrap"}}>
+                  {t.price.yearly}
+                  <span style={{background:yearly?"rgba(255,255,255,.2)":"rgba(37,99,235,.25)",color:yearly?"white":"var(--em)",borderRadius:99,padding:"1px 8px",fontSize:11,fontWeight:700}}>–17%</span>
                 </button>
               </div>
-              {!yearly&&<div style={{fontSize:12,color:"rgba(255,255,255,.3)",display:"flex",alignItems:"center",gap:6}}>
-                <span style={{color:"var(--em)",fontSize:14}}>→</span>
-                {lang==="de"?"Jährlich wählen und 2 Monate gratis sparen!":lang==="en"?"Choose yearly and save 2 months free!":lang==="fr"?"Choisissez l'annuel et économisez 2 mois !":"Scegli l'annuale e risparmia 2 mesi gratis!"}
-              </div>}
             </div>
           </div>
-
-          {/* 4-Spalten Pricing Grid */}
           <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))",gap:16,maxWidth:1100,margin:"0 auto"}}>
-            {t.price.tiers.filter(t=>t.id!=="free"||true).map(tier=>{
-              const savePct = tier.priceM ? Math.round((1-(tier.priceY/tier.priceM))*100) : 0;
-              const annualTotal = tier.priceY ? (tier.priceY*12).toFixed(0) : null;
-              const savedTotal = tier.priceM ? ((tier.priceM - tier.priceY)*12).toFixed(0) : null;
-              const isFree = tier.id==="free";
-              const isPro = tier.id==="pro";
-              const isUlt = tier.id==="ultimate";
-              const isStarter = tier.id==="starter";
-              const tierIdx = t.price.tiers.indexOf(tier);
-              return (
-                <div key={tier.id} className="reveal" style={{
-                  borderRadius:20,padding:"28px 24px",position:"relative",
-                  border: isPro ? "2px solid var(--em)" : isUlt ? "2px solid rgba(245,158,11,.4)" : isStarter ? "2px solid rgba(239,68,68,.4)" : "1.5px solid rgba(255,255,255,.09)",
-                  background: isPro ? "rgba(16,185,129,.07)" : isUlt ? "rgba(245,158,11,.04)" : isStarter ? "rgba(239,68,68,.04)" : "var(--dk3)",
-                  boxShadow: isPro ? "0 0 0 1px rgba(16,185,129,.15),0 20px 60px rgba(16,185,129,.1)" : isStarter ? "0 0 0 1px rgba(239,68,68,.15),0 20px 40px rgba(239,68,68,.08)" : "none",
-                  transition:"transform .22s cubic-bezier(.34,1.56,.64,1),box-shadow .22s,opacity .6s,transform .65s",
-                  transitionDelay:`${tierIdx*0.1}s`
-                }}
-                  onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-4px)";}}
-                  onMouseLeave={e=>{e.currentTarget.style.transform="none";}}>
-                  {isPro&&<div style={{position:"absolute",top:-14,left:"50%",transform:"translateX(-50%)",background:"linear-gradient(135deg,#10b981,#059669)",color:"white",fontSize:11,fontWeight:700,padding:"5px 18px",borderRadius:999,whiteSpace:"nowrap",boxShadow:"0 4px 14px rgba(16,185,129,.4)",letterSpacing:.3}}>{t.price.recom}</div>}
-                  {isStarter&&<div style={{position:"absolute",top:-14,left:"50%",transform:"translateX(-50%)",background:"linear-gradient(135deg,#ef4444,#dc2626)",color:"white",fontSize:11,fontWeight:700,padding:"5px 18px",borderRadius:999,whiteSpace:"nowrap",boxShadow:"0 4px 14px rgba(239,68,68,.4)",letterSpacing:.3}}>
-                    {lang==="de"?"🎒 Für Schüler & Lehrstellen":lang==="en"?"🎒 For Students & Apprentices":lang==="fr"?"🎒 Pour Élèves & Apprentis":"🎒 Per Studenti & Apprendisti"}
-                  </div>}
-                  {isUlt&&savedTotal&&<div style={{position:"absolute",top:-14,left:"50%",transform:"translateX(-50%)",background:"linear-gradient(135deg,#f59e0b,#d97706)",color:"white",fontSize:11,fontWeight:700,padding:"5px 18px",borderRadius:999,whiteSpace:"nowrap",boxShadow:"0 4px 14px rgba(245,158,11,.35)"}}>
-                    {lang==="de"?`Spare CHF ${savedTotal}/Jahr`:lang==="en"?`Save CHF ${savedTotal}/year`:lang==="fr"?`Économisez CHF ${savedTotal}/an`:`Risparmia CHF ${savedTotal}/anno`}
-                  </div>}
-
-                  {/* Plan name */}
-                  <div style={{fontSize:11,fontWeight:700,letterSpacing:2,textTransform:"uppercase",color:isPro?"var(--em)":isUlt?"#f59e0b":isStarter?"#ef4444":"rgba(255,255,255,.28)",marginBottom:12}}>{tier.name}</div>
-
-                  {/* Price display */}
-                  {isFree&&<>
-                    <div style={{fontFamily:"var(--hd)",fontSize:42,fontWeight:800,color:"white",lineHeight:1,marginBottom:4,letterSpacing:"-2px"}}>CHF 0</div>
-                    <div style={{fontSize:12,color:"rgba(255,255,255,.3)",marginBottom:20}}>{lang==="de"?"Kostenlos starten":lang==="en"?"Start for free":lang==="fr"?"Démarrer gratuitement":"Inizia gratis"}</div>
-                  </>}
-                  {isStarter&&<>
-                    <div style={{fontFamily:"var(--hd)",fontSize:42,fontWeight:800,color:"white",lineHeight:1,letterSpacing:"-2px"}}>CHF {C.priceStarter}</div>
-                    <div style={{fontSize:12,color:"rgba(255,255,255,.3)",marginBottom:10}}>{lang==="de"?"Einmalig · kein Abo":lang==="en"?"One-time · no subscription":lang==="fr"?"Unique · sans abonnement":"Una tantum · senza abbonamento"}</div>
-                    <div style={{display:"inline-flex",alignItems:"center",gap:6,background:"rgba(0,0,0,.3)",border:"1px solid rgba(255,255,255,.12)",borderRadius:8,padding:"4px 10px",marginBottom:16}}>
-                      <span style={{background:"#ef4444",color:"white",fontWeight:900,fontSize:11,padding:"2px 7px",borderRadius:4,letterSpacing:.5}}>TWINT</span>
-                      <span style={{fontSize:11,color:"rgba(255,255,255,.45)"}}>· Visa · Mastercard</span>
-                    </div>
-                  </>}
-                  {tier.priceY&&<>
-                    <div style={{fontFamily:"var(--hd)",fontSize:42,fontWeight:800,color:"white",lineHeight:1,letterSpacing:"-2px"}}>
-                      CHF {yearly ? Number(tier.priceY).toFixed(2) : Number(tier.priceM).toFixed(2)}<span style={{fontSize:16,fontWeight:400,color:"rgba(255,255,255,.3)",fontFamily:"var(--bd)",letterSpacing:0}}>/Mo.</span>
-                    </div>
-                    {yearly ? (
-                      <div style={{fontSize:13,color:"rgba(255,255,255,.3)",margin:"6px 0 18px"}}>
-                        CHF {annualTotal}{lang==="de"?" /Jahr":" /year"} · <span style={{color:isPro?"var(--em)":"#f59e0b",fontWeight:700}}>–{savePct}%</span> {lang==="de"?"vs. monatlich":lang==="en"?"vs. monthly":lang==="fr"?"vs. mensuel":"vs. mensile"}
-                      </div>
-                    ) : (
-                      <div style={{fontSize:13,color:"rgba(255,255,255,.3)",margin:"6px 0 18px"}}>
-                        {lang==="de"?"Monatlich kündbar":lang==="en"?"Cancel anytime":lang==="fr"?"Résiliable à tout moment":"Cancellabile in qualsiasi momento"}
-                      </div>
-                    )}
-                  </>}
-
-                  {/* Description */}
-                  <p style={{fontSize:13,color:"rgba(255,255,255,.5)",lineHeight:1.7,margin:"0 0 18px",borderTop:"1px solid rgba(255,255,255,.07)",paddingTop:14}}>{tier.desc}</p>
-
-                  {/* Pro: Tageslimit-Hinweis */}
-                  {isPro&&<div style={{background:"rgba(245,158,11,.08)",border:"1px solid rgba(245,158,11,.2)",borderRadius:10,padding:"10px 14px",marginBottom:14,display:"flex",alignItems:"center",gap:8}}>
-                    <span style={{fontSize:16}}>⚡</span>
-                    <div>
-                      <div style={{fontSize:12,fontWeight:700,color:"#f59e0b"}}>{lang==="de"?"100 Erstellungen/Woche · 25 Fragen/Tag":lang==="en"?"100 creations/week · 25 questions/day":lang==="fr"?"100 créations/semaine · 25 questions/jour":"100 creazioni/settimana · 25 domande/giorno"}</div>
-                      <div style={{fontSize:11,color:"rgba(255,255,255,.3)"}}>{lang==="de"?"Reset jeden Montag 07:00 Uhr":lang==="en"?"Resets every Monday 07:00":lang==="fr"?"Remise à zéro lundi 07h":"Reset ogni lunedì 07:00"}</div>
-                    </div>
-                  </div>}
-
-                  {/* Ultimate: Unlimited badge */}
-                  {isUlt&&<div style={{background:"rgba(245,158,11,.08)",border:"1px solid rgba(245,158,11,.2)",borderRadius:10,padding:"10px 14px",marginBottom:14,display:"flex",alignItems:"center",gap:8}}>
-                    <span style={{fontSize:16}}>♾️</span>
-                    <div>
-                      <div style={{fontSize:12,fontWeight:700,color:"#f59e0b"}}>{lang==="de"?"Absolut unbegrenzt":lang==="en"?"Absolutely unlimited":lang==="fr"?"Absolument illimité":"Assolutamente illimitato"}</div>
-                      <div style={{fontSize:11,color:"rgba(255,255,255,.3)"}}>{lang==="de"?"Kein Limit, kein Reset, kein Warten":lang==="en"?"No limit, no reset, no waiting":lang==="fr"?"Pas de limite ni de reset":"Nessun limite né reset"}</div>
-                    </div>
-                  </div>}
-
-
-                  {/* CTA Button */}
-                  {isFree&&<button onClick={()=>navTo("app")} style={{width:"100%",padding:"13px",borderRadius:12,border:"1.5px solid rgba(255,255,255,.18)",background:"transparent",color:"white",fontFamily:"var(--bd)",fontSize:14,fontWeight:700,cursor:"pointer",transition:"all .2s"}}
-                    onMouseEnter={e=>{e.currentTarget.style.borderColor="rgba(255,255,255,.5)";e.currentTarget.style.background="rgba(255,255,255,.05)";}}
-                    onMouseLeave={e=>{e.currentTarget.style.borderColor="rgba(255,255,255,.18)";e.currentTarget.style.background="transparent";}}>
-                    {tier.btn}
+            {t.price.tiers.map((tier,tierIdx)=>{
+              const isFree=tier.id==="free",isPro=tier.id==="pro",isUlt=tier.id==="ultimate",isStarter=tier.id==="starter";
+              const displayPrice=tier.oneTime?`${tier.priceM}`:(yearly&&tier.priceY?`${tier.priceY}`:(tier.price===0?"0":`${tier.priceM}`));
+              return(
+                <div key={tier.id} className="lp-reveal" style={{
+                  borderRadius:18,padding:"26px 22px",position:"relative",
+                  border:isPro?"2px solid var(--em)":isUlt?"2px solid rgba(245,158,11,.4)":isStarter?"2px solid rgba(239,68,68,.4)":"1.5px solid rgba(255,255,255,.09)",
+                  background:isPro?"rgba(37,99,235,.08)":isUlt?"rgba(245,158,11,.04)":isStarter?"rgba(239,68,68,.04)":"var(--dk3)",
+                  boxShadow:isPro?"0 0 0 1px rgba(37,99,235,.15),0 20px 60px rgba(37,99,235,.1)":"none",
+                  transition:"transform .22s cubic-bezier(.34,1.56,.64,1)",transitionDelay:`${tierIdx*.1}s`
+                }} onMouseEnter={e=>e.currentTarget.style.transform="translateY(-4px)"} onMouseLeave={e=>e.currentTarget.style.transform="none"}>
+                  {isPro&&<div style={{position:"absolute",top:-13,left:"50%",transform:"translateX(-50%)",background:"var(--em)",color:"white",fontSize:11,fontWeight:700,padding:"4px 16px",borderRadius:999,whiteSpace:"nowrap",letterSpacing:.3}}>{t.price.recom}</div>}
+                  {isStarter&&<div style={{position:"absolute",top:-13,left:"50%",transform:"translateX(-50%)",background:"linear-gradient(135deg,#ef4444,#dc2626)",color:"white",fontSize:11,fontWeight:700,padding:"4px 16px",borderRadius:999,whiteSpace:"nowrap"}}>🎒 {lang==="de"?"Für Schüler":lang==="en"?"For Students":lang==="fr"?"Pour Élèves":"Per Studenti"}</div>}
+                  {isUlt&&<div style={{position:"absolute",top:-13,left:"50%",transform:"translateX(-50%)",background:"linear-gradient(135deg,#f59e0b,#d97706)",color:"white",fontSize:11,fontWeight:700,padding:"4px 16px",borderRadius:999,whiteSpace:"nowrap"}}>⭐ Ultimate</div>}
+                  <div style={{fontSize:11,fontWeight:700,letterSpacing:2,textTransform:"uppercase",color:isPro?"var(--em)":isUlt?"#f59e0b":isStarter?"#ef4444":"rgba(255,255,255,.28)",marginBottom:10}}>{tier.name}</div>
+                  <div style={{fontFamily:"var(--hd)",fontSize:36,fontWeight:400,color:"white",lineHeight:1,marginBottom:4,letterSpacing:"-1px"}}>
+                    {tier.price===0?(lang==="de"?"Gratis":lang==="fr"?"Gratuit":"Free"):`CHF ${displayPrice}`}
+                    {tier.oneTime&&<span style={{fontSize:13,fontWeight:400,color:"rgba(255,255,255,.35)",fontFamily:"var(--bd)",letterSpacing:0}}> {lang==="de"?"einmalig":lang==="fr"?"unique":"one-time"}</span>}
+                    {!tier.oneTime&&tier.price!==0&&<span style={{fontSize:13,fontWeight:400,color:"rgba(255,255,255,.35)",fontFamily:"var(--bd)",letterSpacing:0}}>/Mo.</span>}
+                  </div>
+                  <p style={{fontSize:12,color:"rgba(255,255,255,.38)",marginBottom:18,lineHeight:1.5}}>{tier.note}</p>
+                  <ul style={{listStyle:"none",marginBottom:20}}>
+                    {(tier.list||[]).slice(0,5).map((li,j)=>(
+                      <li key={j} style={{fontSize:12,padding:"6px 0",borderBottom:"1px solid rgba(255,255,255,.05)",display:"flex",alignItems:"flex-start",gap:8,color:"rgba(255,255,255,.65)",lineHeight:1.5}}>
+                        <span style={{color:"var(--em)",flexShrink:0,marginTop:1}}>✓</span>{li.replace(/^✦\s*/,"")}
+                      </li>
+                    ))}
+                  </ul>
+                  {isPro&&<button onClick={()=>window.open(yearly?C.stripeYearly:C.stripeMonthly,"_blank")} style={{width:"100%",padding:"13px",borderRadius:12,border:"none",background:"var(--em)",color:"white",fontFamily:"var(--bd)",fontSize:14,fontWeight:600,cursor:"pointer",transition:"all .2s"}}>
+                    {lang==="de"?"Jetzt upgraden →":lang==="fr"?"Passer Pro →":lang==="it"?"Aggiorna ora →":"Upgrade now →"}
                   </button>}
-                  {isPro&&<div style={{display:"flex",flexDirection:"column",gap:8}}>
-                    {/* Monthly – primary */}
-                    <button onClick={()=>window.open(C.stripeMonthly,"_blank")} style={{width:"100%",padding:"13px",borderRadius:12,border:"none",background:"linear-gradient(135deg,#10b981,#059669)",color:"white",fontFamily:"var(--bd)",fontSize:14,fontWeight:700,cursor:"pointer",boxShadow:"0 4px 20px rgba(16,185,129,.35)",transition:"all .2s"}}
-                      onMouseEnter={e=>{e.currentTarget.style.boxShadow="0 8px 32px rgba(16,185,129,.5)";e.currentTarget.style.transform="translateY(-1px)";}}
-                      onMouseLeave={e=>{e.currentTarget.style.boxShadow="0 4px 20px rgba(16,185,129,.35)";e.currentTarget.style.transform="none";}}>
-                      {lang==="de"?`Monatlich → CHF ${C.priceM}/Mo.`:lang==="en"?`Monthly → CHF ${C.priceM}/mo`:lang==="fr"?`Mensuel → CHF ${C.priceM}/mois`:`Mensile → CHF ${C.priceM}/mese`}
-                    </button>
-                    {/* Yearly – secondary with badge */}
-                    <button onClick={()=>window.open(C.stripeYearly,"_blank")} style={{width:"100%",padding:"10px",borderRadius:12,border:"1px solid rgba(255,255,255,.12)",background:"transparent",color:"rgba(255,255,255,.5)",fontFamily:"var(--bd)",fontSize:13,fontWeight:600,cursor:"pointer",transition:"all .2s",position:"relative"}}
-                      onMouseEnter={e=>{e.currentTarget.style.borderColor="rgba(16,185,129,.4)";e.currentTarget.style.color="var(--em)";}}
-                      onMouseLeave={e=>{e.currentTarget.style.borderColor="rgba(255,255,255,.12)";e.currentTarget.style.color="rgba(255,255,255,.5)";}}>
-                      <span style={{position:"absolute",top:-8,right:10,background:"#f59e0b",color:"white",fontSize:9,fontWeight:800,padding:"1px 6px",borderRadius:99}}>–17%</span>
-                      {lang==="de"?`Jährlich → CHF ${C.priceY}/Mo.`:lang==="en"?`Yearly → CHF ${C.priceY}/mo`:lang==="fr"?`Annuel → CHF ${C.priceY}/mois`:`Annuale → CHF ${C.priceY}/mese`}
-                    </button>
-                  </div>}
-                  {isUlt&&<div style={{display:"flex",flexDirection:"column",gap:8}}>
-                    {/* Ultimate Monthly – primary (correct Stripe link for monthly) */}
-                    <button onClick={()=>window.open(C.stripeUltimate,"_blank")} style={{width:"100%",padding:"13px",borderRadius:12,border:"none",background:"linear-gradient(135deg,#f59e0b,#d97706)",color:"white",fontFamily:"var(--bd)",fontSize:14,fontWeight:700,cursor:"pointer",boxShadow:"0 4px 20px rgba(245,158,11,.35)",transition:"all .2s"}}
-                      onMouseEnter={e=>{e.currentTarget.style.boxShadow="0 8px 32px rgba(245,158,11,.5)";e.currentTarget.style.transform="translateY(-1px)";}}
-                      onMouseLeave={e=>{e.currentTarget.style.boxShadow="0 4px 20px rgba(245,158,11,.35)";e.currentTarget.style.transform="none";}}>
-                      {lang==="de"?`Monatlich → CHF ${C.priceUltimate}/Mo.`:lang==="en"?`Monthly → CHF ${C.priceUltimate}/mo`:lang==="fr"?`Mensuel → CHF ${C.priceUltimate}/mois`:`Mensile → CHF ${C.priceUltimate}/mese`}
-                    </button>
-                    {/* Ultimate Yearly – secondary (correct Stripe link for yearly) */}
-                    <button onClick={()=>window.open(C.stripeUltimateYearly,"_blank")} style={{width:"100%",padding:"10px",borderRadius:12,border:"1px solid rgba(245,158,11,.25)",background:"transparent",color:"rgba(245,158,11,.6)",fontFamily:"var(--bd)",fontSize:13,fontWeight:600,cursor:"pointer",transition:"all .2s",position:"relative"}}
-                      onMouseEnter={e=>{e.currentTarget.style.borderColor="rgba(245,158,11,.5)";e.currentTarget.style.color="#f59e0b";}}
-                      onMouseLeave={e=>{e.currentTarget.style.borderColor="rgba(245,158,11,.25)";e.currentTarget.style.color="rgba(245,158,11,.6)";}}>
-                      <span style={{position:"absolute",top:-8,right:10,background:"#10b981",color:"white",fontSize:9,fontWeight:800,padding:"1px 6px",borderRadius:99}}>–20%</span>
-                      {lang==="de"?"Jährlich → CHF 39.90/Mo.":lang==="en"?"Yearly → CHF 39.90/mo":lang==="fr"?"Annuel → CHF 39.90/mois":"Annuale → CHF 39.90/mese"}
-                    </button>
-                  </div>}
-                  {isStarter&&<div>
-                    <button onClick={()=>window.open(C.stripeStarter,"_blank")} style={{width:"100%",padding:"13px",borderRadius:12,border:"none",background:"linear-gradient(135deg,#ef4444,#dc2626)",color:"white",fontFamily:"var(--bd)",fontSize:14,fontWeight:700,cursor:"pointer",boxShadow:"0 4px 20px rgba(239,68,68,.35)",transition:"all .2s"}}
-                      onMouseEnter={e=>{e.currentTarget.style.boxShadow="0 8px 32px rgba(239,68,68,.5)";e.currentTarget.style.transform="translateY(-1px)";}}
-                      onMouseLeave={e=>{e.currentTarget.style.boxShadow="0 4px 20px rgba(239,68,68,.35)";e.currentTarget.style.transform="none";}}>
-                      {tier.btn||`Starter kaufen – CHF ${C.priceStarter} 🇨🇭`}
-                    </button>
-                    <div style={{fontSize:11,textAlign:"center",marginTop:8,color:"rgba(255,255,255,.28)",lineHeight:1.5}}>
-                      {lang==="de"?"Sichere deinem Kind den entscheidenden Vorteil.":lang==="en"?"Give your child the decisive advantage.":lang==="fr"?"Offrez à votre enfant l'avantage décisif.":"Dai al tuo figlio il vantaggio decisivo."}
-                    </div>
-                  </div>}
-                  <div style={{textAlign:"center",fontSize:11,color:"rgba(255,255,255,.18)",marginTop:10}}>{isStarter?(lang==="de"?"Stripe · ✅ Twint · Einmalig":lang==="en"?"Stripe · ✅ Twint · One-time":lang==="fr"?"Stripe · ✅ Twint · Unique":"Stripe · ✅ Twint · Una tantum"):(lang==="de"?"Stripe · Twint · Jederzeit kündbar":lang==="en"?"Stripe · Twint · Cancel anytime":lang==="fr"?"Stripe · Twint · Résiliable":"Stripe · Twint · Cancellabile")}</div>
+                  {isFree&&<button onClick={()=>navTo("app")} style={{width:"100%",padding:"12px",borderRadius:12,border:"1.5px solid rgba(255,255,255,.12)",background:"transparent",color:"rgba(255,255,255,.7)",fontFamily:"var(--bd)",fontSize:14,fontWeight:500,cursor:"pointer",transition:"all .2s"}}>
+                    {lang==="de"?"Kostenlos starten":lang==="fr"?"Commencer gratuitement":lang==="it"?"Inizia gratis":"Start for free"}
+                  </button>}
+                  {isUlt&&<button onClick={()=>window.open(C.stripeUltimate,"_blank")} style={{width:"100%",padding:"13px",borderRadius:12,border:"none",background:"linear-gradient(135deg,#f59e0b,#d97706)",color:"white",fontFamily:"var(--bd)",fontSize:14,fontWeight:600,cursor:"pointer"}}>
+                    Ultimate – CHF {C.priceUltimate}/Mo.
+                  </button>}
+                  {isStarter&&<button onClick={()=>window.open(C.stripeStarter,"_blank")} style={{width:"100%",padding:"13px",borderRadius:12,border:"none",background:"linear-gradient(135deg,#ef4444,#dc2626)",color:"white",fontFamily:"var(--bd)",fontSize:14,fontWeight:600,cursor:"pointer"}}>
+                    {tier.btn||`Starter – CHF ${C.priceStarter}`}
+                  </button>}
+                  <div style={{textAlign:"center",fontSize:11,color:"rgba(255,255,255,.18)",marginTop:10}}>{lang==="de"?"Stripe · Twint · Jederzeit kündbar":lang==="fr"?"Stripe · Twint · Résiliable":"Stripe · Twint · Cancel anytime"}</div>
                 </div>
               );
             })}
           </div>
-
-          {/* Payment methods */}
-          <div style={{textAlign:"center",marginTop:40}}>
-            <div style={{fontSize:11,fontWeight:700,letterSpacing:2,textTransform:"uppercase",color:"rgba(255,255,255,.26)",marginBottom:16}}>{t.payments.label}</div>
+          <div style={{textAlign:"center",marginTop:36}}>
             <div className="pay-row">{t.payments.methods.map(m=><div key={m} className="pay-chip">{m}</div>)}</div>
-            <div style={{fontSize:12,color:"rgba(255,255,255,.2)",marginTop:12}}>{t.payments.sub}</div>
           </div>
         </div>
       </section>
 
-      {/* FAQ */}
+      {/* ── TESTIMONIALS ── */}
+      <section className="lp-section">
+        <div className="con">
+          <div style={{marginBottom:48}} className="lp-reveal">
+            <span className="lp-label">{t.testi.label}</span>
+            <h2 className="lp-title">{t.testi.title}</h2>
+            <p className="lp-sub">{lang==="de"?"Echte Erfahrungen aus dem Schweizer Arbeitsmarkt.":lang==="fr"?"Retours réels du marché du travail suisse.":lang==="it"?"Esperienze reali dal mercato del lavoro svizzero.":"Real experiences from the Swiss job market."}</p>
+          </div>
+          <div className="lp-testi-grid">
+            {t.testi.items.map((item,i)=>(
+              <div key={i} className="lp-testi-card lp-reveal" style={{transitionDelay:`${i*.1}s`}}>
+                <div className="lp-testi-stars">{item.s}</div>
+                <p className="lp-testi-text">„{item.t}"</p>
+                <div className="lp-testi-author">
+                  <div className="lp-testi-av" style={{background:["#2563EB","#059669","#9333EA"][i%3]}}>{item.a[0]}</div>
+                  <div>
+                    <div className="lp-testi-name">{item.a}</div>
+                    <div className="lp-testi-role">{item.r}</div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── CV COMPARE ── */}
+      <section className="lp-section lp-section-alt">
+        <div className="con">
+          <div style={{textAlign:"center",marginBottom:48}} className="lp-reveal">
+            <span className="lp-label">{lang==="de"?"Vorher / Nachher":lang==="fr"?"Avant / Après":lang==="it"?"Prima / Dopo":"Before / After"}</span>
+            <h2 className="lp-title" style={{textAlign:"center",margin:"0 auto 16px"}}>
+              {lang==="de"?"Was KI-Optimierung":lang==="fr"?"Ce que l'optimisation IA":lang==="it"?"Cosa fa l'ottimizzazione IA":"What AI optimisation"}<br/>
+              <em>{lang==="de"?"wirklich":lang==="fr"?"vraiment":lang==="it"?"veramente":"really"}</em> {lang==="de"?"bewirkt":lang==="fr"?"apporte":lang==="it"?"porta":"does"}
+            </h2>
+            <p className="lp-sub" style={{margin:"0 auto"}}>{lang==="de"?"Sieh selbst, wie Stellify ein durchschnittliches CV in eine überzeugende Bewerbung verwandelt.":lang==="fr"?"Voyez comment Stellify transforme un CV ordinaire en une candidature convaincante.":"See how Stellify turns an average CV into a compelling application."}</p>
+          </div>
+          <div className="lp-cv-grid lp-reveal">
+            {/* BEFORE */}
+            <div className="lp-cv-card">
+              <div className="lp-cv-hdr bad">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                {lang==="de"?"Vorher – Ohne Optimierung":lang==="fr"?"Avant – Sans optimisation":"Before – Without optimisation"}
+              </div>
+              <div className="lp-cv-body">
+                {[
+                  {l:lang==="de"?"Zusammenfassung":lang==="fr"?"Résumé":"Summary",lines:["lg","md"]},
+                  {l:lang==="de"?"Berufserfahrung":lang==="fr"?"Expérience":"Experience",lines:["fl","md","sh"]},
+                  {l:lang==="de"?"Fähigkeiten":lang==="fr"?"Compétences":"Skills",lines:["lg","sh"]}
+                ].map((b,i)=>(
+                  <div key={i} className="lp-cv-block bad">
+                    <div className="lp-cv-label">{b.l}</div>
+                    {b.lines.map((c,j)=><div key={j} className={`lp-cv-line ${c}`}/>)}
+                  </div>
+                ))}
+                <div className="lp-cv-score">
+                  <div className="lp-cv-score-row"><span>CV-Score</span><span style={{color:"#EF4444",fontWeight:600}}>54 / 100</span></div>
+                  <div className="lp-cv-track"><div className="lp-cv-fill" style={{width:"54%",background:"#EF4444"}}/></div>
+                </div>
+              </div>
+            </div>
+            {/* AFTER */}
+            <div className="lp-cv-card" style={{borderColor:"rgba(5,150,105,.3)"}}>
+              <div className="lp-cv-hdr good">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                {lang==="de"?"Nachher – KI-optimiert von Stellify":lang==="fr"?"Après – Optimisé par Stellify":"After – AI optimised by Stellify"}
+              </div>
+              <div className="lp-cv-body">
+                {[
+                  {l:lang==="de"?"Zusammenfassung":lang==="fr"?"Résumé":"Summary",lines:["fl","lg"],ai:"✓ KI-optimiert"},
+                  {l:lang==="de"?"Berufserfahrung":lang==="fr"?"Expérience":"Experience",lines:["fl","lg","md"],ai:"✓ ATS-Keywords"},
+                  {l:lang==="de"?"Fähigkeiten":lang==="fr"?"Compétences":"Skills",lines:["fl","lg"],ai:"✓ CH-Standard"}
+                ].map((b,i)=>(
+                  <div key={i} className="lp-cv-block good">
+                    <div className="lp-cv-label">{b.l}</div>
+                    {b.lines.map((c,j)=><div key={j} className={`lp-cv-line ${c}`}/>)}
+                    <span className="lp-cv-ai">{b.ai}</span>
+                  </div>
+                ))}
+                <div className="lp-cv-score">
+                  <div className="lp-cv-score-row"><span>CV-Score</span><span style={{color:"#059669",fontWeight:600}}>94 / 100 &nbsp;+40 ↑</span></div>
+                  <div className="lp-cv-track"><div className="lp-cv-fill" style={{width:"94%",background:"#059669"}}/></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── FAQ ── */}
       <FaqSection lang={lang} email={C.email}/>
 
-      {/* ═══ TESTIMONIALS ═══ */}
-      <section style={{padding:"80px 0",background:"var(--dk)"}}>
-        <div className="con">
-          <div className="sh shc">
-            <div className="seye" style={{color:"#fbbf24",letterSpacing:3}}>★★★★★ {t.testi.label}</div>
-            <h2 className="st">{t.testi.title}</h2>
-          </div>
-          <div className="testi-grid">
-            {t.testi.items.map((item,i)=>(
-              <div key={i} className="testi-card reveal" style={{transitionDelay:`${i*0.13}s`}}>
-                <div style={{display:"flex",gap:3,marginBottom:18}}>
-                  {"★★★★★".split("").map((_,j)=>(
-                    <span key={j} style={{color:"#fbbf24",fontSize:17}}>★</span>
-                  ))}
-                </div>
-                <p style={{fontSize:15,color:"rgba(255,255,255,.7)",lineHeight:1.8,margin:"0 0 24px",fontStyle:"italic",fontFamily:"var(--bd)",fontWeight:300}}>„{item.t}"</p>
-                <div style={{display:"flex",alignItems:"center",gap:12,borderTop:"1px solid rgba(255,255,255,.07)",paddingTop:18}}>
-                  <div style={{width:40,height:40,borderRadius:"50%",background:"linear-gradient(135deg,var(--em),#059669)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,fontWeight:800,color:"white",flexShrink:0}}>
-                    {item.a[0]}
-                  </div>
-                  <div>
-                    <div style={{fontWeight:700,fontSize:14,color:"white"}}>{item.a}</div>
-                    <div style={{fontSize:12,color:"rgba(255,255,255,.3)",marginTop:2}}>{item.r}</div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-          {/* Trust strip */}
-          <div className="logo-strip">
-            {[
-              {ico:"🔒", txt:lang==="de"?"Keine Datenspeicherung":"No data storage"},
-              {ico:"🇨🇭", txt:lang==="de"?"Schweizer Unternehmen":"Swiss company"},
-              {ico:"⭐", txt:lang==="de"?"4.9/5 Bewertung":"4.9/5 rating"},
-              {ico:"👥", txt:lang==="de"?"2.000+ Nutzer":"2,000+ users"},
-              {ico:"✅", txt:lang==="de"?"ATS-validiert":"ATS-validated"},
-            ].map((item,i)=>(
-              <div key={i} className="logo-chip reveal" style={{transitionDelay:`${i*0.07}s`}}>
-                {item.ico} {item.txt}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ═══ WERBE-SPOT ═══ */}
-      <section style={{padding:"100px 0",background:"linear-gradient(180deg,#020209 0%,#060614 50%,#020209 100%)",position:"relative",overflow:"hidden"}}>
-        {/* Ambient glow */}
-        <div style={{position:"absolute",top:"50%",left:"50%",transform:"translate(-50%,-50%)",width:800,height:400,background:"radial-gradient(ellipse,rgba(16,185,129,.07) 0%,transparent 70%)",pointerEvents:"none"}}/>
+      {/* ── CTA ── */}
+      <section className="lp-cta">
         <div className="con" style={{position:"relative",zIndex:1}}>
-          <div style={{textAlign:"center",marginBottom:64}}>
-            <div className="seye" style={{color:"var(--em)",letterSpacing:3,marginBottom:16}}>▶ STELLIFY – DER SPOT</div>
-            <h2 className="st" style={{fontSize:"clamp(32px,5vw,58px)",lineHeight:1.06,marginBottom:0}}>
-              {lang==="de"?"Dein nächster Job.":lang==="en"?"Your next job.":lang==="fr"?"Ton prochain emploi.":"Il tuo prossimo lavoro."}{" "}
-              <span style={{color:"var(--em)"}}>{lang==="de"?"KI-schnell.":lang==="en"?"AI-fast.":lang==="fr"?"Ultra-rapide.":"Veloce come l'IA."}</span>
-            </h2>
+          <h2 className="lp-title" style={{color:"white",textAlign:"center",marginBottom:16}}>{lang==="de"?"Starte noch heute.":lang==="fr"?"Commencez dès aujourd'hui.":lang==="it"?"Inizia oggi stesso.":"Start today."}</h2>
+          <p style={{fontSize:16,color:"rgba(255,255,255,.48)",marginBottom:36,textAlign:"center",fontWeight:300}}>{lang==="de"?"Kostenlos. Ohne Kreditkarte. In 2 Minuten eingerichtet.":lang==="fr"?"Gratuit. Sans carte bancaire. Prêt en 2 minutes.":"Free. No credit card. Set up in 2 minutes."}</p>
+          <div style={{display:"flex",justifyContent:"center"}}>
+            <button className="btn-white" onClick={()=>navTo("app")}>
+              {lang==="de"?"Jetzt kostenlos starten →":lang==="fr"?"Commencer gratuitement →":lang==="it"?"Inizia gratis ora →":"Start for free now →"}
+            </button>
           </div>
-
-          {/* Video Placeholder / Teaser Card */}
-          <div className="reveal" style={{maxWidth:820,margin:"0 auto 64px",background:"rgba(255,255,255,.02)",border:"1px solid rgba(16,185,129,.15)",borderRadius:28,overflow:"hidden",boxShadow:"0 40px 100px rgba(0,0,0,.6)"}}>
-            <div style={{aspectRatio:"16/9",background:"linear-gradient(135deg,#0a0a1a 0%,#0d1a14 50%,#0a0a1a 100%)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",position:"relative",overflow:"hidden",cursor:"pointer"}}
-              onClick={()=>{}}>
-              {/* Animated grid bg */}
-              <div style={{position:"absolute",inset:0,backgroundImage:"linear-gradient(rgba(16,185,129,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(16,185,129,.04) 1px,transparent 1px)",backgroundSize:"60px 60px",pointerEvents:"none"}}/>
-              {/* Play button */}
-              <div style={{width:80,height:80,borderRadius:"50%",background:"linear-gradient(135deg,#10b981,#059669)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:28,boxShadow:"0 0 60px rgba(16,185,129,.5)",marginBottom:24,position:"relative",zIndex:1,cursor:"pointer",transition:"transform .2s"}}
-                onMouseEnter={e=>e.currentTarget.style.transform="scale(1.1)"}
-                onMouseLeave={e=>e.currentTarget.style.transform="scale(1)"}>
-                ▶
-              </div>
-              <div style={{textAlign:"center",position:"relative",zIndex:1,padding:"0 40px"}}>
-                <div style={{fontFamily:"var(--hd)",fontSize:"clamp(20px,3vw,32px)",fontWeight:800,color:"white",letterSpacing:"-1px",lineHeight:1.2,marginBottom:12}}>
-                  {lang==="de"?"30 Sekunden. Ein perfektes Motivationsschreiben.":lang==="en"?"30 seconds. One perfect cover letter.":lang==="fr"?"30 secondes. Une lettre de motivation parfaite.":"30 secondi. Una lettera di motivazione perfetta."}
-                </div>
-                <div style={{fontSize:14,color:"rgba(255,255,255,.4)",lineHeight:1.7}}>
-                  {lang==="de"?"Kein Stress. Kein Blankes Blatt. Nur Resultate.":lang==="en"?"No stress. No blank page. Just results.":lang==="fr"?"Pas de stress. Pas de page blanche. Que des résultats.":"Nessuno stress. Nessuna pagina bianca. Solo risultati."}
-                </div>
-              </div>
-              <div style={{position:"absolute",bottom:24,right:24,fontSize:11,fontWeight:700,color:"rgba(255,255,255,.2)",letterSpacing:2,textTransform:"uppercase"}}>
-                Stellify · Swiss AI Career Copilot
-              </div>
-            </div>
-            {/* Spot tagline strip */}
-            <div style={{padding:"20px 32px",borderTop:"1px solid rgba(255,255,255,.05)",display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:12}}>
-              <div>
-                <div style={{fontFamily:"var(--hd)",fontSize:16,fontWeight:800,color:"white",marginBottom:4}}>
-                  {lang==="de"?"Stellify – Dein Schweizer KI-Karriere-Copilot":lang==="en"?"Stellify – Your Swiss AI Career Copilot":lang==="fr"?"Stellify – Votre copilote carrière IA suisse":"Stellify – Il tuo copilota carriera IA svizzero"}
-                </div>
-                <div style={{fontSize:12,color:"rgba(255,255,255,.35)"}}>
-                  {lang==="de"?"20+ Tools · Gratis starten · Kein Abo nötig":lang==="en"?"20+ Tools · Free start · No subscription needed":lang==="fr"?"20+ outils · Démarrage gratuit":"20+ strumenti · Inizia gratis"}
-                </div>
-              </div>
-              <button className="btn b-em" onClick={()=>navTo("app")} style={{flexShrink:0}}>
-                {lang==="de"?"Jetzt gratis testen →":lang==="en"?"Try free now →":lang==="fr"?"Essayer gratuitement →":"Prova gratis ora →"}
-              </button>
-            </div>
-          </div>
-
-          {/* 3 Spot-Szenen als Teaser-Karten */}
-          {(()=>{
-            const LL=(d,e,f,it)=>({de:d,en:e,fr:f,it}[lang]||d);
-            const scenes=[
-              {n:"01",ico:"🔍",t:LL("Du siehst eine Stelle","You see a job listing","Tu vois une offre","Vedi un annuncio"),d:LL("Du kopierst die Stellenbeschreibung – das war schon alles.","You copy the job description – that's all.","Tu copies l'offre – c'est tout.","Copi l'annuncio – è tutto.")},
-              {n:"02",ico:"⚡",t:LL("Stella analysiert","Stella analyses","Stella analyse","Stella analizza"),d:LL("KI liest dein Profil, die Stelle, den Markt. In Sekunden.","AI reads your profile, the role, the market. In seconds.","L'IA lit ton profil et le poste. En secondes.","L'IA legge il tuo profilo. In secondi.")},
-              {n:"03",ico:"✅",t:LL("Du bewirbst dich","You apply","Tu postules","Ti candidi"),d:LL("Perfektes Motivationsschreiben. Perfekter Lebenslauf. Jetzt.","Perfect cover letter. Perfect CV. Right now.","Lettre et CV parfaits. Maintenant.","Lettera e CV perfetti. Adesso.")},
-            ];
-            return <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:20,maxWidth:820,margin:"0 auto"}} className="reveal">
-            {scenes.map((scene,i)=>(
-              <div key={i} className="reveal" style={{background:"rgba(255,255,255,.02)",border:"1px solid rgba(255,255,255,.07)",borderRadius:16,padding:"22px 20px",transition:"all .22s",transitionDelay:`${i*0.1}s`}}
-                onMouseEnter={e=>{e.currentTarget.style.borderColor="rgba(16,185,129,.25)";e.currentTarget.style.background="rgba(16,185,129,.04)";}}
-                onMouseLeave={e=>{e.currentTarget.style.borderColor="rgba(255,255,255,.07)";e.currentTarget.style.background="rgba(255,255,255,.02)";}}>
-                <div style={{fontSize:28,marginBottom:12}}>{scene.ico}</div>
-                <div style={{fontSize:11,fontWeight:700,color:"var(--em)",letterSpacing:2,marginBottom:6}}>{scene.n}</div>
-                <div style={{fontFamily:"var(--hd)",fontSize:15,fontWeight:700,color:"white",marginBottom:8}}>{scene.t}</div>
-                <div style={{fontSize:12,color:"rgba(255,255,255,.38)",lineHeight:1.65}}>{scene.d}</div>
-              </div>
-            ))}
-          </div>;
-          })()}
         </div>
       </section>
 
-      <section className="cta-sec">
-        <div className="csm">
-          <h2 style={{fontFamily:"var(--hd)",fontSize:"clamp(36px,5vw,60px)",fontWeight:800,color:"white",letterSpacing:"-2px",lineHeight:1.05,marginBottom:16}}>
-            {t.cta.title} <em style={{fontStyle:"normal",color:"var(--em)"}}>{t.cta.italic}</em>
-          </h2>
-          <p style={{fontSize:16,color:"rgba(255,255,255,.4)",marginBottom:32,lineHeight:1.7}}>{t.cta.sub}</p>
-          <button className="btn b-em b-lg" onClick={()=>navTo("app")}>{t.cta.btn}</button>
-        </div>
-      </section>
       <Footer/>
     </div>
   </>);
+
 
   // ══════════════════ APPLICATION TOOL ══════════════════
   if(page==="app") return(<>{<style>{FONTS+CSS}</style>}{sharedOverlays}{pw&&<PW/>}
