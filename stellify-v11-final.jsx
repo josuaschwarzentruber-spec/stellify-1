@@ -10,8 +10,6 @@ const C = {
   email: "support@stellify.ch",
   address: "6300 Zug, Schweiz",
   owner: "JTSP",
-  stripeStarter: "https://buy.stripe.com/PLACEHOLDER_STARTER_990", // Einmalzahlung 9.90 CHF via Twint
-  priceStarter: "9.90",
   stripeMonthly: "https://buy.stripe.com/cNi14m58gbdve0MbaZ2B202",
   stripeYearly:  "https://buy.stripe.com/8x2cN4asAchzg8U92R2B205",
   priceM: "19.90",
@@ -736,7 +734,7 @@ footer{background:var(--dk);padding:50px 28px 24px}
 .lp-badge-pro{background:rgba(37,99,235,.08);color:var(--em);border:1px solid rgba(37,99,235,.2)}
 
 /* How it works */
-.lp-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+.lp-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
 @media(max-width:900px){.lp-steps{grid-template-columns:1fr 1fr}}
 @media(max-width:480px){.lp-steps{grid-template-columns:1fr}}
 .lp-step{background:white;border:1.5px solid var(--bo);border-radius:var(--r2);padding:26px 22px;transition:transform .2s,box-shadow .2s}
@@ -896,22 +894,6 @@ const mkT = (lang) => {
       save:   L("2 Monate gratis","2 mois offerts","2 mesi gratis","2 months free"),
       recom:  L("Empfohlen","Recommandé","Consigliato","Recommended"),
       tiers:[
-        {id:"starter",name:L("🎒 Starter","🎒 Starter","🎒 Starter","🎒 Starter"),priceM:9.90,oneTime:true,
-         note:L("Einmalig CHF 9.90 – kein Abo, zahle mit Twint!","One-time CHF 9.90 – no subscription, pay with Twint!","Unique CHF 9.90 – sans abonnement, paiement par Twint!","Una tantum CHF 9.90 – nessun abbonamento!"),
-         desc:L(
-           "Perfekt für Schüler und Lehrstellensuchende: 1 vollständige Bewerbungsmappe mit KI – Lebenslauf (Swiss-Apprentice-Format mit Schnupperlehren-Sektion) + Motivationsschreiben nach Schweizer Standard. Einmalig, kein Abo.",
-           "Perfect for students seeking apprenticeships: 1 complete application with AI – CV (Swiss-Apprentice format with trial placement section) + cover letter to Swiss standard. One-time, no subscription.",
-           "Parfait pour les élèves cherchant un apprentissage: 1 dossier de candidature IA complet. Paiement unique, sans abonnement.",
-           "Perfetto per studenti in cerca di apprendistato: 1 dossier candidatura completo. Pagamento unico, senza abbonamento."
-         ),
-         list:L(
-           ["✦ 1 vollständige KI-Bewerbungsmappe (Motivationsschreiben + Lebenslauf)","Schweizer Format: Schnupperlehren-Sektion, Foto-Platzierung oben rechts","Schweizer Terminologie: Lehrstelle, Berufslehre, Motivationsschreiben","Noten-Feld für Lieblingsfächer (Mathe, Deutsch) – Lehrbetriebe schauen darauf!","Referenz-Sektion: Lehrer oder Schnupperlehre-Betreuer eintragen","PDF-Export druckfertig","Kein Abo · Einmalzahlung · ✅ Twint-Zahlung möglich"],
-           ["✦ 1 complete AI application pack (cover letter + CV)","Swiss format: trial placement section, photo top right","Swiss terminology: Lehrstelle, Berufslehre, Motivationsschreiben","Grades field for favourite subjects – employers look for this!","Reference section: teacher or trial placement supervisor","Print-ready PDF export","No subscription · One-time payment · ✅ Twint payment accepted"],
-           ["✦ 1 dossier IA complet (lettre de motivation + CV)","Format suisse: section Schnupperlehre, photo en haut à droite","Terminologie suisse: Lehrstelle, Berufslehre","Champ notes matières préférées","Section références: professeur ou encadrant de stage","Export PDF prêt à imprimer","Sans abonnement · Paiement unique · ✅ Twint"],
-           ["✦ 1 dossier IA completo (lettera + CV)","Formato svizzero: sezione Schnupperlehre, foto in alto a destra","Terminologia svizzera: Lehrstelle, Berufslehre","Campo voti materie preferite","Sezione referenze","Export PDF pronto","Senza abbonamento · Pagamento unico · ✅ Twint"]
-         ),
-         twint:true,
-         btn:L("Starter kaufen – CHF 9.90 🇨🇭","Buy Starter – CHF 9.90 🇨🇭","Acheter Starter – CHF 9.90 🇨🇭","Acquista Starter – CHF 9.90 🇨🇭"),btnS:"b-em"},
         {id:"free",name:L("Gratis","Gratuit","Gratuito","Free"),price:0,
          note:L("Kostenlos loslegen – ohne Kreditkarte.","Start for free – no credit card needed.","Gratuit pour toujours – sans carte.","Gratis per sempre – senza carta."),
          desc:L(
@@ -2819,38 +2801,38 @@ function FaqSection({lang, email}) {
     {q:"Is there a student discount?",a:"Not currently, but the annual price (CHF 18.90/mo.) makes the subscription affordable for everyone."},
   ];
   return(
-    <section style={{padding:"88px 0",background:"var(--dk)",position:"relative",overflow:"hidden"}} id="faq">
-      <div style={{position:"absolute",top:-100,right:-80,width:400,height:400,background:"radial-gradient(circle,rgba(16,185,129,.07),transparent)",pointerEvents:"none"}}/>
+    <section style={{padding:"88px 0",background:"var(--bg)"}} id="faq">
       <div className="con">
-        <div className="sh shc">
-          <div className="seye">{lang==="de"?"✦ FAQ":lang==="fr"?"✦ FAQ":lang==="it"?"✦ FAQ":"✦ FAQ"}</div>
-          <h2 className="st">{lang==="de"?"Häufige Fragen":lang==="fr"?"Questions fréquentes":lang==="it"?"Domande frequenti":"Frequently asked questions"}</h2>
-          <p className="ss">{lang==="de"?"Alles was du wissen musst – klar und ehrlich.":lang==="fr"?"Tout ce que vous devez savoir – clairement.":lang==="it"?"Tutto quello che devi sapere.":"Everything you need to know – clear and honest."}</p>
+        <div style={{textAlign:"center",marginBottom:48}}>
+          <span className="lp-label">✦ FAQ</span>
+          <h2 className="lp-title" style={{textAlign:"center",margin:"0 auto 14px"}}>{lang==="de"?"Häufige Fragen":lang==="fr"?"Questions fréquentes":lang==="it"?"Domande frequenti":"Frequently asked questions"}</h2>
+          <p className="lp-sub" style={{margin:"0 auto"}}>{lang==="de"?"Alles was du wissen musst – klar und ehrlich.":lang==="fr"?"Tout ce que vous devez savoir – clairement.":lang==="it"?"Tutto quello che devi sapere.":"Everything you need to know – clear and honest."}</p>
         </div>
-        <div style={{maxWidth:760,margin:"0 auto",display:"flex",flexDirection:"column",gap:6}}>
+        <div style={{maxWidth:760,margin:"0 auto",display:"flex",flexDirection:"column",gap:8}}>
           {faqs.map((faq,i)=>(
-            <div key={i} className="reveal" style={{transitionDelay:`${i*0.06}s`,
-              background:open===i?"rgba(16,185,129,.06)":"rgba(255,255,255,.03)",
-              border:`1.5px solid ${open===i?"rgba(16,185,129,.3)":"rgba(255,255,255,.07)"}`,
-              borderRadius:16,overflow:"hidden",transition:"border-color .22s,background .22s"}}>
+            <div key={i} className="lp-reveal" style={{transitionDelay:`${i*0.06}s`,
+              background:open===i?"rgba(37,99,235,.04)":"white",
+              border:`1.5px solid ${open===i?"rgba(37,99,235,.25)":"var(--bo)"}`,
+              borderRadius:14,overflow:"hidden",transition:"border-color .2s,background .2s",
+              boxShadow:open===i?"0 2px 12px rgba(37,99,235,.08)":"none"}}>
               <button onClick={()=>setOpen(open===i?null:i)}
-                style={{width:"100%",background:"none",border:"none",cursor:"pointer",padding:"20px 24px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:16,textAlign:"left",fontFamily:"var(--bd)"}}>
-                <span style={{fontSize:15,fontWeight:700,color:"white",lineHeight:1.4}}>{faq.q}</span>
-                <div style={{width:28,height:28,borderRadius:"50%",background:open===i?"var(--em)":"rgba(255,255,255,.08)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,transition:"background .2s,transform .2s",transform:open===i?"rotate(45deg)":"none"}}>
-                  <span style={{fontSize:16,color:open===i?"white":"rgba(255,255,255,.4)",lineHeight:1,fontWeight:300}}>+</span>
+                style={{width:"100%",background:"none",border:"none",cursor:"pointer",padding:"18px 22px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:16,textAlign:"left",fontFamily:"var(--bd)"}}>
+                <span style={{fontSize:15,fontWeight:500,color:"var(--ink)",lineHeight:1.4}}>{faq.q}</span>
+                <div style={{width:26,height:26,borderRadius:"50%",background:open===i?"var(--em)":"var(--em3)",border:`1.5px solid ${open===i?"var(--em)":"rgba(37,99,235,.2)"}`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,transition:"background .2s,transform .2s",transform:open===i?"rotate(45deg)":"none"}}>
+                  <span style={{fontSize:16,color:open===i?"white":"var(--em)",lineHeight:1,fontWeight:300}}>+</span>
                 </div>
               </button>
-              {open===i&&<div style={{padding:"0 24px 20px",fontSize:14,color:"rgba(255,255,255,.55)",lineHeight:1.85,borderTop:"1px solid rgba(255,255,255,.07)",paddingTop:16,marginTop:0}}>
+              {open===i&&<div style={{padding:"0 22px 18px",fontSize:14,color:"var(--mu)",lineHeight:1.8,borderTop:"1px solid var(--bo)",paddingTop:14}}>
                 {faq.a}
               </div>}
             </div>
           ))}
         </div>
         <div style={{textAlign:"center",marginTop:44}}>
-          <div style={{display:"inline-flex",alignItems:"center",gap:12,background:"rgba(255,255,255,.04)",border:"1px solid rgba(255,255,255,.08)",borderRadius:16,padding:"16px 28px"}}>
+          <div style={{display:"inline-flex",alignItems:"center",gap:12,background:"white",border:"1.5px solid var(--bo)",borderRadius:16,padding:"16px 28px",boxShadow:"0 2px 12px rgba(0,0,0,.06)"}}>
             <span style={{fontSize:22}}>💬</span>
             <div style={{textAlign:"left"}}>
-              <div style={{fontSize:14,fontWeight:600,color:"white",marginBottom:2}}>{lang==="de"?"Noch Fragen?":lang==="fr"?"D'autres questions?":lang==="it"?"Altre domande?":"Still have questions?"}</div>
+              <div style={{fontSize:14,fontWeight:500,color:"var(--ink)",marginBottom:2}}>{lang==="de"?"Noch Fragen?":lang==="fr"?"D'autres questions?":lang==="it"?"Altre domande?":"Still have questions?"}</div>
               <a href={`mailto:${email}`} style={{fontSize:13,color:"var(--em)",fontWeight:600,textDecoration:"none"}}>{email}</a>
             </div>
           </div>
@@ -3792,36 +3774,48 @@ function AuthModal({ lang, onClose, onSuccess, defaultMode="login" }) {
 
   const GOOGLE_CLIENT_ID = "370460173343-bnc71e8tib764unofcd6sqf7slesehih.apps.googleusercontent.com";
 
-  // Google OAuth2 popup – no page redirect, stays in SPA
+  // Google Sign-In via Identity Services (JWT credential flow)
   const handleGoogleLogin = () => {
     setErr(""); setGLoading(true);
-    const doLogin = () => {
+    const doGIS = () => {
       try {
-        const client = window.google.accounts.oauth2.initTokenClient({
+        window.google.accounts.id.initialize({
           client_id: GOOGLE_CLIENT_ID,
-          scope: "email profile",
-          callback: async (resp) => {
-            if (resp.error) { setErr(L("Google-Login fehlgeschlagen.","Google sign-in failed.","Échec Google.","Errore Google.")); setGLoading(false); return; }
+          callback: (response) => {
             try {
-              const r = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", { headers: { Authorization: `Bearer ${resp.access_token}` } });
-              const u = await r.json();
-              if (!u.email) throw new Error("no email");
-              if (!authGetUser(u.email)) authRegister(u.email, "google-"+Date.now(), "free");
-              const user = authGetUser(u.email);
-              onSuccess(user);
-            } catch { setErr(L("Google-Login fehlgeschlagen.","Google sign-in failed.","Échec Google.","Errore Google.")); }
+              if (!response.credential) throw new Error("no credential");
+              // Decode JWT payload (base64url → JSON)
+              const payload = JSON.parse(atob(response.credential.split(".")[1].replace(/-/g,"+").replace(/_/g,"/")));
+              if (!payload.email) throw new Error("no email");
+              if (!authGetUser(payload.email)) authRegister(payload.email, "google-"+Date.now(), "free");
+              onSuccess(authGetUser(payload.email));
+            } catch {
+              setErr(L("Google-Login fehlgeschlagen.","Google sign-in failed.","Échec Google.","Errore Google."));
+            }
+            setGLoading(false);
+          },
+          use_fedcm_for_prompt: false,
+          cancel_on_tap_outside: true,
+        });
+        window.google.accounts.id.prompt((notification) => {
+          if (notification.isNotDisplayed()) {
+            setErr(L("Google-Popup nicht verfügbar – bitte prüfe die Popup-Einstellungen des Browsers.","Google popup unavailable – please check your browser popup settings.","Popup Google indisponible.","Popup Google non disponibile."));
+            setGLoading(false);
+          } else if (notification.isSkippedMoment()) {
             setGLoading(false);
           }
         });
-        client.requestAccessToken({ prompt: "select_account" });
-      } catch { setErr(L("Google noch nicht bereit – kurz warten.","Google not ready – please wait.","Google pas prêt – attendez.","Google non pronto – attendere.")); setGLoading(false); }
+      } catch {
+        setErr(L("Google-Login nicht verfügbar.","Google sign-in not available.","Google non disponible.","Google non disponibile."));
+        setGLoading(false);
+      }
     };
-    if (window.google?.accounts?.oauth2) { doLogin(); }
+    if (window.google?.accounts?.id) { doGIS(); }
     else {
       const s = document.createElement("script");
       s.src = "https://accounts.google.com/gsi/client";
-      s.onload = doLogin;
-      s.onerror = () => { setErr(L("Google-Script konnte nicht geladen werden.","Failed to load Google script.","Impossible de charger Google.","Impossibile caricare Google.")); setGLoading(false); };
+      s.onload = () => setTimeout(doGIS, 100);
+      s.onerror = () => { setErr(L("Google konnte nicht geladen werden.","Failed to load Google.","Impossible de charger Google.","Impossibile caricare Google.")); setGLoading(false); };
       document.head.appendChild(s);
     }
   };
@@ -6186,7 +6180,8 @@ RISPOSTA: "Sarebbe possibile un bonus di CHF 15k se il budget è limitato?"`)
           <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))",gap:16,maxWidth:1100,margin:"0 auto"}}>
             {t.price.tiers.map((tier,tierIdx)=>{
               const isFree=tier.id==="free",isPro=tier.id==="pro",isUlt=tier.id==="ultimate",isStarter=tier.id==="starter";
-              const displayPrice=tier.oneTime?`${tier.priceM}`:(yearly&&tier.priceY?`${tier.priceY}`:(tier.price===0?"0":`${tier.priceM}`));
+              const fmt=(n)=>Number(n).toFixed(2);
+              const displayPrice=tier.oneTime?fmt(tier.priceM):(yearly&&tier.priceY?fmt(tier.priceY):(tier.price===0?"0":fmt(tier.priceM)));
               return(
                 <div key={tier.id} className="lp-reveal" style={{
                   borderRadius:18,padding:"26px 22px",position:"relative",
