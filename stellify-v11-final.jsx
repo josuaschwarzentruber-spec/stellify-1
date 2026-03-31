@@ -19,8 +19,8 @@ const C = {
   CHAT_FREE_LIMIT: 20,
 
   ULTIMATE_LIMIT: 9999999,  // effektiv unbegrenzt
-  stripeUltimate: "https://buy.stripe.com/aFafZg9ow81jbSEgvj2B206",
-  stripeUltimateYearly: "https://buy.stripe.com/14A9ASfMU95nbSEdj72B203",
+  stripeUltimate: "https://buy.stripe.com/14A9ASfMU95nbSEdj72B203",
+  stripeUltimateYearly: "https://buy.stripe.com/aFafZg9ow81jbSEgvj2B206",
 
   priceUltimate: "49.90",
 
