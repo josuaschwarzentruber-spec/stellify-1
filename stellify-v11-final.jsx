@@ -19,8 +19,8 @@ const C = {
   CHAT_FREE_LIMIT: 20,
 
   ULTIMATE_LIMIT: 9999999,  // effektiv unbegrenzt
-  stripeUltimate: "https://buy.stripe.com/14A9ASfMU95nbSEdj72B203",       // Monatlich CHF 49.90
-  stripeUltimateYearly: "https://buy.stripe.com/aFafZg9ow81jbSEgvj2B206", // Jährlich CHF 39.90/Mo.
+  stripeUltimate: "https://buy.stripe.com/aFafZg9ow81jbSEgvj2B206",        // Monatlich CHF 49.90
+  stripeUltimateYearly: "https://buy.stripe.com/14A9ASfMU95nbSEdj72B203",  // Jährlich CHF 39.90/Mo.
 
   priceUltimate: "49.90",
 
