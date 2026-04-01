@@ -23,6 +23,7 @@ const C = {
   stripeUltimateYearly: "https://buy.stripe.com/aFafZg9ow81jbSEgvj2B206",  // Jährlich  CHF 39.90/Mo.
 
   priceUltimate: "49.90",
+  priceUltimateY: "39.90",
 
   ADMIN_EMAIL: "admin@stellify.ch",
   ADMIN_PW: "Stellify2025!",
@@ -829,7 +830,7 @@ const mkT = (lang) => {
          ),
          btn:L("Ultimate starten → CHF 49.90/Mo.","Start Ultimate → CHF 49.90/mo","Démarrer Ultimate → CHF 49.90/mois","Avvia Ultimate → CHF 49.90/mese"),btnS:"b-out"},
       ],
-      valTitle:L("CHF 19.90 – lohnt sich das?","CHF 19.90 – is it worth it?","CHF 19.90 – ça vaut la peine?","CHF 19.90 – vale la pena?"),
+      valTitle:L(`CHF ${C.priceM} – lohnt sich das?`,`CHF ${C.priceM} – is it worth it?`,`CHF ${C.priceM} – ça vaut la peine?`,`CHF ${C.priceM} – vale la pena?`),
       valPts:L(
         ["Ein Karriereberater kostet CHF 200–400 / Sitzung","Eine schlechte Bewerbung = verpasste Stelle","Zeugnis nicht verstanden = falscher Job","1 erfolgreiche Bewerbung = Abo hat sich gerechnet","Ein schlechter ATS-Score = CV wird nie gelesen","Stellify spart dir 3–5 Std. pro Bewerbung"],
         ["Un conseiller coûte CHF 200–400 / séance","Mauvais score ATS = votre CV n'est jamais lu","Certificat mal compris = mauvais emploi","1 mois de candidature réussie rembourse tout"],
@@ -2633,28 +2634,28 @@ function FaqSection({lang, email}) {
     {q:"Wie viele Generierungen habe ich?",a:`Gratis: ${C.FREE_LIMIT} Generierung${C.FREE_LIMIT!==1?"en":""} zum Testen. Pro: ${C.PRO_LIMIT} Generierungen/Woche (Erneuerung jeden Montag 07:00). Ultimate: unbegrenzt.`},
     {q:"Funktioniert Stellify für alle Branchen?",a:"Ja. Die KI ist auf den Schweizer Jobmarkt trainiert und kennt Gepflogenheiten aus IT, Finanzen, Gesundheit, Bildung, Gastronomie und mehr."},
     {q:"Welche Sprachen werden unterstützt?",a:"Vollständig auf Deutsch, Englisch, Französisch und Italienisch – ideal für Jobs in allen Sprachregionen der Schweiz."},
-    {q:"Gibt es einen Studentenrabatt?",a:"Aktuell nicht, aber der Jahrespreis (CHF 18.90/Mo.) macht das Abo für alle erschwinglich. Meld dich bei uns für spezielle Konditionen."},
+    {q:"Gibt es einen Studentenrabatt?",a:`Aktuell nicht, aber der Jahrespreis (CHF ${C.priceY}/Mo.) macht das Abo für alle erschwinglich. Meld dich bei uns für spezielle Konditionen.`},
   ]:lang==="fr"?[
     {q:"Mes données sont-elles sécurisées?",a:"Vos données ne sont pas stockées. Chaque requête est envoyée directement à l'API Anthropic et n'est pas enregistrée."},
     {q:"Puis-je résilier à tout moment?",a:"Oui – résiliation mensuelle possible, sans durée minimale ni frais cachés."},
     {q:"Combien de générations par plan?",a:"Gratuit: 1 génération. Pro: 60/mois par personne. Famille: 60/mois par personne (3 personnes). Unlimited: 60/mois par personne, membres illimités. Le volume se renouvelle automatiquement le 1er du mois suivant."},
     {q:"Fonctionne pour tous les secteurs?",a:"Oui. L'IA connaît les habitudes du marché suisse dans tous les secteurs."},
     {q:"Quelles langues sont supportées?",a:"Allemand, anglais, français et italien – idéal pour toutes les régions linguistiques."},
-    {q:"Y a-t-il une réduction étudiants?",a:"Pas actuellement, mais le prix annuel (CHF 18.90/mois) est accessible à tous."},
+    {q:"Y a-t-il une réduction étudiants?",a:`Pas actuellement, mais le prix annuel (CHF ${C.priceY}/mois) est accessible à tous.`},
   ]:lang==="it"?[
     {q:"I miei dati sono sicuri?",a:"I tuoi dati non vengono salvati. Ogni richiesta viene inviata direttamente all'API Anthropic e non viene registrata."},
     {q:"Posso cancellare in qualsiasi momento?",a:"Sì – cancellazione mensile possibile, senza durata minima o costi nascosti."},
     {q:"Cosa succede dopo 60 generazioni?",a:"Dopo 60 generazioni Pro al mese, il limite si ripristina automaticamente il 1° del mese successivo."},
     {q:"Funziona per tutti i settori?",a:"Sì. L'IA conosce le abitudini del mercato svizzero in tutti i settori."},
     {q:"Quali lingue sono supportate?",a:"Tedesco, inglese, francese e italiano – ideale per tutte le regioni linguistiche."},
-    {q:"C'è uno sconto studenti?",a:"Al momento no, ma il prezzo annuale (CHF 18.90/mese) è accessibile a tutti."},
+    {q:"C'è uno sconto studenti?",a:`Al momento no, ma il prezzo annuale (CHF ${C.priceY}/mese) è accessibile a tutti.`},
   ]:[
     {q:"Is my data secure?",a:"Your data is not stored. Each request is sent directly to the Anthropic API and not logged. No training on your data."},
     {q:"Can I cancel at any time?",a:"Yes – monthly cancellation possible, no minimum term or hidden fees. Manage your subscription directly via Stripe."},
     {q:"What happens after 60 generations?",a:"After 60 Pro generations per month, your limit resets automatically on the 1st of the following month."},
     {q:"Does it work for all industries?",a:"Yes. The AI is trained on the Swiss job market and knows conventions across IT, finance, health, education, hospitality and more."},
     {q:"Which languages are supported?",a:"Fully available in German, English, French and Italian – ideal for jobs across all Swiss language regions."},
-    {q:"Is there a student discount?",a:"Not currently, but the annual price (CHF 18.90/mo.) makes the subscription affordable for everyone."},
+    {q:"Is there a student discount?",a:`Not currently, but the annual price (CHF ${C.priceY}/mo.) makes the subscription affordable for everyone.`},
   ];
   return(
     <section className="sec sec-w" id="faq">
@@ -4388,7 +4389,7 @@ Antworte NUR mit JSON:
         <button onClick={()=>window.open(C.stripeUltimate,"_blank")} className="btn" style={{background:"linear-gradient(135deg,#f59e0b,#d97706)",color:"white",border:"none",padding:"10px 20px",fontSize:13,fontWeight:700,borderRadius:10,cursor:"pointer",boxShadow:"0 4px 14px rgba(245,158,11,.4)"}}>
           ♾️ {L("Ultimate holen →","Get Ultimate →","Obtenir Ultimate →","Ottieni Ultimate →")}
         </button>
-        <div style={{fontSize:10,color:"rgba(255,255,255,.25)",textAlign:"center"}}>CHF 39.90/Mo. · {L("2 Monate gratis","2 months free","2 mois offerts","2 mesi gratis")}</div>
+        <div style={{fontSize:10,color:"rgba(255,255,255,.25)",textAlign:"center"}}>CHF {C.priceUltimateY}/Mo. · {L("2 Monate gratis","2 months free","2 mois offerts","2 mesi gratis")}</div>
       </div>
     </div>
   ):(
@@ -5765,7 +5766,7 @@ RISPOSTA: "Sarebbe possibile un bonus di CHF 15k se il budget è limitato?"`)
           <div className="sh shc">
             <div className="seye">{lang==="de"?"✦ 20+ Tools – ein Abo":lang==="en"?"✦ 20+ Tools – one subscription":lang==="fr"?"✦ 20+ outils – un abonnement":"✦ 20+ strumenti – un abbonamento"}</div>
             <h2 className="st">{lang==="de"?"Nicht nur für Jobsuchende.":lang==="en"?"Not just for job seekers.":lang==="fr"?"Pas seulement pour les chercheurs d'emploi.":"Non solo per chi cerca lavoro."}</h2>
-            <p className="ss" style={{margin:"0 auto"}}>{lang==="de"?"Karriere, Schule, Produktivität – alles in einem Abo für CHF 19.90/Monat.":lang==="en"?"Career, school, productivity – all in one subscription for CHF 19.90/month.":lang==="fr"?"Carrière, école, productivité – tout pour CHF 19.90/mois.":"Carriera, scuola, produttività – tutto per CHF 19.90/mese."}</p>
+            <p className="ss" style={{margin:"0 auto"}}>{lang==="de"?`Karriere, Schule, Produktivität – alles in einem Abo für CHF ${C.priceM}/Monat.`:lang==="en"?`Career, school, productivity – all in one subscription for CHF ${C.priceM}/month.`:lang==="fr"?`Carrière, école, productivité – tout pour CHF ${C.priceM}/mois.`:`Carriera, scuola, produttività – tutto per CHF ${C.priceM}/mese.`}</p>
             {/* Category pills */}
             <div style={{display:"flex",flexWrap:"wrap",justifyContent:"center",gap:8,marginTop:24}}>
               {[
@@ -6658,7 +6659,7 @@ RISPOSTA: "Sarebbe possibile un bonus di CHF 15k se il budget è limitato?"`)
     <div className="abody">
       <ToolBanner pageId="excel"/>
       {err&&<div className="err">⚠️ {err}</div>}
-      {!pro?<div className="card"><LockMsg sub={L("Der Excel-Generator ist in Pro enthalten. CHF 19.90/Monat.","The Excel generator is included in Pro. CHF 19.90/month.","Le générateur Excel est inclus dans Pro. CHF 19.90/mois.","Il generatore Excel è incluso in Pro. CHF 19.90/mese.")}/></div>:<>
+      {!pro?<div className="card"><LockMsg sub={L(`Der Excel-Generator ist in Pro enthalten. CHF ${C.priceM}/Monat.`,`The Excel generator is included in Pro. CHF ${C.priceM}/month.`,`Le générateur Excel est inclus dans Pro. CHF ${C.priceM}/mois.`,`Il generatore Excel è incluso in Pro. CHF ${C.priceM}/mese.`)}/></div>:<>
         <div className="card">
           <div className="ct">📊 {t.nav.excel}</div>
           <div className="cs">{L("Beschreibe deine Aufgabe – die KI erstellt die perfekte Struktur mit Formeln.","Describe your task – AI creates the perfect structure with formulas.","Décrivez votre tâche – l'IA crée la structure parfaite avec formules.","Descrivi il tuo compito – l'IA crea la struttura perfetta con formule.")}</div>
@@ -6775,7 +6776,7 @@ RISPOSTA: "Sarebbe possibile un bonus di CHF 15k se il budget è limitato?"`)
     <div className="abody">
       <ToolBanner pageId="pptx"/>
       {err&&<div className="err">⚠️ {err}</div>}
-      {!pro?<div className="card"><LockMsg sub={L("Der PowerPoint-Maker ist in Pro enthalten. CHF 19.90/Monat.","The PowerPoint maker is included in Pro. CHF 19.90/month.","Le créateur PowerPoint est inclus dans Pro. CHF 19.90/mois.","Il creatore PowerPoint è incluso in Pro. CHF 19.90/mese.")}/></div>:<>
+      {!pro?<div className="card"><LockMsg sub={L(`Der PowerPoint-Maker ist in Pro enthalten. CHF ${C.priceM}/Monat.`,`The PowerPoint maker is included in Pro. CHF ${C.priceM}/month.`,`Le créateur PowerPoint est inclus dans Pro. CHF ${C.priceM}/mois.`,`Il creatore PowerPoint è incluso in Pro. CHF ${C.priceM}/mese.`)}/></div>:<>
         <div className="card">
           <div className="ct">📽️ {t.nav.pptx}</div>
           <div className="cs">{L("Beschreibe dein Thema – die KI erstellt eine komplette Präsentation mit Inhalt, Struktur und Sprechernotizen.","Describe your topic – AI creates a complete presentation with content, structure and speaker notes.","Décrivez votre sujet – l'IA crée une présentation complète.","Descrivi il tuo argomento – l'IA crea una presentazione completa.")}</div>
@@ -6949,7 +6950,7 @@ VERHALTEN:
 - Wenn du etwas schreibst (z.B. ein Satz für eine Bewerbung), schreib ihn direkt aus
 - Empfehle passende Stellify-Tools wenn sinnvoll, aber zwinge nichts auf
 - Sei warm, direkt, professionell – wie ein erfahrener Karriere-Coach
-- Preis: Gratis (1× Bewerbung/Monat) oder Pro CHF 19.90/Mo`;
+- Preis: Gratis (1× Bewerbung/Monat) oder Pro CHF ${C.priceM}/Mo`;
 
     const TOOL_MAP2 = {
       "bewerbung":["app"],"bewerbungen":["app"],"linkedin":["linkedin"],"ats":["ats"],
