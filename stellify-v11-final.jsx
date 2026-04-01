@@ -19,10 +19,11 @@ const C = {
   CHAT_FREE_LIMIT: 20,
 
   ULTIMATE_LIMIT: 9999999,  // effektiv unbegrenzt
-  stripeUltimate: "https://buy.stripe.com/14A9ASfMU95nbSEdj72B203",
-  stripeUltimateYearly: "https://buy.stripe.com/aFafZg9ow81jbSEgvj2B206",
+  stripeUltimate: "https://buy.stripe.com/14A9ASfMU95nbSEdj72B203",        // Monatlich CHF 49.90
+  stripeUltimateYearly: "https://buy.stripe.com/aFafZg9ow81jbSEgvj2B206",  // Jährlich  CHF 39.90/Mo.
 
   priceUltimate: "49.90",
+  priceUltimateY: "39.90",
 
   ADMIN_EMAIL: "admin@stellify.ch",
   ADMIN_PW: "Stellify2025!",
@@ -573,6 +574,55 @@ footer{background:var(--dk);padding:50px 28px 24px}
 .fcol h5{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.25);margin-bottom:12px}
 .fcol button,.fcol a{display:block;font-size:13px;color:rgba(255,255,255,.36);margin-bottom:7px;cursor:pointer;text-decoration:none;background:none;border:none;font-family:var(--bd);text-align:left;transition:color .18s;padding:0}.fcol button:hover,.fcol a:hover{color:white}
 .fbot{max-width:1200px;margin:0 auto;padding-top:18px;font-size:11px;color:rgba(255,255,255,.25);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+/* ── SPECTACULAR ANIMATIONS ──────────────────────────────────────────── */
+@keyframes fadeInUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
+@keyframes glowPulse{0%,100%{box-shadow:0 2px 14px rgba(16,185,129,.32)}50%{box-shadow:0 4px 36px rgba(16,185,129,.65),0 0 60px rgba(16,185,129,.18)}}
+@keyframes shimmerSlide{0%{background-position:-400% center}100%{background-position:400% center}}
+@keyframes borderPulse{0%,100%{border-color:rgba(16,185,129,.22)}50%{border-color:rgba(16,185,129,.6)}}
+@keyframes scaleIn{from{opacity:0;transform:scale(.88)}to{opacity:1;transform:scale(1)}}
+@keyframes slideInLeft{from{opacity:0;transform:translateX(-20px)}to{opacity:1;transform:translateX(0)}}
+@keyframes emoPop{0%{transform:scale(1)}30%{transform:scale(1.38) rotate(-9deg)}60%{transform:scale(.94) rotate(4deg)}100%{transform:scale(1.18) translateY(-3px)}}
+@keyframes sheen{0%{left:-100%}100%{left:100%}}
+@keyframes floatBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+/* Utility animation classes */
+.anim-fade-up{animation:fadeInUp .52s cubic-bezier(.25,.46,.45,.94) both}
+.anim-scale{animation:scaleIn .44s cubic-bezier(.34,1.56,.64,1) both}
+.anim-slide-left{animation:slideInLeft .42s cubic-bezier(.25,.46,.45,.94) both}
+.stagger-1{animation-delay:.06s}.stagger-2{animation-delay:.14s}.stagger-3{animation-delay:.23s}.stagger-4{animation-delay:.32s}.stagger-5{animation-delay:.41s}
+/* Glow CTA button */
+.glow-btn{animation:glowPulse 2.8s ease-in-out infinite}
+/* Sheen sweep on primary CTA */
+.btn.b-em{position:relative;overflow:hidden}
+.btn.b-em::after{content:'';position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(120deg,transparent,rgba(255,255,255,.22),transparent);pointer-events:none;transition:none}
+.btn.b-em:hover::after{left:130%;transition:left .55s ease}
+/* Enhanced pricing card interactions */
+.pc{transition:transform .28s cubic-bezier(.34,1.56,.64,1),box-shadow .28s ease,border-color .2s ease!important}
+.pc:hover{transform:translateY(-6px) scale(1.015)!important;box-shadow:0 28px 70px rgba(0,0,0,.3)!important}
+.pc.hl:hover{box-shadow:0 28px 70px rgba(16,185,129,.2),0 0 0 1.5px rgba(16,185,129,.45)!important}
+.pc.hl2:hover{box-shadow:0 28px 70px rgba(245,158,11,.14),0 0 0 1.5px rgba(245,158,11,.38)!important}
+/* Emoji pop on tool card hover */
+.tool-card:hover .tc-ico{animation:emoPop .44s cubic-bezier(.34,1.56,.64,1) forwards}
+/* Hero stats float */
+.hstats>div{transition:transform .28s cubic-bezier(.34,1.56,.64,1),box-shadow .28s ease}
+.hstats>div:hover{transform:translateY(-6px) scale(1.05);box-shadow:0 18px 48px rgba(0,0,0,.3)}
+/* Float bob for orbs */
+.orb{animation:orbFloat 8s ease-in-out infinite alternate,floatBob 12s ease-in-out infinite;will-change:transform}
+/* Reveal on scroll */
+.reveal{opacity:0;transform:translateY(32px);transition:opacity .65s cubic-bezier(.25,.46,.45,.94),transform .65s cubic-bezier(.25,.46,.45,.94)}.reveal.in{opacity:1;transform:translateY(0)}
+/* Shimmer text effect for headlines */
+.shimmer-em{background:linear-gradient(90deg,#10b981 0%,#34d399 40%,#6ee7b7 50%,#34d399 60%,#10b981 100%);background-size:300% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:shimmerSlide 3.5s linear infinite}
+/* Animated progress bars */
+.progress-bar{transition:width .7s cubic-bezier(.34,1.56,.64,1)!important;animation:borderPulse 2s ease-in-out infinite}
+/* Pay chip hover */
+.pay-chip{transition:all .18s cubic-bezier(.34,1.56,.64,1)}.pay-chip:hover{transform:scale(1.08);background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2)}
+/* Scroll-triggered section cards */
+.sc{transition:transform .26s cubic-bezier(.34,1.56,.64,1),box-shadow .26s ease,border-color .22s,background .22s}
+.sc:hover{transform:translateY(-4px) scale(1.01)!important;background:rgba(255,255,255,.08)!important;border-color:rgba(255,255,255,.2)!important;box-shadow:0 16px 40px rgba(0,0,0,.25)!important}
+/* Seye badge pulse */
+.seye{animation:borderPulse 2.5s ease-in-out infinite}
+/* fc card glow on hover */
+.fc:hover{border-color:var(--em)!important;box-shadow:0 8px 28px rgba(16,185,129,.1),0 0 0 1px rgba(16,185,129,.2)!important;transform:translateY(-3px)!important}
+/* ──────────────────────────────────────────────────────────────────────── */
 @media(max-width:820px){
   .why-vs,.tools-grid,.feat-g6,.feat-row,.srow,.tg,.vb,.fg2{grid-template-columns:1fr}
   .srow::before{display:none}
@@ -780,7 +830,7 @@ const mkT = (lang) => {
          ),
          btn:L("Ultimate starten → CHF 49.90/Mo.","Start Ultimate → CHF 49.90/mo","Démarrer Ultimate → CHF 49.90/mois","Avvia Ultimate → CHF 49.90/mese"),btnS:"b-out"},
       ],
-      valTitle:L("CHF 19.90 – lohnt sich das?","CHF 19.90 – is it worth it?","CHF 19.90 – ça vaut la peine?","CHF 19.90 – vale la pena?"),
+      valTitle:L(`CHF ${C.priceM} – lohnt sich das?`,`CHF ${C.priceM} – is it worth it?`,`CHF ${C.priceM} – ça vaut la peine?`,`CHF ${C.priceM} – vale la pena?`),
       valPts:L(
         ["Ein Karriereberater kostet CHF 200–400 / Sitzung","Eine schlechte Bewerbung = verpasste Stelle","Zeugnis nicht verstanden = falscher Job","1 erfolgreiche Bewerbung = Abo hat sich gerechnet","Ein schlechter ATS-Score = CV wird nie gelesen","Stellify spart dir 3–5 Std. pro Bewerbung"],
         ["Un conseiller coûte CHF 200–400 / séance","Mauvais score ATS = votre CV n'est jamais lu","Certificat mal compris = mauvais emploi","1 mois de candidature réussie rembourse tout"],
@@ -2413,11 +2463,162 @@ Next step: Apply for Nestlé →`,
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
             <div style={{fontSize:10,fontWeight:700,letterSpacing:"2px",textTransform:"uppercase",color:"var(--em)"}}>✦ STELLIFY OUTPUT</div>
             <div style={{display:"flex",alignItems:"center",gap:4,fontSize:11,color:"rgba(16,185,129,.4)"}}>
-              <div style={{width:5,height:5,background:"var(--em)",borderRadius:"50%"}}/>
-              {lang==="de"?"Live generiert":"Live generated"}
+              <div style={{width:5,height:5,background:"var(--em)",borderRadius:"50%",boxShadow:"0 0 6px rgba(16,185,129,.7)"}}/>
+              {lang==="de"?"Live generiert":lang==="fr"?"Généré en direct":lang==="it"?"Generato live":"Live generated"}
             </div>
           </div>
-          <div style={{fontSize:12,color:"rgba(255,255,255,.62)",lineHeight:1.9,whiteSpace:"pre-wrap",maxHeight:300,overflow:"hidden",maskImage:"linear-gradient(to bottom,white 70%,transparent 100%)",WebkitMaskImage:"linear-gradient(to bottom,white 70%,transparent 100%)"}}>{demo.output}</div>
+          {/* ── App (cover letter) ── */}
+          {demo.id==="app"&&(
+            <div style={{background:"white",borderRadius:10,overflow:"hidden",border:"1px solid #e2e8f0"}}>
+              <div style={{background:"linear-gradient(135deg,#0f172a,#1e293b)",padding:"10px 14px",display:"flex",alignItems:"center",gap:8}}>
+                <div style={{width:8,height:8,background:"#f87171",borderRadius:"50%"}}/><div style={{width:8,height:8,background:"#fbbf24",borderRadius:"50%"}}/><div style={{width:8,height:8,background:"#34d399",borderRadius:"50%"}}/>
+                <span style={{color:"rgba(255,255,255,.5)",fontSize:10,marginLeft:6}}>Motivationsschreiben_Migros_PM.pdf</span>
+              </div>
+              <div style={{padding:"14px 16px",fontSize:11.5,lineHeight:1.8,color:"#1e293b"}}>
+                <div style={{fontWeight:700,marginBottom:6,color:"#0f172a"}}>Sehr geehrte Damen und Herren,</div>
+                <div style={{marginBottom:8}}>mit grossem Interesse habe ich Ihre Ausschreibung für die Position als <strong>Product Manager</strong> bei Migros Zürich gelesen. Als erfahrener Produktmanager mit fünf Jahren FMCG-Erfahrung bringe ich genau die Kombination aus <span style={{color:"#10b981",fontWeight:600}}>strategischem Denken</span> und operativer Umsetzungsstärke mit.</div>
+                <div style={{color:"#94a3b8",fontStyle:"italic",fontSize:11}}>… vollständiges Schreiben · Swiss Format · 60 Sek. generiert</div>
+              </div>
+              <div style={{padding:"6px 14px",background:"#f0fdf4",borderTop:"1px solid #bbf7d0",display:"flex",gap:10,fontSize:10,color:"#15803d",fontWeight:600}}>
+                <span>✓ ATS-optimiert</span><span>✓ Schweizer Stil</span><span>✓ PDF-Export</span>
+              </div>
+            </div>
+          )}
+          {/* ── Li2job ── */}
+          {demo.id==="li2job"&&(
+            <div style={{background:"white",borderRadius:10,overflow:"hidden",border:"1px solid #e2e8f0"}}>
+              <div style={{background:"#0a66c2",padding:"9px 14px",display:"flex",alignItems:"center",gap:8}}>
+                <span style={{fontSize:16}}>🔗</span>
+                <div style={{color:"white",fontWeight:700,fontSize:11,flex:1}}>LinkedIn → Bewerbung · Google Zürich</div>
+                <span style={{background:"#10b981",borderRadius:20,padding:"2px 8px",fontSize:9,color:"white",fontWeight:700}}>✦ Generiert</span>
+              </div>
+              <div style={{padding:"12px 14px",borderBottom:"1px solid #f1f5f9"}}>
+                <div style={{fontSize:10,fontWeight:700,color:"#92400e",marginBottom:5}}>✍️ MOTIVATIONSSCHREIBEN</div>
+                <div style={{background:"#f8fafc",borderRadius:7,padding:"9px 11px",fontSize:11,color:"#334155",lineHeight:1.7}}>als ETH-Absolvent mit 4 Jahren Python & React-Erfahrung bewerbe ich mich für die Senior Developer Position…<span style={{color:"#94a3b8",fontStyle:"italic"}}> (weiter)</span></div>
+              </div>
+              <div style={{padding:"12px 14px"}}>
+                <div style={{fontSize:10,fontWeight:700,color:"#1d4ed8",marginBottom:6}}>💡 DEINE 3 STÄRKSTEN ARGUMENTE</div>
+                {[{n:1,t:"ETH-Abschluss",v:95,c:"#10b981"},{n:2,t:"Python-Expertise",v:92,c:"#0a66c2"},{n:3,t:"Kein Visum",v:88,c:"#f59e0b"}].map((a,i)=>(
+                  <div key={i} style={{display:"flex",alignItems:"center",gap:8,marginBottom:5}}>
+                    <div style={{width:18,height:18,background:a.c,borderRadius:5,display:"flex",alignItems:"center",justifyContent:"center",color:"white",fontSize:9,fontWeight:800,flexShrink:0}}>{a.n}</div>
+                    <div style={{flex:1,fontSize:11,color:"#0f172a",fontWeight:600}}>{a.t}</div>
+                    <div style={{width:60,height:4,background:"#f1f5f9",borderRadius:3,overflow:"hidden"}}><div style={{height:"100%",width:`${a.v}%`,background:a.c,borderRadius:3}}/></div>
+                    <span style={{fontSize:10,fontWeight:700,color:a.c,flexShrink:0}}>{a.v}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          {/* ── LinkedIn ── */}
+          {demo.id==="linkedin"&&(
+            <div style={{background:"white",borderRadius:10,overflow:"hidden",border:"1px solid #e2e8f0"}}>
+              <div style={{background:"linear-gradient(135deg,#0a66c2,#0077b5)",padding:"9px 14px",display:"flex",alignItems:"center",gap:8}}>
+                <span style={{fontSize:16}}>💼</span>
+                <div style={{color:"white",fontWeight:700,fontSize:11,flex:1}}>LinkedIn Profil-Optimierung</div>
+                <span style={{background:"rgba(16,185,129,.3)",borderRadius:20,padding:"2px 8px",fontSize:9,color:"#6ee7b7",fontWeight:700}}>+34 Punkte</span>
+              </div>
+              <div style={{padding:"11px 14px",borderBottom:"1px solid #f1f5f9"}}>
+                <div style={{fontSize:9,fontWeight:700,color:"#dc2626",letterSpacing:"1px",marginBottom:4}}>✗ VORHER · 54/100</div>
+                <div style={{background:"#fff8f8",border:"1px solid #fecdd3",borderRadius:7,padding:"7px 11px",fontSize:11,color:"#374151",fontStyle:"italic"}}>«Software Engineer bei UBS»</div>
+              </div>
+              <div style={{padding:"11px 14px",borderBottom:"1px solid #f1f5f9"}}>
+                <div style={{fontSize:9,fontWeight:700,color:"#10b981",letterSpacing:"1px",marginBottom:4}}>✦ NACHHER · 88/100</div>
+                <div style={{background:"#f0fdf4",border:"1px solid #bbf7d0",borderRadius:7,padding:"7px 11px",fontSize:11,color:"#0f172a",fontWeight:600}}>«Senior Software Engineer | Python & Cloud | ETH Zürich | Open to opportunities»</div>
+                <div style={{fontSize:10,color:"#10b981",marginTop:4}}>→ +340% mehr Recruiter-Klicks</div>
+              </div>
+              <div style={{padding:"10px 14px"}}>
+                <div style={{fontSize:9,fontWeight:700,color:"#0a66c2",letterSpacing:"1px",marginBottom:6}}>TOP SKILLS</div>
+                <div style={{display:"flex",flexWrap:"wrap",gap:4}}>
+                  {["Python","React","Cloud Arch.","Agile","TypeScript"].map((s,i)=><span key={i} style={{background:"rgba(10,102,194,.08)",border:"1px solid rgba(10,102,194,.2)",borderRadius:20,padding:"2px 9px",fontSize:10,color:"#0a66c2"}}>{s}</span>)}
+                </div>
+              </div>
+            </div>
+          )}
+          {/* ── ATS-Check ── */}
+          {demo.label==="ATS-Check"&&(()=>{
+            const sc=62; const circ=188; const off=circ-(circ*sc/100);
+            return(
+              <div style={{background:"white",borderRadius:10,overflow:"hidden",border:"1px solid #e2e8f0"}}>
+                <div style={{background:"linear-gradient(135deg,#0f172a,#1e293b)",padding:"9px 14px",display:"flex",alignItems:"center",gap:8}}>
+                  <span style={{fontSize:16}}>🤖</span>
+                  <div style={{color:"white",fontWeight:700,fontSize:11,flex:1}}>ATS-Simulation · Software Engineer</div>
+                  <span style={{background:"rgba(245,158,11,.2)",border:"1px solid rgba(245,158,11,.4)",borderRadius:20,padding:"2px 8px",fontSize:9,color:"#f59e0b",fontWeight:700}}>⚠️ 62/100</span>
+                </div>
+                <div style={{padding:"12px 14px",display:"flex",alignItems:"center",gap:14,borderBottom:"1px solid #f1f5f9"}}>
+                  <div style={{position:"relative",width:64,height:64,flexShrink:0}}>
+                    <svg width="64" height="64" viewBox="0 0 64 64"><circle cx="32" cy="32" r="28" fill="none" stroke="#f1f5f9" strokeWidth="7"/><circle cx="32" cy="32" r="28" fill="none" stroke="#f59e0b" strokeWidth="7" strokeDasharray={circ} strokeDashoffset={off} strokeLinecap="round" transform="rotate(-90 32 32)"/></svg>
+                    <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}}>
+                      <div style={{fontFamily:"var(--hd)",fontSize:17,fontWeight:800,color:"#0f172a",lineHeight:1}}>{sc}</div>
+                      <div style={{fontSize:8,color:"#94a3b8"}}>/100</div>
+                    </div>
+                  </div>
+                  <div>
+                    <div style={{fontWeight:700,fontSize:12,color:"#0f172a",marginBottom:3}}>⚠️ {lang==="de"?"Wird aussortiert":lang==="fr"?"Sera rejeté":lang==="it"?"Sarà scartato":"Will be rejected"}</div>
+                    <div style={{fontSize:11,color:"#64748b"}}>{lang==="de"?"4 kritische Keywords fehlen":lang==="fr"?"4 mots-clés critiques manquants":lang==="it"?"4 parole chiave critiche mancanti":"4 critical keywords missing"}</div>
+                  </div>
+                </div>
+                <div style={{padding:"10px 14px",borderBottom:"1px solid #f1f5f9"}}>
+                  <div style={{fontSize:9,fontWeight:700,color:"#10b981",letterSpacing:"1px",marginBottom:5}}>✓ {lang==="de"?"GEFUNDEN":"FOUND"}</div>
+                  <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>{["Berufsbezeichnung","Uni-Abschluss","PM"].map((k,i)=><span key={i} style={{background:"#f0fdf4",border:"1px solid #bbf7d0",borderRadius:20,padding:"2px 9px",fontSize:10,color:"#15803d",fontWeight:600}}>{k}</span>)}</div>
+                </div>
+                <div style={{padding:"10px 14px"}}>
+                  <div style={{fontSize:9,fontWeight:700,color:"#dc2626",letterSpacing:"1px",marginBottom:5}}>✗ {lang==="de"?"FEHLEND":"MISSING"}</div>
+                  <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>{["Python","Agile","Cloud","Go-to-Market"].map((k,i)=><span key={i} style={{background:"#fff1f2",border:"1px solid #fecdd3",borderRadius:20,padding:"2px 9px",fontSize:10,color:"#dc2626",fontWeight:600}}>{k}</span>)}</div>
+                </div>
+              </div>
+            );
+          })()}
+          {/* ── Job Matching ── */}
+          {demo.id==="jobmatch"&&(
+            <div style={{background:"white",borderRadius:10,overflow:"hidden",border:"1px solid #e2e8f0"}}>
+              <div style={{background:"linear-gradient(135deg,#064e3b,#065f46)",padding:"9px 14px",display:"flex",alignItems:"center",gap:8}}>
+                <span style={{fontSize:16}}>🎯</span>
+                <div style={{color:"white",fontWeight:700,fontSize:11,flex:1}}>Job-Matching · {lang==="de"?"Top 5 Ergebnisse":"Top 5 Results"}</div>
+                <span style={{background:"rgba(16,185,129,.2)",borderRadius:20,padding:"2px 8px",fontSize:9,color:"#6ee7b7",fontWeight:700}}>CHF 100k+</span>
+              </div>
+              {[{n:1,t:"Head of Marketing",co:"Nestlé Vevey",p:92,c:"#10b981"},{n:2,t:"Brand Manager",co:"Lindt Kilchberg",p:88,c:"#3b82f6"},{n:3,t:"Marketing Director",co:"Migros Zürich",p:85,c:"#8b5cf6"}].map((j,i)=>(
+                <div key={i} style={{padding:"10px 14px",borderBottom:i<2?"1px solid #f1f5f9":"none",display:"flex",alignItems:"center",gap:10}}>
+                  <div style={{width:26,height:26,background:`${j.c}18`,border:`2px solid ${j.c}40`,borderRadius:7,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"var(--hd)",fontSize:12,fontWeight:800,color:j.c,flexShrink:0}}>{j.n}</div>
+                  <div style={{flex:1,minWidth:0}}>
+                    <div style={{fontWeight:700,fontSize:11.5,color:"#0f172a"}}>{j.t}</div>
+                    <div style={{fontSize:10,color:"#64748b"}}>{j.co}</div>
+                  </div>
+                  <div style={{textAlign:"right",flexShrink:0}}>
+                    <div style={{fontFamily:"var(--hd)",fontSize:16,fontWeight:800,color:j.c,lineHeight:1}}>{j.p}%</div>
+                    <div style={{height:3,width:44,background:"#f1f5f9",borderRadius:3,marginTop:3,overflow:"hidden"}}><div style={{height:"100%",width:`${j.p}%`,background:j.c,borderRadius:3}}/></div>
+                  </div>
+                </div>
+              ))}
+              <div style={{padding:"7px 12px",background:"#f0fdf4",borderTop:"1px solid #bbf7d0",fontSize:10,color:"#15803d",fontWeight:600}}>→ Nestlé an #1 · Bewerbung direkt starten</div>
+            </div>
+          )}
+          {/* ── Interview Coach ── */}
+          {demo.id==="coach"&&(
+            <div style={{background:"white",borderRadius:10,overflow:"hidden",border:"1px solid #e2e8f0"}}>
+              <div style={{background:"linear-gradient(135deg,#4c1d95,#6d28d9)",padding:"9px 14px",display:"flex",alignItems:"center",gap:8}}>
+                <span style={{fontSize:16}}>🎤</span>
+                <div style={{color:"white",fontWeight:700,fontSize:11,flex:1}}>Interview-Coach · Bewertung</div>
+              </div>
+              <div style={{padding:"12px 14px",borderBottom:"1px solid #f1f5f9",display:"flex",alignItems:"center",gap:14}}>
+                <div style={{textAlign:"center",flexShrink:0}}>
+                  <div style={{fontFamily:"var(--hd)",fontSize:26,fontWeight:800,color:"#f59e0b",lineHeight:1}}>61</div>
+                  <div style={{fontSize:9,color:"#94a3b8"}}>/100</div>
+                </div>
+                <div style={{flex:1}}>
+                  <div style={{height:6,background:"#f1f5f9",borderRadius:3,overflow:"hidden",marginBottom:4}}><div style={{height:"100%",width:"61%",background:"linear-gradient(90deg,#f59e0b,#fbbf24)",borderRadius:3}}/></div>
+                  <div style={{fontSize:11,color:"#92400e",fontWeight:600}}>⚠️ {lang==="de"?"Ausbaufähig – zu vage":lang==="fr"?"À améliorer":"Needs improvement"}</div>
+                </div>
+              </div>
+              <div style={{padding:"10px 14px",borderBottom:"1px solid #f1f5f9",background:"#fff8f8"}}>
+                <div style={{fontSize:9,fontWeight:700,color:"#dc2626",letterSpacing:"1px",marginBottom:4}}>✗ {lang==="de"?"SCHWÄCHEN":"WEAKNESSES"}</div>
+                {[lang==="de"?"Zu vage – kein Bezug zur Stelle":"Too vague – no role reference",lang==="de"?"Klingt generisch":"Sounds generic"].map((t,i)=><div key={i} style={{fontSize:11,color:"#374151",display:"flex",gap:5,marginBottom:2}}><span style={{color:"#dc2626"}}>×</span>{t}</div>)}
+              </div>
+              <div style={{padding:"10px 14px"}}>
+                <div style={{fontSize:9,fontWeight:700,color:"#10b981",letterSpacing:"1px",marginBottom:4}}>💡 {lang==="de"?"BESSERE ANTWORT":"BETTER ANSWER"} → 89/100</div>
+                <div style={{background:"#f0fdf4",border:"1px solid #bbf7d0",borderRadius:7,padding:"8px 11px",fontSize:11,color:"#0f172a",fontStyle:"italic",lineHeight:1.6}}>«{lang==="de"?"In 5 Jahren sehe ich mich in einer Marketingleitung – bei Migros möchte ich Marke XY aufbauen, dann 3–5 Personen führen.":"In 5 years I see myself leading a marketing team – aligned with your 2028 growth strategy."}»</div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -2433,28 +2634,28 @@ function FaqSection({lang, email}) {
     {q:"Wie viele Generierungen habe ich?",a:`Gratis: ${C.FREE_LIMIT} Generierung${C.FREE_LIMIT!==1?"en":""} zum Testen. Pro: ${C.PRO_LIMIT} Generierungen/Woche (Erneuerung jeden Montag 07:00). Ultimate: unbegrenzt.`},
     {q:"Funktioniert Stellify für alle Branchen?",a:"Ja. Die KI ist auf den Schweizer Jobmarkt trainiert und kennt Gepflogenheiten aus IT, Finanzen, Gesundheit, Bildung, Gastronomie und mehr."},
     {q:"Welche Sprachen werden unterstützt?",a:"Vollständig auf Deutsch, Englisch, Französisch und Italienisch – ideal für Jobs in allen Sprachregionen der Schweiz."},
-    {q:"Gibt es einen Studentenrabatt?",a:"Aktuell nicht, aber der Jahrespreis (CHF 18.90/Mo.) macht das Abo für alle erschwinglich. Meld dich bei uns für spezielle Konditionen."},
+    {q:"Gibt es einen Studentenrabatt?",a:`Aktuell nicht, aber der Jahrespreis (CHF ${C.priceY}/Mo.) macht das Abo für alle erschwinglich. Meld dich bei uns für spezielle Konditionen.`},
   ]:lang==="fr"?[
     {q:"Mes données sont-elles sécurisées?",a:"Vos données ne sont pas stockées. Chaque requête est envoyée directement à l'API Anthropic et n'est pas enregistrée."},
     {q:"Puis-je résilier à tout moment?",a:"Oui – résiliation mensuelle possible, sans durée minimale ni frais cachés."},
     {q:"Combien de générations par plan?",a:"Gratuit: 1 génération. Pro: 60/mois par personne. Famille: 60/mois par personne (3 personnes). Unlimited: 60/mois par personne, membres illimités. Le volume se renouvelle automatiquement le 1er du mois suivant."},
     {q:"Fonctionne pour tous les secteurs?",a:"Oui. L'IA connaît les habitudes du marché suisse dans tous les secteurs."},
     {q:"Quelles langues sont supportées?",a:"Allemand, anglais, français et italien – idéal pour toutes les régions linguistiques."},
-    {q:"Y a-t-il une réduction étudiants?",a:"Pas actuellement, mais le prix annuel (CHF 18.90/mois) est accessible à tous."},
+    {q:"Y a-t-il une réduction étudiants?",a:`Pas actuellement, mais le prix annuel (CHF ${C.priceY}/mois) est accessible à tous.`},
   ]:lang==="it"?[
     {q:"I miei dati sono sicuri?",a:"I tuoi dati non vengono salvati. Ogni richiesta viene inviata direttamente all'API Anthropic e non viene registrata."},
     {q:"Posso cancellare in qualsiasi momento?",a:"Sì – cancellazione mensile possibile, senza durata minima o costi nascosti."},
     {q:"Cosa succede dopo 60 generazioni?",a:"Dopo 60 generazioni Pro al mese, il limite si ripristina automaticamente il 1° del mese successivo."},
     {q:"Funziona per tutti i settori?",a:"Sì. L'IA conosce le abitudini del mercato svizzero in tutti i settori."},
     {q:"Quali lingue sono supportate?",a:"Tedesco, inglese, francese e italiano – ideale per tutte le regioni linguistiche."},
-    {q:"C'è uno sconto studenti?",a:"Al momento no, ma il prezzo annuale (CHF 18.90/mese) è accessibile a tutti."},
+    {q:"C'è uno sconto studenti?",a:`Al momento no, ma il prezzo annuale (CHF ${C.priceY}/mese) è accessibile a tutti.`},
   ]:[
     {q:"Is my data secure?",a:"Your data is not stored. Each request is sent directly to the Anthropic API and not logged. No training on your data."},
     {q:"Can I cancel at any time?",a:"Yes – monthly cancellation possible, no minimum term or hidden fees. Manage your subscription directly via Stripe."},
     {q:"What happens after 60 generations?",a:"After 60 Pro generations per month, your limit resets automatically on the 1st of the following month."},
     {q:"Does it work for all industries?",a:"Yes. The AI is trained on the Swiss job market and knows conventions across IT, finance, health, education, hospitality and more."},
     {q:"Which languages are supported?",a:"Fully available in German, English, French and Italian – ideal for jobs across all Swiss language regions."},
-    {q:"Is there a student discount?",a:"Not currently, but the annual price (CHF 18.90/mo.) makes the subscription affordable for everyone."},
+    {q:"Is there a student discount?",a:`Not currently, but the annual price (CHF ${C.priceY}/mo.) makes the subscription affordable for everyone.`},
   ];
   return(
     <section className="sec sec-w" id="faq">
@@ -4188,7 +4389,7 @@ Antworte NUR mit JSON:
         <button onClick={()=>window.open(C.stripeUltimate,"_blank")} className="btn" style={{background:"linear-gradient(135deg,#f59e0b,#d97706)",color:"white",border:"none",padding:"10px 20px",fontSize:13,fontWeight:700,borderRadius:10,cursor:"pointer",boxShadow:"0 4px 14px rgba(245,158,11,.4)"}}>
           ♾️ {L("Ultimate holen →","Get Ultimate →","Obtenir Ultimate →","Ottieni Ultimate →")}
         </button>
-        <div style={{fontSize:10,color:"rgba(255,255,255,.25)",textAlign:"center"}}>CHF 39.90/Mo. · {L("2 Monate gratis","2 months free","2 mois offerts","2 mesi gratis")}</div>
+        <div style={{fontSize:10,color:"rgba(255,255,255,.25)",textAlign:"center"}}>CHF {C.priceUltimateY}/Mo. · {L("2 Monate gratis","2 months free","2 mois offerts","2 mesi gratis")}</div>
       </div>
     </div>
   ):(
@@ -5024,6 +5225,178 @@ RISPOSTA: "Sarebbe possibile un bonus di CHF 15k se il budget è limitato?"`)
     </div>
   );
 
+  const AtsDemoRich=()=>{
+    const score=62;
+    const circ=251;
+    const offset=circ-(circ*score/100);
+    const kwF=["Berufsbezeichnung","Uni-Abschluss","Projektmanagement"];
+    const kwM=["Python","Agile/Scrum","GCP/AWS","Go-to-Market"];
+    return(
+      <div style={{background:"white",borderRadius:14,overflow:"hidden",border:"1px solid #e2e8f0",fontSize:12.5}}>
+        <div style={{background:"linear-gradient(135deg,#0f172a,#1e293b)",padding:"10px 16px",display:"flex",alignItems:"center",gap:10}}>
+          <span style={{fontSize:18}}>🤖</span>
+          <div style={{flex:1}}>
+            <div style={{color:"white",fontWeight:800,fontSize:12}}>ATS-Simulation</div>
+            <div style={{color:"rgba(255,255,255,.55)",fontSize:10.5}}>Senior Marketing Manager – Nestlé Vevey</div>
+          </div>
+          <div style={{background:"rgba(245,158,11,.2)",border:"1px solid rgba(245,158,11,.4)",borderRadius:20,padding:"3px 10px",fontSize:10,color:"#f59e0b",fontWeight:700}}>⚠️ {L("Optimierung nötig","Needs optimization","Optimisation requise","Ottimizzazione necessaria")}</div>
+        </div>
+        <div style={{padding:"14px 16px",borderBottom:"1px solid #f1f5f9",display:"flex",alignItems:"center",gap:20}}>
+          <div style={{position:"relative",width:84,height:84,flexShrink:0}}>
+            <svg width="84" height="84" viewBox="0 0 84 84"><circle cx="42" cy="42" r="36" fill="none" stroke="#f1f5f9" strokeWidth="8"/><circle cx="42" cy="42" r="36" fill="none" stroke="#f59e0b" strokeWidth="8" strokeDasharray={circ} strokeDashoffset={offset} strokeLinecap="round" transform="rotate(-90 42 42)" style={{transition:"stroke-dashoffset 1s cubic-bezier(.34,1.56,.64,1)"}}/></svg>
+            <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}}>
+              <div style={{fontFamily:"var(--hd)",fontSize:22,fontWeight:800,color:"#0f172a",lineHeight:1}}>{score}</div>
+              <div style={{fontSize:9,color:"#94a3b8",fontWeight:600,letterSpacing:".5px"}}>/100</div>
+            </div>
+          </div>
+          <div style={{flex:1}}>
+            <div style={{fontFamily:"var(--hd)",fontSize:16,fontWeight:800,color:"#0f172a",marginBottom:3}}>⚠️ {L("Wird aussortiert","Will be rejected","Sera rejeté","Sarà scartato")}</div>
+            <div style={{fontSize:12,color:"#64748b",lineHeight:1.6}}>{L("4 kritische Keywords fehlen. Mit Anpassungen: Score 87/100 ✅","4 critical keywords missing. With adjustments: Score 87/100 ✅","4 mots-clés critiques manquants. Avec ajustements: Score 87/100 ✅","4 parole chiave critiche mancanti. Con correzioni: Score 87/100 ✅")}</div>
+            <div style={{display:"flex",gap:4,marginTop:8,flexWrap:"wrap"}}>
+              {[{l:"Keyword-Match",v:62},{l:"Format",v:88},{l:"Struktur",v:74}].map((m,i)=>(
+                <div key={i} style={{fontSize:10,color:"#64748b"}}>
+                  <span style={{fontWeight:700,color:"#0f172a"}}>{m.v}%</span> {m.l}{i<2?" · ":""}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+        <div style={{padding:"12px 16px",borderBottom:"1px solid #f1f5f9"}}>
+          <div style={{fontSize:10,fontWeight:700,letterSpacing:"1.5px",textTransform:"uppercase",color:"#10b981",marginBottom:8}}>✓ {L("Gefunden","Found","Trouvé","Trovato")}</div>
+          <div style={{display:"flex",flexWrap:"wrap",gap:5}}>
+            {kwF.map((k,i)=><span key={i} style={{background:"#f0fdf4",border:"1px solid #bbf7d0",borderRadius:20,padding:"3px 10px",fontSize:11,fontWeight:600,color:"#15803d"}}>{k}</span>)}
+          </div>
+        </div>
+        <div style={{padding:"12px 16px"}}>
+          <div style={{fontSize:10,fontWeight:700,letterSpacing:"1.5px",textTransform:"uppercase",color:"#dc2626",marginBottom:8}}>✗ {L("Kritisch fehlend","Critically missing","Manquant critique","Mancante critico")}</div>
+          <div style={{display:"flex",flexWrap:"wrap",gap:5}}>
+            {kwM.map((k,i)=><span key={i} style={{background:"#fff1f2",border:"1px solid #fecdd3",borderRadius:20,padding:"3px 10px",fontSize:11,fontWeight:600,color:"#dc2626"}}>{k}</span>)}
+          </div>
+        </div>
+        <div style={{padding:"8px 14px",background:"#fffbeb",borderTop:"1px solid #fde68a",fontSize:11,color:"#92400e",display:"flex",alignItems:"center",gap:6}}>
+          <span>💡</span>{L("3 Optimierungstipps generiert – sofort umsetzbar","3 optimization tips generated – immediately actionable","3 conseils d'optimisation générés","3 consigli di ottimizzazione generati")}
+        </div>
+      </div>
+    );
+  };
+
+  const LinkedInDemoRich=()=>(
+    <div style={{background:"white",borderRadius:14,overflow:"hidden",border:"1px solid #e2e8f0",fontSize:12.5}}>
+      <div style={{background:"linear-gradient(135deg,#0a66c2,#0077b5)",padding:"10px 16px",display:"flex",alignItems:"center",gap:10}}>
+        <span style={{fontSize:18}}>💼</span>
+        <div style={{flex:1}}>
+          <div style={{color:"white",fontWeight:800,fontSize:12}}>LinkedIn Optimierung</div>
+          <div style={{color:"rgba(255,255,255,.65)",fontSize:10.5}}>Software Engineer bei UBS → Senior Dev at Google</div>
+        </div>
+        <div style={{background:"rgba(16,185,129,.25)",borderRadius:20,padding:"3px 10px",fontSize:10,color:"#6ee7b7",fontWeight:700}}>✦ Score +34pt</div>
+      </div>
+      <div style={{padding:"12px 16px",borderBottom:"1px solid #f1f5f9"}}>
+        <div style={{fontSize:10,fontWeight:700,letterSpacing:"1.5px",textTransform:"uppercase",color:"#dc2626",marginBottom:6}}>✗ VORHER · 54/100</div>
+        <div style={{background:"#fff8f8",border:"1px solid #fecdd3",borderRadius:8,padding:"9px 12px",fontSize:12,color:"#374151",fontStyle:"italic"}}>«Software Engineer bei UBS»</div>
+        <div style={{fontSize:10,color:"#94a3b8",marginTop:4}}>→ {L("Zu generisch – kein Keyword-Treffer","Too generic – no keyword match","Trop générique – aucune correspondance","Troppo generico – nessuna corrispondenza")}</div>
+      </div>
+      <div style={{padding:"12px 16px",borderBottom:"1px solid #f1f5f9"}}>
+        <div style={{fontSize:10,fontWeight:700,letterSpacing:"1.5px",textTransform:"uppercase",color:"#10b981",marginBottom:6}}>✦ NACHHER · 88/100</div>
+        <div style={{background:"#f0fdf4",border:"1px solid #bbf7d0",borderRadius:8,padding:"9px 12px",fontSize:12,color:"#0f172a",fontWeight:600}}>«Senior Software Engineer | Python & Cloud | ETH Zürich | Open to opportunities»</div>
+        <div style={{fontSize:10,color:"#10b981",marginTop:4}}>→ +340% {L("mehr Recruiter-Klicks","more recruiter clicks","plus de clics recruteurs","più clic recruiter")}</div>
+      </div>
+      <div style={{padding:"12px 16px"}}>
+        <div style={{fontSize:10,fontWeight:700,letterSpacing:"1.5px",textTransform:"uppercase",color:"#0a66c2",marginBottom:8}}>{L("TOP SKILLS FÜR RECRUITER","TOP SKILLS FOR RECRUITERS","TOP COMPÉTENCES","TOP SKILL PER RECRUITER")}</div>
+        <div style={{display:"flex",flexWrap:"wrap",gap:5}}>
+          {["Python","React","Node.js","Cloud Arch.","Agile","TypeScript","System Design"].map((s,i)=>(
+            <span key={i} style={{background:"rgba(10,102,194,.08)",border:"1px solid rgba(10,102,194,.2)",borderRadius:20,padding:"3px 10px",fontSize:11,color:"#0a66c2",fontWeight:500}}>{s}</span>
+          ))}
+        </div>
+      </div>
+      <div style={{padding:"8px 14px",background:"#f0f9ff",borderTop:"1px solid #bae6fd",fontSize:11,color:"#0369a1",display:"flex",alignItems:"center",gap:6}}>
+        <span>💡</span>{L("3 Profil-Tipps · About-Sektion · Skills optimiert","3 profile tips · About section · Skills optimized","3 conseils profil · Section About · Compétences optimisées","3 consigli profilo · Sezione About · Skills ottimizzate")}
+      </div>
+    </div>
+  );
+
+  const JobMatchDemoRich=()=>{
+    const jobs=[
+      {n:1,title:"Head of Marketing",co:"Nestlé Vevey",pct:92,tags:["FMCG","CHF 115–130k","Vevey"],c:"#10b981"},
+      {n:2,title:"Brand Manager",co:"Lindt Kilchberg",pct:88,tags:["FMCG","CHF 100–115k","Kilchberg"],c:"#3b82f6"},
+      {n:3,title:"Marketing Director",co:"Migros Zürich",pct:85,tags:["Retail","CHF 110–125k","Zürich"],c:"#8b5cf6"},
+    ];
+    return(
+      <div style={{background:"white",borderRadius:14,overflow:"hidden",border:"1px solid #e2e8f0",fontSize:12.5}}>
+        <div style={{background:"linear-gradient(135deg,#064e3b,#065f46)",padding:"10px 16px",display:"flex",alignItems:"center",gap:10}}>
+          <span style={{fontSize:18}}>🎯</span>
+          <div style={{flex:1}}>
+            <div style={{color:"white",fontWeight:800,fontSize:12}}>Job-Matching</div>
+            <div style={{color:"rgba(255,255,255,.6)",fontSize:10.5}}>Marketing Manager · 6 J. FMCG · Zürich · CHF 100k+</div>
+          </div>
+          <div style={{background:"rgba(16,185,129,.2)",borderRadius:20,padding:"3px 10px",fontSize:10,color:"#6ee7b7",fontWeight:700}}>Top 5 Matches</div>
+        </div>
+        {jobs.map((j,i)=>(
+          <div key={i} style={{padding:"12px 16px",borderBottom:i<2?"1px solid #f1f5f9":"none",display:"flex",alignItems:"center",gap:12}}>
+            <div style={{width:32,height:32,background:`${j.c}18`,border:`2px solid ${j.c}40`,borderRadius:9,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"var(--hd)",fontSize:14,fontWeight:800,color:j.c,flexShrink:0}}>{j.n}</div>
+            <div style={{flex:1,minWidth:0}}>
+              <div style={{fontWeight:700,fontSize:12.5,color:"#0f172a",marginBottom:3}}>{j.title} <span style={{color:"#64748b",fontWeight:400}}>– {j.co}</span></div>
+              <div style={{display:"flex",flexWrap:"wrap",gap:4}}>
+                {j.tags.map((t,k)=><span key={k} style={{background:"#f8fafc",border:"1px solid #e2e8f0",borderRadius:20,padding:"2px 8px",fontSize:10,color:"#475569",fontWeight:500}}>{t}</span>)}
+              </div>
+            </div>
+            <div style={{textAlign:"right",flexShrink:0}}>
+              <div style={{fontFamily:"var(--hd)",fontSize:18,fontWeight:800,color:j.c,lineHeight:1}}>{j.pct}%</div>
+              <div style={{height:4,width:52,background:"#f1f5f9",borderRadius:3,marginTop:4,overflow:"hidden"}}>
+                <div style={{height:"100%",width:`${j.pct}%`,background:j.c,borderRadius:3}}/>
+              </div>
+            </div>
+          </div>
+        ))}
+        <div style={{padding:"8px 14px",background:"#f0fdf4",borderTop:"1px solid #bbf7d0",fontSize:11,color:"#15803d",display:"flex",alignItems:"center",gap:6}}>
+          <span>→</span>{L("5 Matches · Nestlé an #1 · Bewerbung direkt starten","5 matches · Nestlé at #1 · Start application directly","5 correspondances · Nestlé en #1","5 corrispondenze · Nestlé al #1")}
+        </div>
+      </div>
+    );
+  };
+
+  const CoachDemoRich=()=>(
+    <div style={{background:"white",borderRadius:14,overflow:"hidden",border:"1px solid #e2e8f0",fontSize:12.5}}>
+      <div style={{background:"linear-gradient(135deg,#4c1d95,#6d28d9)",padding:"10px 16px",display:"flex",alignItems:"center",gap:10}}>
+        <span style={{fontSize:18}}>🎤</span>
+        <div style={{flex:1}}>
+          <div style={{color:"white",fontWeight:800,fontSize:12}}>Interview-Coach</div>
+          <div style={{color:"rgba(255,255,255,.6)",fontSize:10.5}}>{L("«Wo sehen Sie sich in 5 Jahren?»","«Where do you see yourself in 5 years?»","«Où vous voyez-vous dans 5 ans?»","«Dove si vede tra 5 anni?»")}</div>
+        </div>
+      </div>
+      <div style={{padding:"12px 16px",borderBottom:"1px solid #f1f5f9",display:"flex",alignItems:"center",gap:14}}>
+        <div style={{textAlign:"center",flexShrink:0}}>
+          <div style={{fontFamily:"var(--hd)",fontSize:28,fontWeight:800,color:"#f59e0b",lineHeight:1}}>61</div>
+          <div style={{fontSize:9,color:"#94a3b8",fontWeight:600,letterSpacing:".5px"}}>/100</div>
+        </div>
+        <div style={{flex:1}}>
+          <div style={{height:7,background:"#f1f5f9",borderRadius:5,overflow:"hidden",marginBottom:5}}>
+            <div style={{height:"100%",width:"61%",background:"linear-gradient(90deg,#f59e0b,#fbbf24)",borderRadius:5}}/>
+          </div>
+          <div style={{fontSize:11,color:"#92400e",fontWeight:600}}>⚠️ {L("Ausbaufähig – zu vage","Needs improvement – too vague","À améliorer – trop vague","Da migliorare – troppo vago")}</div>
+        </div>
+      </div>
+      <div style={{padding:"10px 16px",borderBottom:"1px solid #f1f5f9",background:"#fff8f8"}}>
+        <div style={{fontSize:10,fontWeight:700,color:"#dc2626",letterSpacing:"1px",textTransform:"uppercase",marginBottom:5}}>✗ {L("Schwächen","Weaknesses","Faiblesses","Punti deboli")}</div>
+        {[
+          L("Zu vage – kein Bezug zur Stelle","Too vague – no reference to the role","Trop vague – pas de lien avec le poste","Troppo vago – nessun riferimento al ruolo"),
+          L("Klingt generisch – jeder Bewerber sagt das","Sounds generic – every applicant says this","Semble générique – tout le monde dit ça","Suona generico – tutti i candidati lo dicono"),
+        ].map((t,i)=><div key={i} style={{fontSize:11.5,color:"#374151",display:"flex",gap:6,marginBottom:3}}><span style={{color:"#dc2626",flexShrink:0}}>×</span>{t}</div>)}
+      </div>
+      <div style={{padding:"10px 16px"}}>
+        <div style={{fontSize:10,fontWeight:700,color:"#10b981",letterSpacing:"1px",textTransform:"uppercase",marginBottom:5}}>💡 {L("Bessere Antwort","Better answer","Meilleure réponse","Risposta migliore")} → 89/100</div>
+        <div style={{background:"#f0fdf4",border:"1px solid #bbf7d0",borderRadius:8,padding:"9px 12px",fontSize:11.5,color:"#0f172a",lineHeight:1.65,fontStyle:"italic"}}>
+          {L("«In 5 Jahren sehe ich mich in einer Marketingleitung bei einem FMCG-Unternehmen. Bei Migros möchte ich zuerst Marke XY aufbauen, dann 3–5 Personen führen – passend zu Ihrer Wachstumsstrategie 2028.»",
+             "«In 5 years I see myself leading a marketing team at an FMCG company. At Migros I'd build brand XY first, then lead 3–5 people – aligned with your 2028 growth strategy.»",
+             "«Dans 5 ans je me vois diriger une équipe marketing. Chez Migros, je développerais d'abord la marque XY, puis dirigerais 3–5 personnes.»",
+             "«Tra 5 anni mi vedo a guidare un team marketing. Da Migros svilupperei prima il marchio XY, poi guiderei 3–5 persone.»")}
+        </div>
+      </div>
+      <div style={{padding:"7px 14px",background:"#faf5ff",borderTop:"1px solid #e9d5ff",fontSize:11,color:"#7c3aed",display:"flex",alignItems:"center",gap:6}}>
+        <span>🎯</span>{L("Score +28 Punkte · vollständige Analyse generiert","Score +28 points · full analysis generated","Score +28 points · analyse complète générée","Score +28 punti · analisi completa generata")}
+      </div>
+    </div>
+  );
+
   const ExcelDemo=()=>{
     const rows=[
       {cat:L("Miete","Rent","Loyer","Affitto"),          budget:1800, ist:1800,  col:null},
@@ -5255,9 +5628,13 @@ RISPOSTA: "Sarebbe possibile un bonus di CHF 15k se il budget è limitato?"`)
             <span style={{background:"var(--em)",color:"white",borderRadius:7,padding:"2px 10px",fontSize:11,fontWeight:700}}>✦ {L("Beispiel-Output","Example output","Exemple de résultat","Esempio output")}</span>
             <span style={{fontSize:12,color:"var(--mu)"}}>{L("So sieht dein Ergebnis aus","This is what your result looks like","Voici votre résultat","Ecco il tuo risultato")}</span>
           </div>
-          {toolId==="excel" ? <ExcelDemo/> :
-           toolId==="pptx"  ? <PptxDemo/> :
-           toolId==="li2job"? <Li2jobDemo/> :
+          {toolId==="excel"   ? <ExcelDemo/> :
+           toolId==="pptx"    ? <PptxDemo/> :
+           toolId==="li2job"  ? <Li2jobDemo/> :
+           toolId==="ats"     ? <AtsDemoRich/> :
+           toolId==="linkedin"? <LinkedInDemoRich/> :
+           toolId==="jobmatch"? <JobMatchDemoRich/> :
+           toolId==="coach"   ? <CoachDemoRich/> :
            <div style={{background:"white",borderRadius:12,padding:"16px",border:"1px solid rgba(16,185,129,.12)",fontSize:13,color:"var(--ink)",lineHeight:1.85,whiteSpace:"pre-wrap",maxHeight:280,overflow:"hidden",maskImage:"linear-gradient(to bottom,black 60%,transparent 100%)",WebkitMaskImage:"linear-gradient(to bottom,black 60%,transparent 100%)"}}>
              {demo || sub}
            </div>}
@@ -5389,7 +5766,7 @@ RISPOSTA: "Sarebbe possibile un bonus di CHF 15k se il budget è limitato?"`)
           <div className="sh shc">
             <div className="seye">{lang==="de"?"✦ 20+ Tools – ein Abo":lang==="en"?"✦ 20+ Tools – one subscription":lang==="fr"?"✦ 20+ outils – un abonnement":"✦ 20+ strumenti – un abbonamento"}</div>
             <h2 className="st">{lang==="de"?"Nicht nur für Jobsuchende.":lang==="en"?"Not just for job seekers.":lang==="fr"?"Pas seulement pour les chercheurs d'emploi.":"Non solo per chi cerca lavoro."}</h2>
-            <p className="ss" style={{margin:"0 auto"}}>{lang==="de"?"Karriere, Schule, Produktivität – alles in einem Abo für CHF 19.90/Monat.":lang==="en"?"Career, school, productivity – all in one subscription for CHF 19.90/month.":lang==="fr"?"Carrière, école, productivité – tout pour CHF 19.90/mois.":"Carriera, scuola, produttività – tutto per CHF 19.90/mese."}</p>
+            <p className="ss" style={{margin:"0 auto"}}>{lang==="de"?`Karriere, Schule, Produktivität – alles in einem Abo für CHF ${C.priceM}/Monat.`:lang==="en"?`Career, school, productivity – all in one subscription for CHF ${C.priceM}/month.`:lang==="fr"?`Carrière, école, productivité – tout pour CHF ${C.priceM}/mois.`:`Carriera, scuola, produttività – tutto per CHF ${C.priceM}/mese.`}</p>
             {/* Category pills */}
             <div style={{display:"flex",flexWrap:"wrap",justifyContent:"center",gap:8,marginTop:24}}>
               {[
@@ -5800,7 +6177,7 @@ RISPOSTA: "Sarebbe possibile un bonus di CHF 15k se il budget è limitato?"`)
                 </ul>
                 {tier.id==="free"&&<button className="btn b-out b-w" style={{borderColor:"rgba(255,255,255,.18)",color:"white"}} onClick={()=>navTo("app")}>{tier.btn}</button>}
                 {tier.id==="pro"&&<button className={`btn ${tier.btnS} b-w`} onClick={()=>window.open(stripeLink(),"_blank")}>{tier.btn}</button>}
-                {tier.id==="ultimate"&&<button className={`btn b-out b-w`} style={{borderColor:"rgba(245,158,11,.4)",color:"rgba(245,158,11,.85)"}} onClick={()=>window.open(C.stripeUltimate,"_blank")}>{tier.btn}</button>}
+                {tier.id==="ultimate"&&<button className={`btn b-out b-w`} style={{borderColor:"rgba(245,158,11,.4)",color:"rgba(245,158,11,.85)"}} onClick={()=>window.open(yearly?C.stripeUltimateYearly:C.stripeUltimate,"_blank")}>{tier.btn}</button>}
               </div>
             ))}
           </div>
@@ -6282,7 +6659,7 @@ RISPOSTA: "Sarebbe possibile un bonus di CHF 15k se il budget è limitato?"`)
     <div className="abody">
       <ToolBanner pageId="excel"/>
       {err&&<div className="err">⚠️ {err}</div>}
-      {!pro?<div className="card"><LockMsg sub={L("Der Excel-Generator ist in Pro enthalten. CHF 19.90/Monat.","The Excel generator is included in Pro. CHF 19.90/month.","Le générateur Excel est inclus dans Pro. CHF 19.90/mois.","Il generatore Excel è incluso in Pro. CHF 19.90/mese.")}/></div>:<>
+      {!pro?<div className="card"><LockMsg sub={L(`Der Excel-Generator ist in Pro enthalten. CHF ${C.priceM}/Monat.`,`The Excel generator is included in Pro. CHF ${C.priceM}/month.`,`Le générateur Excel est inclus dans Pro. CHF ${C.priceM}/mois.`,`Il generatore Excel è incluso in Pro. CHF ${C.priceM}/mese.`)}/></div>:<>
         <div className="card">
           <div className="ct">📊 {t.nav.excel}</div>
           <div className="cs">{L("Beschreibe deine Aufgabe – die KI erstellt die perfekte Struktur mit Formeln.","Describe your task – AI creates the perfect structure with formulas.","Décrivez votre tâche – l'IA crée la structure parfaite avec formules.","Descrivi il tuo compito – l'IA crea la struttura perfetta con formule.")}</div>
@@ -6399,7 +6776,7 @@ RISPOSTA: "Sarebbe possibile un bonus di CHF 15k se il budget è limitato?"`)
     <div className="abody">
       <ToolBanner pageId="pptx"/>
       {err&&<div className="err">⚠️ {err}</div>}
-      {!pro?<div className="card"><LockMsg sub={L("Der PowerPoint-Maker ist in Pro enthalten. CHF 19.90/Monat.","The PowerPoint maker is included in Pro. CHF 19.90/month.","Le créateur PowerPoint est inclus dans Pro. CHF 19.90/mois.","Il creatore PowerPoint è incluso in Pro. CHF 19.90/mese.")}/></div>:<>
+      {!pro?<div className="card"><LockMsg sub={L(`Der PowerPoint-Maker ist in Pro enthalten. CHF ${C.priceM}/Monat.`,`The PowerPoint maker is included in Pro. CHF ${C.priceM}/month.`,`Le créateur PowerPoint est inclus dans Pro. CHF ${C.priceM}/mois.`,`Il creatore PowerPoint è incluso in Pro. CHF ${C.priceM}/mese.`)}/></div>:<>
         <div className="card">
           <div className="ct">📽️ {t.nav.pptx}</div>
           <div className="cs">{L("Beschreibe dein Thema – die KI erstellt eine komplette Präsentation mit Inhalt, Struktur und Sprechernotizen.","Describe your topic – AI creates a complete presentation with content, structure and speaker notes.","Décrivez votre sujet – l'IA crée une présentation complète.","Descrivi il tuo argomento – l'IA crea una presentazione completa.")}</div>
@@ -6573,7 +6950,7 @@ VERHALTEN:
 - Wenn du etwas schreibst (z.B. ein Satz für eine Bewerbung), schreib ihn direkt aus
 - Empfehle passende Stellify-Tools wenn sinnvoll, aber zwinge nichts auf
 - Sei warm, direkt, professionell – wie ein erfahrener Karriere-Coach
-- Preis: Gratis (1× Bewerbung/Monat) oder Pro CHF 19.90/Mo`;
+- Preis: Gratis (1× Bewerbung/Monat) oder Pro CHF ${C.priceM}/Mo`;
 
     const TOOL_MAP2 = {
       "bewerbung":["app"],"bewerbungen":["app"],"linkedin":["linkedin"],"ats":["ats"],
